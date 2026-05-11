@@ -1,0 +1,14 @@
+{
+  "name": "trip-planner-telegram-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot to interact with OpenCode as an AI coding agent",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "node bot.js"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=18"
+  }
+}
