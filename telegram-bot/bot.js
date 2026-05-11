@@ -61,11 +61,34 @@ function tg(method, params) {
 }
 
 async function sendMsg(chatId, text) {
-  if (!chatId || !text) return;
+  if (!chatId || !text) return 0;
+  let lastId = 0;
   for (const chunk of text.match(/[\s\S]{1,4000}/g) || [text]) {
-    try { await tg('sendMessage', { chat_id: chatId, text: chunk, parse_mode: 'Markdown' }); }
-    catch { try { await tg('sendMessage', { chat_id: chatId, text: chunk }); } catch {} }
+    try { const r = await tg('sendMessage', { chat_id: chatId, text: chunk, parse_mode: 'Markdown' }); if (r?.result?.message_id) lastId = r.result.message_id; }
+    catch { try { const r = await tg('sendMessage', { chat_id: chatId, text: chunk }); if (r?.result?.message_id) lastId = r.result.message_id; } catch {} }
     await new Promise(r => setTimeout(r, 200));
+  }
+  return lastId;
+}
+
+async function editMsg(chatId, msgId, text) {
+  if (!chatId || !msgId || !text) return;
+  try { await tg('editMessageText', { chat_id: chatId, message_id: msgId, text, parse_mode: 'Markdown' }); }
+  catch { try { await tg('editMessageText', { chat_id: chatId, message_id: msgId, text }); } catch {} }
+}
+
+async function withStatus(chatId, label, fn) {
+  const msgId = await sendMsg(chatId, label);
+  const typing = setInterval(() => { tg('sendChatAction', { chat_id: chatId, action: 'typing' }).catch(() => {}); }, 4000);
+  try {
+    const result = await fn();
+    clearInterval(typing);
+    if (msgId) await tg('deleteMessage', { chat_id: chatId, message_id: msgId }).catch(() => {});
+    return result;
+  } catch (e) {
+    clearInterval(typing);
+    if (msgId) editMsg(chatId, msgId, '⚠️ Error: ' + e.message).catch(() => {});
+    throw e;
   }
 }
 
@@ -208,10 +231,12 @@ async function processMessage(chatId, text) {
     try { await tg('sendChatAction', { chat_id: chatId, action: 'typing' }); } catch {}
 
     let response;
-    try { response = await ollamaChat(conversations[chatId]); }
+    try { response = await withStatus(chatId, '🤔 Pensando...', () => ollamaChat(conversations[chatId])); }
     catch (e) {
       log('Error Ollama: ' + e.message);
-      await sendMsg(chatId, '⚠️ Error: ' + e.message);
+      if (!conversations[chatId]?.some(m => m.content?.includes('Error: ' + e.message))) {
+        await sendMsg(chatId, '⚠️ Error: ' + e.message);
+      }
       return;
     }
 
