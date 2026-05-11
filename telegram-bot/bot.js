@@ -98,6 +98,7 @@ INSTRUCCIONES:
 5. Los comandos shell usan cmd.exe: usa && para encadenar, comillas dobles para strings.
 6. Primero diagnostica (lee archivos, revisa config) antes de sugerir soluciones genéricas.
 7. Si te piden conversar, solo habla normalmente sin usar herramientas.
+8. IMPORTANTE: Si propusiste un plan en texto y el usuario responde "adelante", "hazlo", "sí", "genial", etc., EJECUTA el plan con herramientas. No repitas el plan otra vez.
 
 Proyecto: ${PROJECT_DIR}
 Modelo: ${MODEL}`;
@@ -180,6 +181,19 @@ function ollamaChat(messages) {
 
 async function processMessage(chatId, text) {
   if (!conversations[chatId]) conversations[chatId] = [{ role: 'system', content: SYS_PROMPT }];
+
+  // Detect user approval of a previous bot plan → force execution
+  const approvalWords = ['adelante', 'hazlo', 'haz', 'ejecuta', 'sí', 'sí,', 'si', 'genial', 'ok', 'okay', 'de acuerdo', 'dale', 'vamos', 'perfecto', 'me parece genial', 'me parece bien'];
+  const isApproval = approvalWords.some(w => text.toLowerCase().startsWith(w) || text.toLowerCase() === w);
+  const lastBotMsg = [...conversations[chatId]].reverse().find(m => m.role === 'assistant');
+  if (isApproval && lastBotMsg && !parseToolCall(lastBotMsg.content)) {
+    log('Aprobación detectada, forzando ejecución');
+    conversations[chatId].push({
+      role: 'system',
+      content: 'El usuario acaba de aprobar tu plan anterior. EJECÚTALO AHORA usando herramientas. No repitas el plan. Responde SOLO con JSON tool call.'
+    });
+  }
+
   conversations[chatId].push({ role: 'user', content: text });
   if (conversations[chatId].length > 32) conversations[chatId] = [conversations[chatId][0], ...conversations[chatId].slice(-30)];
 
@@ -187,6 +201,7 @@ async function processMessage(chatId, text) {
   const MAX_TURNS = 10;
   let consecutiveFails = 0;
   const attempted = [];
+  let lastAssistantText = '';
 
   while (turn < MAX_TURNS) {
     turn++;
@@ -203,6 +218,16 @@ async function processMessage(chatId, text) {
     const content = response.message?.content || '';
     if (!content) { await sendMsg(chatId, '⚠️ Respuesta vacía'); return; }
 
+    // Detect repeated text response → break the loop
+    if (lastAssistantText && content.length > 30 && content === lastAssistantText) {
+      log('Respuesta repetida, forzando acción');
+      conversations[chatId].push({
+        role: 'system',
+        content: 'TE ESTÁS REPITIENDO. El usuario quiere progreso, no el mismo texto. Si puedes ejecutar algo con herramientas, hazlo. Si no, di algo diferente o pide instrucciones específicas.'
+      });
+      continue;
+    }
+
     const toolCall = parseToolCall(content);
 
     if (toolCall) {
@@ -213,6 +238,7 @@ async function processMessage(chatId, text) {
         return;
       }
       attempted.push(key);
+      lastAssistantText = ''; // Reset repeat detection on tool call
 
       const label = toolCall.name === 'bash' ? '`' + (toolCall.args.command || '').substring(0, 60) + '`'
         : toolCall.name === 'gh' ? '`gh ' + (toolCall.args.args || []).join(' ').substring(0, 60) + '`'
@@ -241,7 +267,8 @@ async function processMessage(chatId, text) {
       continue;
     }
 
-    // Text response - natural conversation or info
+    // Text response
+    lastAssistantText = content;
     conversations[chatId].push({ role: 'assistant', content });
     await sendMsg(chatId, content);
     break;
