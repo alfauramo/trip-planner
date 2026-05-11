@@ -55,30 +55,50 @@ function post(url, body) {
   });
 }
 
+let lastMessageId = 0;
+
 async function sendMessage(text, chatId = CHAT_ID) {
   if (!chatId) { console.log('No chat ID configured. Message:', text.substring(0, 100)); return; }
   
   const chunks = text.match(/[\s\S]{1,4096}/g) || [text];
   for (const chunk of chunks) {
-    await get(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(chunk)}&parse_mode=Markdown`);
+    const result = await get(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(chunk)}&parse_mode=Markdown`);
+    if (result && result.result) lastMessageId = result.result.message_id;
     await new Promise(r => setTimeout(r, 100));
   }
+  return lastMessageId;
+}
+
+async function editMessage(chatId, messageId, text) {
+  if (!chatId || !messageId) return;
+  await get(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/editMessageText?chat_id=${chatId}&message_id=${messageId}&text=${encodeURIComponent(text)}&parse_mode=Markdown`);
 }
 
 async function processMessage(chatId, messageId, text) {
   console.log(`\n📩 Message from ${chatId}: ${text.substring(0, 100)}...`);
   
+  let statusMsgId = 0;
   try {
-    await sendMessage('🤖 Procesando tu solicitud...', chatId);
+    statusMsgId = await sendMessage('🤖 Procesando tu solicitud...\n\n⏳ Ejecutando OpenCode...', chatId);
 
-    const opencode = spawn('opencode', ['run', text], {
+    const opencode = spawn('opencode', ['run', '--continue', '-m', 'ollama/qwen2.5-coder:3b', text], {
       cwd: OPENCODE_PROJECT,
-      env: { ...process.env, FORCE_COLOR: '0' },
+      env: { ...process.env, FORCE_COLOR: '0', OLLAMA_HOST: 'http://localhost:11434' },
       shell: true
     });
 
     let output = '';
     let errorOutput = '';
+    let lastUpdate = Date.now();
+
+    opencode.stdout.on('data', (data) => { 
+      output += data.toString(); 
+      if (Date.now() - lastUpdate > 15000 && statusMsgId) {
+        editMessage(chatId, statusMsgId, '🤖 Procesando...\n\n📝 Output recibido, esperando más...');
+        lastUpdate = Date.now();
+      }
+    });
+    opencode.stderr.on('data', (data) => { errorOutput += data.toString(); });
 
     opencode.stdout.on('data', (data) => { output += data.toString(); });
     opencode.stderr.on('data', (data) => { errorOutput += data.toString(); });
