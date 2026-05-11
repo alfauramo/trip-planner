@@ -71,7 +71,7 @@ async function processMessage(chatId, messageId, text) {
   try {
     await sendMessage('🤖 Procesando tu solicitud...', chatId);
 
-    const opencode = spawn('npx', ['-y', '@opencode-ai/cli@latest', '--no-input', '--non-interactive', '--', text], {
+    const opencode = spawn('opencode', ['--no-input', '--non-interactive', '--', text], {
       cwd: OPENCODE_PROJECT,
       env: { ...process.env, FORCE_COLOR: '0' },
       shell: true
