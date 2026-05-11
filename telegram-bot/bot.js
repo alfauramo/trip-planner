@@ -1,181 +1,286 @@
-#!/usr/bin/env node
-
 const https = require('https');
-const http = require('http');
-const { spawn } = require('child_process');
+const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
-const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
-const OPENCODE_PROJECT = process.env.OPENCODE_PROJECT || path.join(__dirname, '..');
-const POLL_INTERVAL = 2000;
-
-let offset = 0;
-let processing = false;
-const pendingMessages = [];
-
-function get(url) {
-  return new Promise((resolve, reject) => {
-    const req = https.get(url, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try { resolve(JSON.parse(data)); }
-        catch (e) { resolve(data); }
-      });
-    });
-    req.on('error', reject);
-    req.setTimeout(10000, () => { req.destroy(); reject(new Error('Request timeout')); });
-  });
+const LOG_FILE = path.join(__dirname, 'bot.log');
+function log(msg) {
+  const line = `[${new Date().toISOString()}] ${msg}`;
+  console.log(msg);
+  try { fs.appendFileSync(LOG_FILE, line + '\n'); } catch {}
 }
 
-function post(url, body) {
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+  for (const line of fs.readFileSync(envPath, 'utf-8').split('\n')) {
+    const t = line.trim();
+    if (!t || t.startsWith('#')) continue;
+    const i = t.indexOf('=');
+    if (i === -1) continue;
+    const k = t.substring(0, i).trim();
+    const v = t.substring(i + 1).trim();
+    if (!process.env[k]) process.env[k] = v;
+  }
+}
+
+const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
+const ALLOWED_USER_ID = process.env.TELEGRAM_ALLOWED_USER_ID || process.env.TELEGRAM_CHAT_ID;
+const PROJECT_DIR = process.env.PROJECT_DIR || path.join(__dirname, '..');
+const POLL_INTERVAL = parseInt(process.env.POLL_INTERVAL || '2000', 10);
+const MODEL = process.env.OLLAMA_MODEL || 'qwen2.5-coder:7b';
+
+if (!TELEGRAM_TOKEN) { log('ERROR: TELEGRAM_TOKEN no configurado'); process.exit(1); }
+
+const GH_CLI = 'C:\\Program Files\\GitHub CLI\\gh.exe';
+const conversations = {};
+
+function httpReq(url, method, body) {
   return new Promise((resolve, reject) => {
-    const data = JSON.stringify(body);
-    const urlObj = new URL(url);
-    const options = {
-      hostname: urlObj.hostname,
-      port: urlObj.port || 443,
-      path: urlObj.pathname,
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) }
+    const u = new URL(url);
+    const opts = {
+      hostname: u.hostname, port: u.port || 443, path: u.pathname + u.search,
+      method: method || 'GET', headers: {}
     };
-    const req = https.request(options, (res) => {
-      let response = '';
-      res.on('data', chunk => response += chunk);
-      res.on('end', () => {
-        try { resolve(JSON.parse(response)); }
-        catch (e) { resolve(response); }
-      });
+    const data = body ? JSON.stringify(body) : null;
+    if (data) opts.headers['Content-Length'] = Buffer.byteLength(data);
+    const mod = u.protocol === 'https:' ? https : require('http');
+    const req = mod.request(opts, res => {
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => { try { resolve(JSON.parse(d)); } catch { resolve(d); } });
     });
     req.on('error', reject);
-    req.write(data);
+    req.setTimeout(20000, () => { req.destroy(); reject(new Error('Timeout')); });
+    if (data) req.write(data);
     req.end();
   });
 }
 
-let lastMessageId = 0;
+function tg(method, params) {
+  return httpReq(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/${method}?${new URLSearchParams(params)}`);
+}
 
-async function sendMessage(text, chatId = CHAT_ID) {
-  if (!chatId) { console.log('No chat ID configured. Message:', text.substring(0, 100)); return; }
-  
-  const chunks = text.match(/[\s\S]{1,4096}/g) || [text];
-  for (const chunk of chunks) {
-    const result = await get(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(chunk)}&parse_mode=Markdown`);
-    if (result && result.result) lastMessageId = result.result.message_id;
-    await new Promise(r => setTimeout(r, 100));
+async function sendMsg(chatId, text) {
+  if (!chatId || !text) return;
+  for (const chunk of text.match(/[\s\S]{1,4000}/g) || [text]) {
+    try { await tg('sendMessage', { chat_id: chatId, text: chunk, parse_mode: 'Markdown' }); }
+    catch { try { await tg('sendMessage', { chat_id: chatId, text: chunk }); } catch {} }
+    await new Promise(r => setTimeout(r, 200));
   }
-  return lastMessageId;
 }
 
-async function editMessage(chatId, messageId, text) {
-  if (!chatId || !messageId) return;
-  await get(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/editMessageText?chat_id=${chatId}&message_id=${messageId}&text=${encodeURIComponent(text)}&parse_mode=Markdown`);
+function execCmd(cmd, opts = {}) {
+  try { const out = execSync(cmd, { encoding: 'utf-8', timeout: 60000, maxBuffer: 10 * 1024 * 1024, shell: 'cmd', ...opts }); return { success: true, output: out || '(sin output)' }; }
+  catch (e) { return { success: false, error: e.message, output: e.stdout || '' }; }
 }
 
-async function processMessage(chatId, messageId, text) {
-  console.log(`\n📩 Message from ${chatId}: ${text.substring(0, 100)}...`);
-  
-  let statusMsgId = 0;
+const TOOLS = [
+  { name: 'bash', desc: 'Ejecuta comandos shell (cmd.exe). Args: {"command":"comando","workdir":"dir"}' },
+  { name: 'read_file', desc: 'Lee archivos. Args: {"path":"ruta","offset":1,"limit":100}' },
+  { name: 'write_file', desc: 'Escribe archivos. Args: {"path":"ruta","content":"contenido"}' },
+  { name: 'edit_file', desc: 'Edita archivos. Args: {"path":"ruta","old_string":"texto","new_string":"texto"}' },
+  { name: 'glob', desc: 'Busca archivos. Args: {"pattern":"**/*.tsx","base":"dir"}' },
+  { name: 'grep', desc: 'Busca texto en archivos. Args: {"pattern":"regex","base":"dir"}' },
+  { name: 'read_directory', desc: 'Lista contenido de directorio. Args: {"path":"ruta"}' },
+  { name: 'gh', desc: 'Ejecuta GitHub CLI. Args: {"args":["api","repos/..."]}' },
+];
+
+const SYS_PROMPT = `Eres un asistente de desarrollo que trabaja en el proyecto Trip Planner (React + Supabase + TypeScript + Tailwind).
+
+Tienes acceso a estas herramientas:
+${TOOLS.map(t => '- ' + t.name + ': ' + t.desc).join('\n')}
+
+INSTRUCCIONES:
+1. Si te piden HACER algo (ejecutar, leer, modificar, build, deploy, etc.), responde SOLO con JSON exacto: {"tool":"nombre","args":{...}}
+2. Si te piden INFORMACIÓN, explicación, opinión, o conversación normal, responde en texto natural.
+3. Si un comando falla, analiza el error y prueba un enfoque diferente. NO repitas el mismo comando.
+4. Para GitHub Pages: usa gh con args ["api","repos/alfauramo/trip-planner/pages"]
+5. Los comandos shell usan cmd.exe: usa && para encadenar, comillas dobles para strings.
+6. Primero diagnostica (lee archivos, revisa config) antes de sugerir soluciones genéricas.
+7. Si te piden conversar, solo habla normalmente sin usar herramientas.
+
+Proyecto: ${PROJECT_DIR}
+Modelo: ${MODEL}`;
+
+function runTool(name, args) {
   try {
-    statusMsgId = await sendMessage('🤖 Procesando tu solicitud...\n\n⏳ Ejecutando OpenCode...', chatId);
-
-    const opencode = spawn('opencode', ['run', '--continue', '-m', 'ollama/qwen2.5-coder:7b', text], {
-      cwd: OPENCODE_PROJECT,
-      env: { ...process.env, FORCE_COLOR: '0', OLLAMA_HOST: 'http://localhost:11434' },
-      shell: true
-    });
-
-    let output = '';
-    let errorOutput = '';
-    let lastUpdate = Date.now();
-
-    opencode.stdout.on('data', (data) => { 
-      output += data.toString(); 
-      if (Date.now() - lastUpdate > 15000 && statusMsgId) {
-        editMessage(chatId, statusMsgId, '🤖 Procesando...\n\n📝 Output recibido, esperando más...');
-        lastUpdate = Date.now();
+    switch (name) {
+      case 'bash': return execCmd(args.command, { cwd: args.workdir || PROJECT_DIR });
+      case 'read_file': {
+        if (!fs.existsSync(args.path)) return { success: false, error: 'No encontrado: ' + args.path };
+        const lines = fs.readFileSync(args.path, 'utf-8').split('\n');
+        const s = lines.slice((args.offset || 1) - 1, (args.offset || 1) - 1 + (args.limit || lines.length));
+        return { success: true, output: s.join('\n'), total_lines: lines.length };
       }
-    });
-    opencode.stderr.on('data', (data) => { errorOutput += data.toString(); });
-
-    opencode.stdout.on('data', (data) => { output += data.toString(); });
-    opencode.stderr.on('data', (data) => { errorOutput += data.toString(); });
-
-    opencode.on('error', (err) => {
-      console.error('OpenCode error:', err);
-      sendMessage(`❌ Error: ${err.message}`, chatId);
-    });
-
-    opencode.on('close', async (code) => {
-      console.log(`OpenCode finished with code ${code}`);
-      
-      const fullOutput = output + (errorOutput ? '\n' + errorOutput : '');
-      
-      if (code === 0 && fullOutput.trim()) {
-        const truncated = fullOutput.length > 4000 ? fullOutput.substring(0, 4000) + '\n\n... (respuesta truncada)' : fullOutput;
-        await sendMessage(`✅ *Resultado:*\n\`\`\`\n${truncated}\n\`\`\``, chatId);
-      } else if (fullOutput.trim()) {
-        const truncated = fullOutput.length > 4000 ? fullOutput.substring(0, 4000) + '\n\n... (respuesta truncada)' : fullOutput;
-        await sendMessage(`⚠️ *Output:*\n\`\`\`\n${truncated}\n\`\`\``, chatId);
-      } else {
-        await sendMessage('✅ Tarea completada (sin output visible)', chatId);
+      case 'write_file': {
+        const dir = path.dirname(args.path);
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(args.path, args.content, 'utf-8');
+        return { success: true, output: 'Escrito: ' + path.basename(args.path) };
       }
-      
-      await get(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/answerCallbackQuery?callback_query_id=`);
-    });
-  } catch (err) {
-    console.error('Error processing message:', err);
-    await sendMessage(`❌ Error: ${err.message}`, chatId);
+      case 'edit_file': {
+        const c = fs.readFileSync(args.path, 'utf-8');
+        if (!c.includes(args.old_string)) return { success: false, error: 'Texto no encontrado en el archivo' };
+        fs.writeFileSync(args.path, c.replace(args.old_string, args.new_string), 'utf-8');
+        return { success: true, output: 'Editado correctamente' };
+      }
+      case 'glob': {
+        const r = execCmd(`dir /s /b "${(args.base || PROJECT_DIR)}\\${args.pattern}"`);
+        return { success: r.success, output: r.output || '(sin resultados)' };
+      }
+      case 'grep': {
+        const r = execCmd(`findstr /s /n /i "${args.pattern}" "${args.base || PROJECT_DIR}\\*"`);
+        return { success: true, output: r.output || '(sin coincidencias)' };
+      }
+      case 'read_directory': {
+        const entries = fs.readdirSync(args.path, { withFileTypes: true });
+        return { success: true, output: entries.map(e => (e.isDirectory() ? '[DIR] ' : '[FILE] ') + e.name).join('\n') };
+      }
+      case 'gh': {
+        const r = execCmd(`"${GH_CLI}" ${(args.args || []).join(' ')}`);
+        return { success: true, output: r.output || '(sin output)' };
+      }
+      default: return { success: false, error: 'Tool desconocido: ' + name };
+    }
+  } catch (e) { return { success: false, error: e.message }; }
+}
+
+function parseToolCall(content) {
+  if (!content) return null;
+  const trimmed = content.trim();
+  try {
+    const p = JSON.parse(trimmed);
+    if (p.tool && TOOLS.some(t => t.name === p.tool)) return { name: p.tool, args: p.args || {} };
+  } catch {}
+  const m = trimmed.match(/\{(?:[^{}]|(?:\{[^{}]*\}))*\}/);
+  if (m) {
+    try { const p = JSON.parse(m[0]); if (p.tool && TOOLS.some(t => t.name === p.tool)) return { name: p.tool, args: p.args || {} }; } catch {}
   }
+  return null;
+}
+
+function ollamaChat(messages) {
+  return new Promise((resolve, reject) => {
+    const body = JSON.stringify({ model: MODEL, messages, stream: false, options: { temperature: 0.2, num_predict: 16384 } });
+    const u = new URL('http://localhost:11434/api/chat');
+    const opts = {
+      hostname: u.hostname, port: u.port, path: u.pathname, method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }
+    };
+    const req = require('http').request(opts, res => {
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => { try { resolve(JSON.parse(d)); } catch (e) { reject(new Error('Parse error: ' + d.substring(0,200))); } });
+    });
+    req.on('error', reject);
+    req.setTimeout(60000, () => { req.destroy(); reject(new Error('Ollama timeout')); });
+    req.write(body); req.end();
+  });
+}
+
+async function processMessage(chatId, text) {
+  if (!conversations[chatId]) conversations[chatId] = [{ role: 'system', content: SYS_PROMPT }];
+  conversations[chatId].push({ role: 'user', content: text });
+  if (conversations[chatId].length > 32) conversations[chatId] = [conversations[chatId][0], ...conversations[chatId].slice(-30)];
+
+  let turn = 0;
+  const MAX_TURNS = 10;
+  let consecutiveFails = 0;
+  const attempted = [];
+
+  while (turn < MAX_TURNS) {
+    turn++;
+    try { await tg('sendChatAction', { chat_id: chatId, action: 'typing' }); } catch {}
+
+    let response;
+    try { response = await ollamaChat(conversations[chatId]); }
+    catch (e) {
+      log('Error Ollama: ' + e.message);
+      await sendMsg(chatId, '⚠️ Error: ' + e.message);
+      return;
+    }
+
+    const content = response.message?.content || '';
+    if (!content) { await sendMsg(chatId, '⚠️ Respuesta vacía'); return; }
+
+    const toolCall = parseToolCall(content);
+
+    if (toolCall) {
+      const key = toolCall.name + ':' + JSON.stringify(toolCall.args);
+      if (attempted.includes(key)) {
+        log('Tool repetido, abortando');
+        await sendMsg(chatId, '⚠️ Ese comando ya se intentó. Dame otra instrucción.');
+        return;
+      }
+      attempted.push(key);
+
+      const label = toolCall.name === 'bash' ? '`' + (toolCall.args.command || '').substring(0, 60) + '`'
+        : toolCall.name === 'gh' ? '`gh ' + (toolCall.args.args || []).join(' ').substring(0, 60) + '`'
+        : (toolCall.args.path || toolCall.name);
+      log(`Tool: ${toolCall.name} ${label}`);
+      await sendMsg(chatId, `🔧 ${toolCall.name} ${label}`);
+
+      const result = runTool(toolCall.name, toolCall.args);
+      conversations[chatId].push({ role: 'assistant', content });
+      conversations[chatId].push({ role: 'tool', content: JSON.stringify(result) });
+
+      if (!result.success) {
+        consecutiveFails++;
+        log(`Falló (${consecutiveFails}/3): ${result.error}`);
+        if (consecutiveFails >= 3) {
+          await sendMsg(chatId, '⚠️ Fallaron 3 intentos: ' + (result.error || ''));
+          await sendMsg(chatId, 'Revisa manualmente o dime qué hacer.');
+          return;
+        }
+        await sendMsg(chatId, '⚠️ Error: ' + (result.error || result.output || 'fallo desconocido'));
+        if (result.output) await sendMsg(chatId, '```\n' + result.output.substring(0, 1000) + '\n```');
+        return;
+      } else {
+        consecutiveFails = 0;
+      }
+      continue;
+    }
+
+    // Text response - natural conversation or info
+    conversations[chatId].push({ role: 'assistant', content });
+    await sendMsg(chatId, content);
+    break;
+  }
+
+  if (turn >= MAX_TURNS) await sendMsg(chatId, '⚠️ Demasiadas operaciones. Intenta con algo más directo.');
 }
 
 async function poll() {
-  if (processing) return;
-  processing = true;
-  
-  try {
-    const updates = await get(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/getUpdates?offset=${offset}&timeout=5`);
-    
-    if (updates.ok && updates.result && updates.result.length > 0) {
-      for (const update of updates.result) {
-        offset = update.update_id + 1;
-        
-        if (update.message && update.message.text) {
-          const text = update.message.text.trim();
-          if (text) {
-            await processMessage(update.message.chat.id, update.message.message_id, text);
-          }
-        }
-        
-        if (update.edited_message && update.edited_message.text) {
-          const text = update.edited_message.text.trim();
-          if (text) {
-            await processMessage(update.edited_message.chat.id, update.edited_message.message_id, text);
-          }
+  let offset = 0;
+  log('🤖 Bot iniciado - modelo: ' + MODEL);
+  log('Proyecto: ' + PROJECT_DIR);
+  log('Usuario: ' + (ALLOWED_USER_ID || 'todos'));
+
+  async function pollOnce() {
+    try {
+      const data = await tg('getUpdates', { offset, timeout: 1 });
+      if (data.ok && data.result && data.result.length > 0) {
+        for (const update of data.result) {
+          offset = update.update_id + 1;
+          if (!update.message) continue;
+          const chatId = update.message.chat.id;
+          const userId = update.message.from?.id?.toString();
+          const text = update.message.text?.trim();
+          log(`📩 ${(text || '(media)').substring(0, 100)} [${chatId}]`);
+          if (ALLOWED_USER_ID && userId !== ALLOWED_USER_ID) { await sendMsg(chatId, '⛔ No tienes permiso.'); continue; }
+          if (!text) continue;
+          if (text === '/start') { conversations[chatId] = [{ role: 'system', content: SYS_PROMPT }]; await sendMsg(chatId, '👋 Hola! Soy el asistente de Trip Planner. Puedo ayudarte con el código, ejecutar comandos, diagnosticar problemas, o simplemente conversar. ¿En qué te ayudo?'); continue; }
+          if (text === '/clear') { conversations[chatId] = [{ role: 'system', content: SYS_PROMPT }]; await sendMsg(chatId, '🧹 Conversación reiniciada.'); continue; }
+          if (text === '/help') { await sendMsg(chatId, '/start - Iniciar\n/clear - Reiniciar conversación\n/help - Esta ayuda'); continue; }
+          await processMessage(chatId, text);
         }
       }
-    }
-  } catch (err) {
-    console.error('Poll error:', err.message);
-  } finally {
-    processing = false;
+    } catch (e) { log('Poll error: ' + e.message); }
+    setTimeout(pollOnce, POLL_INTERVAL);
   }
+  pollOnce();
 }
 
-async function setup() {
-  if (!CHAT_ID) {
-    console.log('⚠️ CHAT_ID not set. Listening for any message...');
-    console.log('Edit this file or set TELEGRAM_CHAT_ID env var to restrict to your chat.');
-  }
-  
-  console.log('🤖 Telegram Bot started!');
-  console.log(`📁 Project: ${OPENCODE_PROJECT}`);
-  console.log(`💬 Chat ID: ${CHAT_ID || 'ALL (waiting for first message)'}`);
-  console.log('\nWaiting for messages...\n');
-  
-  setInterval(poll, POLL_INTERVAL);
-}
-
-setup();
+process.on('SIGINT', () => { log('Bot detenido'); process.exit(0); });
+process.on('SIGTERM', () => { log('Bot detenido'); process.exit(0); });
+poll();
