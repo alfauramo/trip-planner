@@ -81,7 +81,7 @@ async function processMessage(chatId, messageId, text) {
   try {
     statusMsgId = await sendMessage('🤖 Procesando tu solicitud...\n\n⏳ Ejecutando OpenCode...', chatId);
 
-    const opencode = spawn('opencode', ['run', '--continue', '-m', 'ollama/qwen2.5-coder:3b', text], {
+    const opencode = spawn('opencode', ['run', '--continue', '-m', 'ollama/qwen2.5-coder:7b', text], {
       cwd: OPENCODE_PROJECT,
       env: { ...process.env, FORCE_COLOR: '0', OLLAMA_HOST: 'http://localhost:11434' },
       shell: true
