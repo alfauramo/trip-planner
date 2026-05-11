@@ -173,7 +173,7 @@ function ollamaChat(messages) {
       res.on('end', () => { try { resolve(JSON.parse(d)); } catch (e) { reject(new Error('Parse error: ' + d.substring(0,200))); } });
     });
     req.on('error', reject);
-    req.setTimeout(60000, () => { req.destroy(); reject(new Error('Ollama timeout')); });
+    req.setTimeout(180000, () => { req.destroy(); reject(new Error('Ollama timeout')); });
     req.write(body); req.end();
   });
 }
