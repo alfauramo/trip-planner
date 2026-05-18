@@ -8,13 +8,13 @@ import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../components/ConfirmModal';
 import { LoadingCard } from '../components/Loading';
 import { Tooltip } from '../components/Tooltip';
-import { Footer } from '../components/Footer';
 import { NotificationBell } from '../components/NotificationBell';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { BottomSheet } from '../components/BottomSheet';
 import { SwipeableRow } from '../components/SwipeableRow';
 import { useIsMobile } from '../hooks/useMediaQuery';
 import { usePullToRefresh } from '../hooks/usePullToRefresh';
+import { Footer } from '../components/Footer';
 import { hapticLight, hapticMedium } from '../lib/haptic';
 import { useToast } from '../components/Toast';
 
@@ -86,21 +86,23 @@ export function DashboardPage() {
 
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-        <header className="bg-white dark:bg-gray-800 border-b dark:border-gray-700">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col">
+        <header className="bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 sticky top-0 z-20">
           <div className="px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Plane className="w-6 h-6 text-blue-500" />
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-sm">
+                <Plane className="w-4 h-4 text-white" />
+              </div>
               <span className="text-lg font-bold text-gray-800 dark:text-white">Trip Planner</span>
             </div>
-            <div className="flex items-center gap-2">
-              <ThemeToggle />
+            <div className="flex items-center gap-1">
               <NotificationBell />
+              <ThemeToggle />
               <button
                 type="button"
                 onClick={handleLogout}
                 aria-label="Cerrar sesión"
-                className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                className="p-2 text-gray-400 hover:text-red-500 transition-colors rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800"
               >
                 <LogOut className="w-5 h-5" />
               </button>
@@ -171,7 +173,7 @@ export function DashboardPage() {
                 <div className="space-y-4">
                   {trips.map((trip) => (
                     <SwipeableRow key={trip.id} onDelete={() => handleDeleteTrip(trip.id)} disabled={!isMobile}>
-                      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden card-hover">
+                      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.2)] overflow-hidden card-hover border border-gray-50 dark:border-gray-800">
                         <Link to={`/trips/${trip.id}`} className="block" onClick={() => hapticLight()}>
                           <div className="relative h-36 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
                             {trip.cover_image ? (
@@ -261,34 +263,36 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-      <header className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <Plane className="w-8 h-8 text-blue-500" />
-            <span className="ml-2 text-xl font-bold text-gray-800 dark:text-white">Trip Planner</span>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col">
+      <header className="bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 sticky top-0 z-20">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-md">
+              <Plane className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xl font-bold text-gray-800 dark:text-white">Trip Planner</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <NotificationBell />
             <ThemeToggle />
             <Tooltip content="Mi perfil">
               <button
                 type="button"
                 onClick={() => navigate('/profile')}
-                className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
               >
                 {profile?.avatar_url ? (
                   <img
                     src={profile.avatar_url}
                     alt={displayName}
                     loading="lazy"
-                    className="w-8 h-8 rounded-full object-cover"
+                    className="w-8 h-8 rounded-full object-cover ring-2 ring-gray-100 dark:ring-gray-700"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                     }}
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-medium">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-medium ring-2 ring-gray-100 dark:ring-gray-700">
                     {displayName.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -302,7 +306,7 @@ export function DashboardPage() {
                 type="button"
                 onClick={handleLogout}
                 aria-label="Cerrar sesión"
-                className="p-2 text-gray-600 dark:text-gray-300 hover:text-red-500 transition-colors"
+                className="p-2 text-gray-500 dark:text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
               >
                 <LogOut className="w-5 h-5" />
               </button>
@@ -311,16 +315,16 @@ export function DashboardPage() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-4xl mx-auto px-4 py-8">
+      <main className="flex-1 max-w-5xl mx-auto px-4 py-8 w-full">
         {profileIncomplete && (
-          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-4 mb-6 flex items-center justify-between text-white">
+          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-4 mb-8 flex items-center justify-between text-white shadow-sm">
             <div>
               <p className="font-medium">¡Completa tu perfil!</p>
               <p className="text-sm opacity-80">Añade tu nombre para que tus compañeros te reconozcan</p>
             </div>
             <button
               onClick={() => navigate('/profile')}
-              className="px-4 py-2 bg-white text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors"
+              className="px-4 py-2 bg-white text-blue-600 rounded-xl font-medium hover:bg-blue-50 transition-colors shrink-0"
             >
               Ir al perfil
             </button>
@@ -335,14 +339,14 @@ export function DashboardPage() {
               hapticMedium();
               setShowNewTrip(true);
             }}
-            className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600 transition-colors"
+            className="flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-4 py-2 rounded-xl font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm"
           >
             <Plus className="w-5 h-5" /> Nuevo Viaje
           </button>
         </div>
 
         {loading ? (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-5 md:grid-cols-2">
             <LoadingCard />
             <LoadingCard />
           </div>
@@ -366,10 +370,10 @@ export function DashboardPage() {
             {trips.map((trip) => (
               <div
                 key={trip.id}
-                className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden card-hover group"
+                className="bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.2)] overflow-hidden card-hover group border border-gray-50 dark:border-gray-800"
               >
                 <Link to={`/trips/${trip.id}`} className="block">
-                  <div className="relative aspect-video bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
+                  <div className="relative aspect-video bg-gradient-to-br from-slate-700 to-slate-900">
                     {trip.cover_image ? (
                       <img
                         src={trip.cover_image}
@@ -382,10 +386,10 @@ export function DashboardPage() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <Plane className="w-16 h-16 text-white/30" />
+                        <Plane className="w-16 h-16 text-white/20" />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                     {(trip.start_date || trip.end_date) && (
                       <div className="date-badge">
                         <Calendar className="w-3 h-3 inline mr-1" />

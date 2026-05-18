@@ -87,14 +87,6 @@ input[type='date']::-webkit-calendar-picker-indicator {
   }
 }
 
-.animate-slide-up {
-  animation: slide-up 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-}
-
-.animate-fade-in {
-  animation: fade-in 0.2s ease-out;
-}
-
 @keyframes slide-down {
   from {
     transform: translateY(-120%);
@@ -117,6 +109,35 @@ input[type='date']::-webkit-calendar-picker-indicator {
   }
 }
 
+@keyframes scale-in {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
 .animate-slide-in {
   animation: slide-down 0.3s ease-out;
 }
@@ -146,18 +167,8 @@ input[type='date']::-webkit-calendar-picker-indicator {
 ::view-transition-old(root) {
   animation: 0.2s ease-out both fade-out;
 }
-
 ::view-transition-new(root) {
   animation: 0.25s ease-out both fade-in;
-}
-
-@keyframes fade-out {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
 }
 
 .min-h-dynamic {
@@ -184,12 +195,14 @@ input[type='date']::-webkit-calendar-picker-indicator {
 }
 
 .card-hover {
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
 }
+
 .card-hover:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
+
 .dark .card-hover:hover {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
@@ -197,13 +210,16 @@ input[type='date']::-webkit-calendar-picker-indicator {
 .avatar-stack {
   display: flex;
 }
+
 .avatar-stack > * {
   border: 2px solid white;
   margin-right: -6px;
 }
+
 .dark .avatar-stack > * {
   border-color: #1e293b;
 }
+
 .avatar-stack > *:last-child {
   margin-right: 0;
 }
@@ -214,18 +230,25 @@ input[type='date']::-webkit-calendar-picker-indicator {
   backdrop-filter: blur(4px);
   color: #1e293b;
 }
+
 .dark .date-badge {
   background: rgba(30, 41, 59, 0.9);
   color: #e2e8f0;
 }
 
 .timeline-line {
-  @apply absolute left-5 top-10 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700;
+  @apply absolute left-5 top-10 bottom-0 w-0.5;
+  background: linear-gradient(to bottom, #e2e8f0, #e2e8f0 50%, transparent);
+}
+
+.dark .timeline-line {
+  background: linear-gradient(to bottom, #334155, #334155 50%, transparent);
 }
 
 .event-card {
-  transition: all 0.15s ease;
+  transition: all 0.15s cubic-bezier(0.32, 0.72, 0, 1);
 }
+
 .event-card:hover {
   @apply shadow-md;
   transform: translateX(2px);

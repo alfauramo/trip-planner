@@ -65,13 +65,8 @@ export function TripDetailHeader({
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  const formatDateShort = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
+  const formatDateShort = (dateString: string) =>
+    new Date(dateString).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
 
   const handleShare = () => {
     const url = `${window.location.origin}/trip-planner/trips/${trip.id}`;
@@ -84,9 +79,9 @@ export function TripDetailHeader({
 
   if (isMobile) {
     return (
-      <header className="sticky top-0 z-20 bg-white dark:bg-gray-900">
-        <div className="relative h-36 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500">
-          {trip.cover_image && (
+      <>
+        <div className="relative h-56 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900">
+          {trip.cover_image ? (
             <>
               <img
                 src={trip.cover_image}
@@ -97,30 +92,37 @@ export function TripDetailHeader({
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10" />
             </>
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Plane className="w-16 h-16 text-white/20" />
+            </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-          <div className="absolute top-0 left-0 right-0 px-4 pt-3 flex items-center justify-between">
-            <Link to="/" className="p-2 -ml-2 rounded-xl bg-white/20 backdrop-blur-sm text-white">
+          <div className="absolute top-0 left-0 right-0 px-4 pt-4 flex items-center justify-between">
+            <Link
+              to="/"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white active:scale-95 transition-transform"
+            >
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={handleShare}
                 aria-label="Compartir"
-                className="p-2 rounded-xl bg-white/20 backdrop-blur-sm text-white"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white active:scale-95 transition-transform"
               >
                 <Share2 className="w-4 h-4" />
               </button>
               <ThemeToggle />
             </div>
           </div>
-          <div className="absolute bottom-3 left-4 right-4">
-            <h1 className="text-xl font-bold text-white drop-shadow-sm">{trip.title}</h1>
+          <div className="absolute bottom-0 left-0 right-0 px-5 pb-5">
+            <h1 className="text-2xl font-bold text-white drop-shadow-lg">{trip.title}</h1>
+            {trip.description && <p className="text-sm text-white/70 mt-0.5 line-clamp-1">{trip.description}</p>}
             {(trip.start_date || trip.end_date) && (
-              <p className="text-sm text-white/80 mt-0.5">
+              <p className="text-sm text-white/80 mt-1 font-medium">
                 {trip.start_date && formatDateShort(trip.start_date)}
                 {trip.start_date && trip.end_date && ' — '}
                 {trip.end_date && formatDateShort(trip.end_date)}
@@ -129,84 +131,88 @@ export function TripDetailHeader({
           </div>
         </div>
 
-        <div className="px-4 py-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar border-b dark:border-gray-800">
-          {tabConfig.map((tab) => {
-            const TabIcon = tab.icon;
-            const active = activeTab === tab.key;
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => onTabChange(tab.key as any)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all shrink-0 ${
-                  active
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
-                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
-              >
-                <TabIcon className="w-3.5 h-3.5" />
-                {tab.label}
-              </button>
-            );
-          })}
+        <div className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800">
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar px-3 py-2">
+            {tabConfig.map((tab) => {
+              const TabIcon = tab.icon;
+              const active = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => onTabChange(tab.key as any)}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all shrink-0 ${
+                    active
+                      ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-sm'
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  <TabIcon className="w-3.5 h-3.5" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </header>
+      </>
     );
   }
 
   return (
-    <header className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-20">
-      <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-md">
-            <Plane className="w-5 h-5 text-white" />
+    <>
+      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl sticky top-0 z-20 border-b border-gray-100 dark:border-gray-800">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-md">
+              <Plane className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-lg font-bold text-gray-800 dark:text-white">Trip Planner</span>
+          </Link>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <ThemeToggle />
+            <Tooltip content="Mi perfil">
+              <button
+                type="button"
+                onClick={() => navigate('/profile')}
+                className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
+              >
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt={displayName}
+                    loading="lazy"
+                    className="w-8 h-8 rounded-full object-cover ring-2 ring-gray-100 dark:ring-gray-700"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-medium ring-2 ring-gray-100 dark:ring-gray-700">
+                    {displayName.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden sm:block">
+                  {displayName}
+                </span>
+              </button>
+            </Tooltip>
+            <Tooltip content="Cerrar sesión">
+              <button
+                type="button"
+                onClick={onLogout}
+                aria-label="Cerrar sesión"
+                className="p-2 text-gray-500 dark:text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            </Tooltip>
           </div>
-          <span className="text-lg font-bold text-gray-800 dark:text-white">Trip Planner</span>
-        </Link>
-        <div className="flex items-center gap-2">
-          <NotificationBell />
-          <ThemeToggle />
-          <Tooltip content="Mi perfil">
-            <button
-              type="button"
-              onClick={() => navigate('/profile')}
-              className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
-            >
-              {profile?.avatar_url ? (
-                <img
-                  src={profile.avatar_url}
-                  alt={displayName}
-                  loading="lazy"
-                  className="w-8 h-8 rounded-full object-cover ring-2 ring-gray-100 dark:ring-gray-700"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-medium ring-2 ring-gray-100 dark:ring-gray-700">
-                  {displayName.charAt(0).toUpperCase()}
-                </div>
-              )}
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden sm:block">
-                {displayName}
-              </span>
-            </button>
-          </Tooltip>
-          <Tooltip content="Cerrar sesión">
-            <button
-              type="button"
-              onClick={onLogout}
-              aria-label="Cerrar sesión"
-              className="p-2 text-gray-500 dark:text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-            </button>
-          </Tooltip>
         </div>
-      </div>
+      </header>
 
-      <div className="relative h-56 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500">
-        {trip.cover_image && (
+      <div className="relative h-64 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900">
+        {trip.cover_image ? (
           <>
             <img
               src={trip.cover_image}
@@ -217,26 +223,29 @@ export function TripDetailHeader({
                 (e.target as HTMLImageElement).style.display = 'none';
               }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10" />
           </>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Plane className="w-24 h-24 text-white/20" />
+          </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
         <div className="absolute bottom-0 left-0 right-0">
-          <div className="max-w-5xl mx-auto px-4 pb-5">
+          <div className="max-w-5xl mx-auto px-4 pb-6">
             <div className="flex items-center gap-4">
               <Link
                 to="/"
-                className="p-2 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white transition-colors"
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white/30 transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
               </Link>
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-white drop-shadow-sm">{trip.title}</h1>
+                <h1 className="text-3xl font-bold text-white drop-shadow-lg">{trip.title}</h1>
                 {trip.description && (
                   <p className="text-sm text-white/70 mt-1 max-w-xl line-clamp-1">{trip.description}</p>
                 )}
                 {(trip.start_date || trip.end_date) && (
-                  <p className="text-sm text-white/80 mt-1">
+                  <p className="text-sm text-white/80 mt-1 font-medium">
                     {trip.start_date && formatDateShort(trip.start_date)}
                     {trip.start_date && trip.end_date && ' — '}
                     {trip.end_date && formatDateShort(trip.end_date)}
@@ -246,71 +255,70 @@ export function TripDetailHeader({
             </div>
           </div>
         </div>
-        {!trip.cover_image && (
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-            <Plane className="w-20 h-20 text-white/20" />
-          </div>
-        )}
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-2 flex items-center gap-2 border-b dark:border-gray-800">
-        <button
-          type="button"
-          onClick={onEditTrip}
-          aria-label="Editar viaje"
-          className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-blue-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-        >
-          <Pencil className="w-4 h-4" />
-          <span className="hidden sm:inline">Editar viaje</span>
-        </button>
-        <button
-          type="button"
-          onClick={onEditCover}
-          aria-label="Editar portada"
-          className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-blue-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-        >
-          <ImageIcon className="w-4 h-4" />
-          <span className="hidden sm:inline">Portada</span>
-        </button>
-        <ExportTripPDF trip={{ ...trip, days, members } as any} />
-        <div className="flex-1" />
-        <button
-          type="button"
-          onClick={handleShare}
-          aria-label="Compartir"
-          className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-blue-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-        >
-          <Share2 className="w-4 h-4" />
-          <span className="hidden sm:inline">Compartir</span>
-        </button>
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+        <div className="max-w-5xl mx-auto px-4 py-2 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onEditTrip}
+            aria-label="Editar viaje"
+            className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-blue-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+          >
+            <Pencil className="w-4 h-4" />
+            <span className="hidden sm:inline">Editar viaje</span>
+          </button>
+          <button
+            type="button"
+            onClick={onEditCover}
+            aria-label="Editar portada"
+            className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-blue-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+          >
+            <ImageIcon className="w-4 h-4" />
+            <span className="hidden sm:inline">Portada</span>
+          </button>
+          <ExportTripPDF trip={{ ...trip, days, members } as any} />
+          <div className="flex-1" />
+          <button
+            type="button"
+            onClick={handleShare}
+            aria-label="Compartir"
+            className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-blue-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+          >
+            <Share2 className="w-4 h-4" />
+            <span className="hidden sm:inline">Compartir</span>
+          </button>
+        </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 flex overflow-x-auto no-scrollbar">
-        {tabConfig.map((tab) => {
-          const TabIcon = tab.icon;
-          const active = activeTab === tab.key;
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => onTabChange(tab.key as any)}
-              className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-all shrink-0 ${
-                active
-                  ? 'border-blue-500 text-blue-600 font-medium'
-                  : 'border-transparent text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-              }`}
-            >
-              <TabIcon className="w-4 h-4" />
-              <span className="whitespace-nowrap text-sm">{tab.label}</span>
-              {tab.key === 'members' && members.length > 0 && (
-                <span className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs px-1.5 py-0.5 rounded-full font-medium">
-                  {members.length}
-                </span>
-              )}
-            </button>
-          );
-        })}
+      <div className="bg-white dark:bg-gray-900 shadow-sm sticky top-[57px] z-10">
+        <div className="max-w-5xl mx-auto px-4 flex overflow-x-auto no-scrollbar">
+          {tabConfig.map((tab) => {
+            const TabIcon = tab.icon;
+            const active = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => onTabChange(tab.key as any)}
+                className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-all shrink-0 ${
+                  active
+                    ? 'border-gray-900 dark:border-white text-gray-900 dark:text-white font-medium'
+                    : 'border-transparent text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
+                }`}
+              >
+                <TabIcon className="w-4 h-4" />
+                <span className="whitespace-nowrap text-sm">{tab.label}</span>
+                {tab.key === 'members' && members.length > 0 && (
+                  <span className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs px-1.5 py-0.5 rounded-full font-medium">
+                    {members.length}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
-    </header>
+    </>
   );
 }
