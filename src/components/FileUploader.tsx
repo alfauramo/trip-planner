@@ -13,13 +13,32 @@ interface FileUploaderProps {
 
 export function FileUploader({ eventId, attachments, onAttachmentsChange }: FileUploaderProps) {
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { showToast } = useToast();
   const { confirm } = useConfirm();
 
+  const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+  const MAX_SIZE = 5 * 1024 * 1024;
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+
+    setError('');
+
+    for (const file of Array.from(files)) {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        setError(`Formato no permitido: ${file.name}. Solo imágenes (PNG, JPEG, WebP, GIF)`);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        return;
+      }
+      if (file.size > MAX_SIZE) {
+        setError(`Archivo demasiado grande: ${file.name}. Máximo 5MB`);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        return;
+      }
+    }
 
     setUploading(true);
     
@@ -73,7 +92,7 @@ export function FileUploader({ eventId, attachments, onAttachmentsChange }: File
           ref={fileInputRef}
           type="file"
           multiple
-          accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx,.xls,.xlsx"
+          accept="image/png,image/jpeg,image/webp,image/gif"
           onChange={handleFileChange}
           className="hidden"
         />
@@ -96,6 +115,10 @@ export function FileUploader({ eventId, attachments, onAttachmentsChange }: File
           )}
         </button>
       </div>
+
+      {error && (
+        <p className="text-sm text-red-500 dark:text-red-400">{error}</p>
+      )}
 
       {attachments.length > 0 && (
         <div className="space-y-2">

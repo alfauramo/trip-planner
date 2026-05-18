@@ -25,6 +25,7 @@ export function MobileNav() {
           return (
             <button
               key={item.path}
+              type="button"
               onClick={() => navigate(item.path)}
               className={`flex flex-col items-center justify-center gap-0.5 px-4 py-2 min-w-0 transition-colors ${
                 active

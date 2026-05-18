@@ -87,6 +87,7 @@ export function RegisterPage() {
         <h2 className="text-xl font-semibold text-center mb-6">Crear Cuenta</h2>
 
         <button
+          type="button"
           onClick={handleGoogleRegister}
           disabled={loadingGoogle}
           className="w-full flex items-center justify-center gap-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-3 px-4 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 mb-4"

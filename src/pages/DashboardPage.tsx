@@ -85,7 +85,7 @@ export function DashboardPage() {
             <div className="flex items-center gap-2">
               <ThemeToggle />
               <NotificationBell />
-              <button onClick={handleLogout} className="p-2 text-gray-400 hover:text-red-500 transition-colors">
+              <button type="button" onClick={handleLogout} aria-label="Cerrar sesión" className="p-2 text-gray-400 hover:text-red-500 transition-colors">
                 <LogOut className="w-5 h-5" />
               </button>
             </div>
@@ -98,7 +98,7 @@ export function DashboardPage() {
               <p className="font-medium text-sm">¡Completa tu perfil!</p>
               <p className="text-xs opacity-80 truncate">Añade tu nombre para que te reconozcan</p>
             </div>
-            <button onClick={() => navigate('/profile')} className="shrink-0 px-3 py-1.5 bg-white text-blue-600 rounded-lg text-xs font-medium">
+            <button type="button" onClick={() => navigate('/profile')} className="shrink-0 px-3 py-1.5 bg-white text-blue-600 rounded-lg text-xs font-medium">
               Ir
             </button>
           </div>
@@ -129,13 +129,14 @@ export function DashboardPage() {
                   </div>
                   <p className="text-gray-500 dark:text-gray-400 font-medium mb-1">Aún no tienes viajes</p>
                   <p className="text-sm text-gray-400 mb-6">Crea tu primer viaje y empieza a planificar</p>
-                  <button
-                    onClick={() => { hapticMedium(); setShowNewTrip(true); }}
-                    className="inline-flex items-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-xl font-medium shadow-lg shadow-blue-500/20 active:scale-95 transition-transform"
-                  >
-                    <Plus className="w-5 h-5" />
-                    Crear Viaje
-                  </button>
+              <button
+                type="button"
+                onClick={() => { hapticMedium(); setShowNewTrip(true); }}
+                className="inline-flex items-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-xl font-medium shadow-lg shadow-blue-500/20 active:scale-95 transition-transform"
+              >
+                <Plus className="w-5 h-5" />
+                Crear Viaje
+              </button>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -145,7 +146,7 @@ export function DashboardPage() {
                         <Link to={`/trips/${trip.id}`} className="flex gap-3 p-3" onClick={() => hapticLight()}>
                           {trip.cover_image ? (
                             <div className="w-20 h-20 rounded-lg bg-gray-100 dark:bg-gray-700 overflow-hidden shrink-0">
-                              <img src={trip.cover_image} alt={trip.title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                              <img src={trip.cover_image} alt={trip.title} loading="lazy" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                             </div>
                           ) : (
                             <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shrink-0">
@@ -172,10 +173,10 @@ export function DashboardPage() {
                           <ArrowRight className="w-5 h-5 text-gray-300 dark:text-gray-600 self-center" />
                         </Link>
                         <div className="px-3 pb-2 flex justify-end gap-2">
-                          <button onClick={() => handleShare(trip)} className="text-xs text-gray-400 hover:text-blue-500 px-2 py-1 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                          <button type="button" onClick={() => handleShare(trip)} aria-label="Compartir" className="text-xs text-gray-400 hover:text-blue-500 px-2 py-1 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
                             <Share2 className="w-3.5 h-3.5" />
                           </button>
-                          <button onClick={() => handleDeleteTrip(trip.id)} className="text-xs text-gray-400 hover:text-red-500 px-2 py-1 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                          <button type="button" onClick={() => handleDeleteTrip(trip.id)} className="text-xs text-gray-400 hover:text-red-500 px-2 py-1 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
                             Eliminar
                           </button>
                         </div>
@@ -189,7 +190,9 @@ export function DashboardPage() {
         </div>
 
         <button
+          type="button"
           onClick={() => { hapticMedium(); setShowNewTrip(true); }}
+          aria-label="Nuevo viaje"
           className="fixed right-5 bottom-20 z-30 w-14 h-14 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded-full shadow-lg shadow-blue-500/30 flex items-center justify-center transition-all active:scale-90"
         >
           <Plus className="w-6 h-6" />
@@ -216,9 +219,9 @@ export function DashboardPage() {
             <NotificationBell />
             <ThemeToggle />
             <Tooltip content="Mi perfil">
-              <button onClick={() => navigate('/profile')} className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+              <button type="button" onClick={() => navigate('/profile')} className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                 {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt={displayName} className="w-8 h-8 rounded-full object-cover" />
+                  <img src={profile.avatar_url} alt={displayName} loading="lazy" className="w-8 h-8 rounded-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-medium">
                     {displayName.charAt(0).toUpperCase()}
@@ -228,7 +231,7 @@ export function DashboardPage() {
               </button>
             </Tooltip>
             <Tooltip content="Cerrar sesión">
-              <button onClick={handleLogout} className="p-2 text-gray-600 dark:text-gray-300 hover:text-red-500 transition-colors">
+              <button type="button" onClick={handleLogout} aria-label="Cerrar sesión" className="p-2 text-gray-600 dark:text-gray-300 hover:text-red-500 transition-colors">
                 <LogOut className="w-5 h-5" />
               </button>
             </Tooltip>
@@ -249,7 +252,7 @@ export function DashboardPage() {
 
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Mis Viajes</h1>
-          <button onClick={() => { hapticMedium(); setShowNewTrip(true); }} className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600 transition-colors">
+          <button type="button" onClick={() => { hapticMedium(); setShowNewTrip(true); }} className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600 transition-colors">
             <Plus className="w-5 h-5" /> Nuevo Viaje
           </button>
         </div>
@@ -266,7 +269,7 @@ export function DashboardPage() {
             </div>
             <p className="text-gray-500 dark:text-gray-400 font-medium mb-1">Aún no tienes viajes planificados</p>
             <p className="text-sm text-gray-400 mb-6">Crea tu primer viaje para empezar a organizar tu aventura</p>
-            <button onClick={() => setShowNewTrip(true)} className="text-blue-500 hover:underline font-medium">Crea tu primer viaje</button>
+            <button type="button" onClick={() => setShowNewTrip(true)} className="text-blue-500 hover:underline font-medium">Crea tu primer viaje</button>
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
@@ -275,7 +278,7 @@ export function DashboardPage() {
                 <Link to={`/trips/${trip.id}`} className="block">
                   {trip.cover_image ? (
                     <div className="aspect-video bg-gray-100 dark:bg-gray-700 overflow-hidden">
-                      <img src={trip.cover_image} alt={trip.title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                      <img src={trip.cover_image} alt={trip.title} loading="lazy" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                     </div>
                   ) : (
                     <div className="aspect-video bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
@@ -297,10 +300,10 @@ export function DashboardPage() {
                   </div>
                 </Link>
                 <div className="border-t dark:border-gray-700 px-5 py-3 flex justify-end gap-2">
-                  <button onClick={() => handleShare(trip)} className="text-sm text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-1">
+                  <button type="button" onClick={() => handleShare(trip)} aria-label="Compartir" className="text-sm text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-1">
                     <Share2 className="w-4 h-4" />
                   </button>
-                  <button onClick={() => handleDeleteTrip(trip.id)} className="text-sm text-red-500 dark:text-red-400 hover:underline">Eliminar</button>
+                  <button type="button" onClick={() => handleDeleteTrip(trip.id)} className="text-sm text-red-500 dark:text-red-400 hover:underline">Eliminar</button>
                 </div>
               </div>
             ))}

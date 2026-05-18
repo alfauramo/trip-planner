@@ -77,7 +77,7 @@ export function ProfilePage() {
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
         <header className="bg-white dark:bg-gray-800 border-b dark:border-gray-700">
           <div className="px-4 py-3 flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+            <button type="button" onClick={() => navigate(-1)} aria-label="Volver" className="p-1.5 -ml-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
               <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
@@ -95,7 +95,7 @@ export function ProfilePage() {
               <div className="flex items-center gap-4 mb-6">
                 <div className="relative">
                   {profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt={displayName} className="w-20 h-20 rounded-full object-cover border-4 border-gray-100 dark:border-gray-700" />
+                    <img src={profile.avatar_url} alt={displayName} loading="lazy" className="w-20 h-20 rounded-full object-cover border-4 border-gray-100 dark:border-gray-700" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                   ) : (
                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-2xl font-semibold border-4 border-gray-100 dark:border-gray-700">
                       {displayName.charAt(0).toUpperCase()}
@@ -156,6 +156,7 @@ export function ProfilePage() {
 
             <div className="px-5 py-4 bg-gray-50 dark:bg-gray-700/50 border-t dark:border-gray-700">
               <button
+                type="button"
                 onClick={handleSave}
                 disabled={loading}
                 className="w-full flex items-center justify-center gap-2 py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 active:bg-blue-700 transition-colors shadow-sm disabled:opacity-50"
@@ -179,7 +180,7 @@ export function ProfilePage() {
       <header className="bg-white dark:bg-gray-800 shadow-sm">
         <div className="max-w-2xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate('/')} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+            <button type="button" onClick={() => navigate('/')} aria-label="Volver" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
               <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
@@ -198,7 +199,7 @@ export function ProfilePage() {
             <div className="flex items-center gap-6 mb-8">
               <div className="relative">
                 {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt={displayName} className="w-24 h-24 rounded-full object-cover border-4 border-gray-100 dark:border-gray-700" />
+                  <img src={profile.avatar_url} alt={displayName} loading="lazy" className="w-24 h-24 rounded-full object-cover border-4 border-gray-100 dark:border-gray-700" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                 ) : (
                   <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-semibold border-4 border-gray-100 dark:border-gray-700">
                     {displayName.charAt(0).toUpperCase()}
@@ -265,6 +266,7 @@ export function ProfilePage() {
 
           <div className="px-8 py-4 bg-gray-50 dark:bg-gray-700/50 border-t dark:border-gray-700 flex justify-end">
             <button
+              type="button"
               onClick={handleSave}
               disabled={loading}
               className="flex items-center gap-2 px-6 py-2.5 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 active:bg-blue-700 transition-colors shadow-sm disabled:opacity-50"

@@ -1,0 +1,10 @@
+export const Z_INDEX = {
+  MODAL: 50,
+  BOTTOM_SHEET: 50,
+  MOBILE_NAV: 40,
+  TOAST: 200,
+  CONFIRM_MODAL: 100,
+  TOOLTIP: 300,
+  NOTIFICATION_DROPDOWN: 45,
+  FAB: 30,
+} as const;

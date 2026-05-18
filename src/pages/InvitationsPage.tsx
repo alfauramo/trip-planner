@@ -128,7 +128,7 @@ export function InvitationsPage() {
                 <div key={invitation.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
                   {invitation.trip?.cover_image && (
                     <div className="h-28 overflow-hidden">
-                      <img src={invitation.trip.cover_image} alt={invitation.trip.title} className="w-full h-full object-cover" />
+                      <img src={invitation.trip.cover_image} alt={invitation.trip.title} loading="lazy" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                     </div>
                   )}
                   <div className="p-4">
@@ -208,7 +208,7 @@ export function InvitationsPage() {
               <div key={invitation.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
                 {invitation.trip?.cover_image && (
                   <div className="h-32 overflow-hidden">
-                    <img src={invitation.trip.cover_image} alt={invitation.trip.title} className="w-full h-full object-cover" />
+                    <img src={invitation.trip.cover_image} alt={invitation.trip.title} loading="lazy" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                   </div>
                 )}
                 <div className="p-5">

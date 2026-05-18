@@ -66,7 +66,7 @@ export function BottomSheet({ children, onClose, title }: BottomSheetProps) {
           {title && (
             <div className="shrink-0 flex items-center justify-between px-5 pb-3 border-b dark:border-gray-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h2>
-              <button onClick={onClose} className="p-1.5 -mr-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+              <button type="button" onClick={onClose} aria-label="Cerrar" className="p-1.5 -mr-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -90,7 +90,7 @@ export function BottomSheet({ children, onClose, title }: BottomSheetProps) {
         {title && (
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h2>
-            <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600">
+            <button type="button" onClick={onClose} aria-label="Cerrar" className="p-1 text-gray-400 hover:text-gray-600">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>

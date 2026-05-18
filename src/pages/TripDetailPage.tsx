@@ -2,41 +2,32 @@ import { useState, useEffect } from 'react';
 import { useConfirm } from '../components/ConfirmModal';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Plus, Calendar, Trash2, GripVertical,
-  Image as ImageIcon, Users, Pencil, Hotel, Plane, Utensils,
-  ShoppingBag, CheckSquare, Map as MapIcon, Clock, Euro, FileText, Globe, Edit2,
-  Receipt, ArrowRight, TrendingUp, ExternalLink, LogOut, Download, Check, Route, Sparkles, Package, Share2, Compass
+  Receipt, Plus, Download, TrendingUp, ArrowRight,
+  CheckSquare, Check, Trash2, Euro
 } from 'lucide-react';
-import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { useTripDetail } from '../hooks/useTrips';
+import { useTripDetail } from '../hooks/useTripDetail';
 import { useTrips } from '../hooks/useTrips';
 import { CoverSelector } from '../components/CoverSelector';
 import { TripMembersManager } from '../components/TripMembersManager';
-import { FileUploader } from '../components/FileUploader';
 import { useToast } from '../components/Toast';
 import { LoadingOverlay, DetailSkeleton } from '../components/Loading';
-import { SwipeableRow } from '../components/SwipeableRow';
-import { Tooltip } from '../components/Tooltip';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { TripEvent, Attachment, Day, EXPENSE_CATEGORIES, ExpenseCategory } from '../types';
-import { getEventAttachments } from '../lib/attachments';
+import { TripEvent, EXPENSE_CATEGORIES, ExpenseCategory } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { Footer } from '../components/Footer';
-import { NotificationBell } from '../components/NotificationBell';
 import { TripMap } from '../components/TripMap';
-import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
-import { ExportTripPDF } from '../components/ExportTripPDF';
-import { WeatherForecast } from '../components/WeatherForecast';
 import { PackingList } from '../components/PackingList';
 import { ActivityTimeline } from '../components/ActivityTimeline';
-import { ThemeToggle } from '../components/ThemeToggle';
 import { BottomSheet } from '../components/BottomSheet';
 import { useIsMobile } from '../hooks/useMediaQuery';
+import { TripDetailHeader } from '../components/TripDetailHeader';
+import {
+  TripItinerary, AddDayForm, EditDayForm, AddEventForm,
+  EditEventContent, EventDetailsContent, getMemberDisplayName
+} from '../components/TripItinerary';
 
 const tripSchema = z.object({
   title: z.string().min(1, 'El título es requerido'),
@@ -54,221 +45,7 @@ const tripSchema = z.object({
   path: ['end_date'],
 });
 
-const placeSchema = z.object({
-  name: z.string().min(1, 'El nombre es requerido'),
-  address: z.string().optional(),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
-  notes: z.string().optional(),
-  event_type: z.string(),
-  start_time: z.string().optional(),
-  end_time: z.string().optional(),
-  google_maps_url: z.string().optional(),
-  website_url: z.string().optional(),
-  cost_amount: z.string().optional(),
-  cost_currency: z.string(),
-  cost_paid: z.boolean(),
-  booking_reference: z.string().optional(),
-  booking_status: z.string().optional(),
-  booking_platform: z.string().optional(),
-  booking_contact_name: z.string().optional(),
-  booking_contact_phone: z.string().optional(),
-});
-
 type TripForm = z.infer<typeof tripSchema>;
-type PlaceForm = z.infer<typeof placeSchema>;
-
-const eventTypes = [
-  { value: 'activity', label: 'Actividad', icon: MapIcon, color: 'bg-blue-100 text-blue-600' },
-  { value: 'accommodation', label: 'Alojamiento', icon: Hotel, color: 'bg-purple-100 text-purple-600' },
-  { value: 'transport', label: 'Transporte', icon: Plane, color: 'bg-orange-100 text-orange-600' },
-  { value: 'restaurant', label: 'Restaurante', icon: Utensils, color: 'bg-green-100 text-green-600' },
-  { value: 'shopping', label: 'Compras', icon: ShoppingBag, color: 'bg-pink-100 text-pink-600' },
-  { value: 'todo', label: 'Tarea', icon: CheckSquare, color: 'bg-yellow-100 text-yellow-600' },
-] as const;
-
-const tabConfig = [
-  { key: 'itinerary', label: 'Itinerario', icon: Calendar },
-  { key: 'expenses', label: 'Gastos', icon: Receipt },
-  { key: 'members', label: 'Miembros', icon: Users },
-  { key: 'checklist', label: 'Checklist', icon: CheckSquare },
-  { key: 'packing', label: 'Equipaje', icon: Package },
-  { key: 'map', label: 'Mapa', icon: MapIcon },
-  { key: 'activity', label: 'Actividad', icon: Clock },
-] as const;
-
-function SortableEvent({
-  event,
-  onEdit,
-  onAddDetails,
-  onDelete,
-  onOpenMaps,
-  isMobile,
-}: {
-  event: TripEvent;
-  onEdit: () => void;
-  onAddDetails: () => void;
-  onDelete: () => void;
-  onOpenMaps?: () => void;
-  isMobile: boolean;
-}) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: event.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  const typeConfig = eventTypes.find(t => t.value === event.event_type) || eventTypes[0];
-  const EventIcon = typeConfig.icon;
-
-  const hasDetails = event.cost_amount || event.address || event.google_maps_url || 
-                     event.booking_reference || event.participants?.length || event.notes;
-
-  if (isMobile) {
-    return (
-      <div
-        ref={setNodeRef}
-        style={style}
-        className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl group"
-      >
-        <button
-          {...attributes}
-          {...listeners}
-          className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:text-gray-300"
-        >
-          <GripVertical className="w-4 h-4" />
-        </button>
-        <div className={`p-1.5 rounded-lg ${typeConfig.color}`}>
-          <EventIcon className="w-4 h-4" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5">
-            <p className="font-medium text-gray-800 dark:text-white text-sm truncate">{event.name}</p>
-            {event.start_time && (
-              <span className="shrink-0 text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">
-                {event.start_time}
-              </span>
-            )}
-          </div>
-          {event.address && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{event.address}</p>
-          )}
-        </div>
-        <div className="flex items-center gap-0.5">
-          <button
-            onClick={onAddDetails}
-            className="p-1.5 text-gray-400 hover:text-blue-500"
-          >
-            <FileText className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={onDelete}
-            className="p-1.5 text-gray-400 hover:text-red-500"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg group"
-    >
-      <button
-        {...attributes}
-        {...listeners}
-        className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:text-gray-300"
-      >
-        <GripVertical className="w-4 h-4" />
-      </button>
-      <div className={`p-2 rounded-lg ${typeConfig.color}`}>
-        <EventIcon className="w-4 h-4" />
-      </div>
-      <div className="flex-1">
-        <div className="flex items-center gap-2">
-          <p className="font-medium text-gray-800 dark:text-white">{event.name}</p>
-          {event.start_time && (
-            <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded">
-              {event.start_time}{event.end_time && ` - ${event.end_time}`}
-            </span>
-          )}
-          {event.booking_status && event.booking_status !== 'pending' && (
-            <span className={`text-xs px-2 py-0.5 rounded ${
-              event.booking_status === 'paid' ? 'bg-green-100 text-green-600' :
-              event.booking_status === 'confirmed' ? 'bg-orange-100 text-orange-600' :
-              'bg-red-100 text-red-600'
-            }`}>
-              {event.booking_status === 'paid' ? 'Pagado' :
-               event.booking_status === 'confirmed' ? 'Confirmado' : 'Cancelado'}
-            </span>
-          )}
-        </div>
-        {event.address && (
-          <p className="text-sm text-gray-500 dark:text-gray-400">{event.address}</p>
-        )}
-        {event.notes && (
-          <p className="text-sm text-gray-400 mt-1">{event.notes}</p>
-        )}
-        {(event.cost_amount && event.cost_amount > 0) && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            {event.cost_amount} {event.cost_currency} {!event.cost_paid && '(pendiente)'}
-          </p>
-        )}
-      </div>
-      <div className="flex items-center gap-1">
-        {event.google_maps_url && (
-          <Tooltip content="Abrir en Google Maps">
-            <button
-              onClick={onOpenMaps}
-              className="p-1 text-gray-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <ExternalLink className="w-4 h-4" />
-            </button>
-          </Tooltip>
-        )}
-        <Tooltip content={hasDetails ? 'Ver/editar detalles' : 'Añadir detalles'}>
-          <button
-            onClick={onAddDetails}
-            className={`p-1 opacity-0 group-hover:opacity-100 transition-opacity ${
-              hasDetails ? 'text-green-500 hover:text-green-600' : 'text-gray-400 hover:text-blue-500'
-            }`}
-          >
-            <FileText className="w-4 h-4" />
-          </button>
-        </Tooltip>
-        <Tooltip content="Editar nombre u hora">
-          <button
-            onClick={onEdit}
-            className="p-1 text-gray-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <Edit2 className="w-4 h-4" />
-          </button>
-        </Tooltip>
-        <Tooltip content="Eliminar evento">
-          <button
-            onClick={onDelete}
-            className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </Tooltip>
-      </div>
-    </div>
-  );
-}
 
 export function TripDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -303,20 +80,6 @@ export function TripDetailPage() {
     }
   };
 
-  const handleDragEnd = async (event: DragEndEvent, dayId: string) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-    const day = days.find(d => d.id === dayId);
-    if (!day) return;
-    const oldIndex = day.events.findIndex(e => e.id === active.id);
-    const newIndex = day.events.findIndex(e => e.id === over.id);
-    if (oldIndex === -1 || newIndex === -1) return;
-    const newEvents = [...day.events];
-    const [movedItem] = newEvents.splice(oldIndex, 1);
-    newEvents.splice(newIndex, 0, movedItem);
-    await reorderEvents(dayId, newEvents.map(e => e.id));
-  };
-
   if (loading) {
     return isMobile ? <DetailSkeleton /> : <LoadingOverlay />;
   }
@@ -332,167 +95,22 @@ export function TripDetailPage() {
     );
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-    });
-  };
-
-  const formatDateShort = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
-
-  const optimizeDayOrder = async (day: any) => {
-    const eventsWithCoords = day.events.filter((e: any) => e.latitude && e.longitude);
-    if (eventsWithCoords.length < 2) {
-      showToast('Se necesitan al menos 2 eventos con ubicación', 'error');
-      return;
-    }
-    const toRad = (deg: number) => (deg * Math.PI) / 180;
-    const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-      const R = 6371;
-      const dLat = toRad(lat2 - lat1);
-      const dLon = toRad(lon2 - lon1);
-      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-      return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    };
-    const optimize = (points: any[]) => {
-      const visited: boolean[] = new Array(points.length).fill(false);
-      const order: number[] = [0];
-      visited[0] = true;
-      let current = 0;
-      while (order.length < points.length) {
-        let nearestIdx = -1;
-        let nearestDist = Infinity;
-        for (let i = 0; i < points.length; i++) {
-          if (!visited[i]) {
-            const dist = haversineDistance(
-              points[current].latitude, points[current].longitude,
-              points[i].latitude, points[i].longitude
-            );
-            if (dist < nearestDist) {
-              nearestDist = dist;
-              nearestIdx = i;
-            }
-          }
-        }
-        if (nearestIdx !== -1) {
-          order.push(nearestIdx);
-          visited[nearestIdx] = true;
-          current = nearestIdx;
-        }
-      }
-      return order.map(idx => points[idx]);
-    };
-    const optimizedOrder = optimize(eventsWithCoords);
-    const updates = optimizedOrder.map((event, idx) => ({
-      id: event.id,
-      order: idx,
-    }));
-    for (const update of updates) {
-      await supabase.from('events').update({ order: update.order }).eq('id', update.id);
-    }
-    showToast('Ruta optimizada');
-    refresh();
-  };
-
-  const openDayInMaps = (day: any) => {
-    const eventsWithLocation = day.events.filter((e: any) => 
-      (e.latitude && e.longitude) || e.google_maps_url || e.address
-    );
-    if (eventsWithLocation.length === 0) {
-      showToast('No hay eventos con ubicación', 'error');
-      return;
-    }
-    let mapsUrl = 'https://www.google.com/maps/dir/';
-    eventsWithLocation.forEach((event: any, idx: number) => {
-      if (event.latitude && event.longitude) {
-        mapsUrl += `${event.latitude},${event.longitude}`;
-      } else if (event.google_maps_url) {
-        const match = event.google_maps_url.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
-        if (match) {
-          mapsUrl += `${match[1]},${match[2]}`;
-        } else {
-          mapsUrl += encodeURIComponent(event.name);
-        }
-      } else if (event.address) {
-        mapsUrl += encodeURIComponent(event.address);
-      }
-      if (idx < eventsWithLocation.length - 1) mapsUrl += '/';
-    });
-    window.open(mapsUrl, '_blank');
-  };
-
   if (isMobile) {
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
-        <header className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 sticky top-0 z-20">
-          <div className="px-4 py-2.5 flex items-center gap-3">
-            <Link to="/" className="p-1.5 -ml-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-              <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-            </Link>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-base font-semibold text-gray-900 dark:text-white truncate">{trip.title}</h1>
-              {(trip.start_date || trip.end_date) && (
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {trip.start_date && formatDateShort(trip.start_date)}
-                  {trip.start_date && trip.end_date && ' - '}
-                  {trip.end_date && formatDateShort(trip.end_date)}
-                </p>
-              )}
-            </div>
-            <div className="flex items-center gap-1">
-              <button onClick={() => {
-                const url = `${window.location.origin}/trip-planner/trips/${trip.id}`;
-                if (navigator.share) navigator.share({ title: trip.title, url }).catch(() => {});
-                else navigator.clipboard.writeText(url);
-              }} className="p-1.5 text-gray-500 hover:text-blue-500 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                <Share2 className="w-4 h-4" />
-              </button>
-              <NotificationBell />
-              <ThemeToggle />
-            </div>
-          </div>
-
-          {trip.cover_image && (
-            <div className="relative h-36">
-              <img
-                src={trip.cover_image}
-                alt={trip.title}
-                className="w-full h-full object-cover"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-            </div>
-          )}
-
-          <div className="px-4 py-1.5 flex items-center gap-1 border-t dark:border-gray-700 overflow-x-auto no-scrollbar">
-            {tabConfig.map((tab) => {
-              const TabIcon = tab.icon;
-              const active = activeTab === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key as any)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors shrink-0 ${
-                    active
-                      ? 'bg-blue-500 text-white shadow-sm'
-                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  <TabIcon className="w-3.5 h-3.5" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-        </header>
+        <TripDetailHeader
+          trip={trip}
+          activeTab={activeTab}
+          onTabChange={(tab) => setActiveTab(tab as any)}
+          isMobile
+          displayName={displayName}
+          profile={profile}
+          onLogout={handleLogout}
+          onEditTrip={() => setShowEditTrip(true)}
+          onEditCover={() => setShowCoverEditor(true)}
+          members={members}
+          days={days}
+        />
 
         <main className="flex-1 px-4 py-4 pb-20">
           {activeTab === 'members' ? (
@@ -515,7 +133,7 @@ export function TripDetailPage() {
               isMobile
             />
           ) : activeTab === 'checklist' ? (
-            <ChecklistSection tripId={trip.id} isMobile />
+            <ChecklistSection tripId={trip.id} />
           ) : activeTab === 'packing' ? (
             <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
               <PackingList tripId={trip.id} />
@@ -543,126 +161,29 @@ export function TripDetailPage() {
               <ActivityTimeline tripId={trip.id} />
             </div>
           ) : (
-            <>
-              {trip.description && (
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">{trip.description}</p>
-              )}
-              <WeatherForecast trip={{ ...trip, days, members } as any} />
-              <div className="flex items-center justify-between mb-4 mt-4">
-                <h2 className="text-base font-semibold text-gray-800 dark:text-white flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4" />
-                  Itinerario
-                </h2>
-                <button
-                  onClick={() => setShowAddDay(true)}
-                  className="flex items-center gap-1 text-sm text-blue-500 font-medium"
-                >
-                  <Plus className="w-4 h-4" />
-                  Añadir Día
-                </button>
-              </div>
-
-              {days.length === 0 ? (
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center shadow-sm">
-                  <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Compass className="w-7 h-7 text-blue-400" />
-                  </div>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Itinerario vacío</p>
-                  <p className="text-xs text-gray-400 mb-4">Empieza añadiendo los días de tu viaje</p>
-                  <button onClick={() => setShowAddDay(true)} className="text-blue-500 text-sm font-medium">Añade el primer día</button>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {days.map((day) => (
-                    <div key={day.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-                      <div className="bg-blue-50 dark:bg-gray-700/50 px-4 py-2.5 flex items-center justify-between">
-                        <div className="min-w-0 flex-1">
-                          <span className="text-xs text-blue-600 font-medium">Día {day.day_number}</span>
-                          <h3 className="font-semibold text-gray-800 dark:text-white text-sm capitalize">
-                            {formatDate(day.date)}
-                          </h3>
-                          {day.notes && (
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{day.notes}</p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-0.5 shrink-0">
-                          <button onClick={() => setEditingDay(day)} className="p-1.5 text-gray-400 hover:text-blue-500">
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={async () => {
-                              if (await confirm('¿Eliminar este día?')) {
-                                try { await deleteDay(day.id); showToast('Día eliminado'); } catch (err: any) { showToast(err.message || 'Error', 'error'); }
-                              }
-                            }}
-                            className="p-1.5 text-gray-400 hover:text-red-500"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="p-3">
-                        {day.events.length === 0 ? (
-                          <p className="text-gray-400 text-xs text-center py-3">No hay eventos en este día</p>
-                        ) : (
-                          <DndContext collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, day.id)}>
-                            <SortableContext items={day.events.map(ev => ev.id)} strategy={verticalListSortingStrategy}>
-                              <div className="space-y-2">
-                                {day.events.map((event) => (
-                                  <SwipeableRow key={event.id} onDelete={async () => {
-                                    if (await confirm('¿Eliminar este evento?')) {
-                                      await deleteEvent(event.id, day.id);
-                                      showToast('Evento eliminado');
-                                    }
-                                  }}>
-                                    <SortableEvent
-                                      event={event}
-                                      isMobile
-                                      onEdit={() => setEditingEvent(event)}
-                                      onAddDetails={() => setEventDetails(event)}
-                                      onDelete={async () => {
-                                        if (await confirm('¿Eliminar este evento?')) {
-                                          await deleteEvent(event.id, day.id);
-                                          showToast('Evento eliminado');
-                                        }
-                                      }}
-                                      onOpenMaps={() => event.google_maps_url && window.open(event.google_maps_url, '_blank')}
-                                    />
-                                  </SwipeableRow>
-                                ))}
-                              </div>
-                            </SortableContext>
-                          </DndContext>
-                        )}
-                        <button
-                          onClick={() => setShowAddEvent(day.id)}
-                          className="w-full mt-2 py-2.5 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl text-gray-400 text-sm hover:border-blue-400 hover:text-blue-500 transition-colors flex items-center justify-center gap-1.5"
-                        >
-                          <Plus className="w-4 h-4" />
-                          Añadir Evento
-                        </button>
-                        {day.events.length >= 2 && (
-                          <div className="flex gap-2 mt-2">
-                            <button onClick={() => optimizeDayOrder(day)} className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-purple-50 text-purple-600 rounded-xl text-xs font-medium">
-                              <Sparkles className="w-3.5 h-3.5" /> Optimizar
-                            </button>
-                            <button onClick={() => openDayInMaps(day)} className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-medium">
-                              <Route className="w-3.5 h-3.5" /> Maps
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
+            <TripItinerary
+              trip={trip}
+              days={days}
+              members={members}
+              isMobile
+              onAddDayClick={() => setShowAddDay(true)}
+              onAddEventClick={(dayId) => setShowAddEvent(dayId)}
+              onEditEventClick={(event) => setEditingEvent(event)}
+              onViewEventDetails={(event) => setEventDetails(event)}
+              onEditDayClick={(day) => setEditingDay(day)}
+              onDeleteDay={deleteDay}
+              onDeleteEvent={deleteEvent}
+              onReorderEvents={reorderEvents}
+              onRefresh={refresh}
+            />
           )}
         </main>
 
         {activeTab === 'itinerary' && days.length > 0 && (
           <button
+            type="button"
             onClick={() => setShowAddDay(true)}
+            aria-label="Añadir día"
             className="fixed right-5 bottom-20 z-30 w-14 h-14 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded-full shadow-lg shadow-blue-500/30 flex items-center justify-center transition-all active:scale-95"
           >
             <Plus className="w-6 h-6" />
@@ -817,121 +338,19 @@ export function TripDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
-      <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-20">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center gap-2">
-              <Plane className="w-7 h-7 text-blue-500" />
-              <span className="text-lg font-bold text-gray-800 dark:text-white hidden sm:block">Trip Planner</span>
-            </Link>
-          </div>
-          <div className="flex items-center gap-2">
-            <NotificationBell />
-            <ThemeToggle />
-            <Tooltip content="Mi perfil">
-              <button
-                onClick={() => navigate('/profile')}
-                className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt={displayName} className="w-8 h-8 rounded-full object-cover" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-medium">
-                    {displayName.charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <span className="text-sm font-medium text-gray-700 hidden sm:block">{displayName}</span>
-              </button>
-            </Tooltip>
-            <Tooltip content="Cerrar sesión">
-              <button onClick={handleLogout} className="p-2 text-gray-600 dark:text-gray-300 hover:text-red-500 transition-colors">
-                <LogOut className="w-5 h-5" />
-              </button>
-            </Tooltip>
-          </div>
-        </div>
-        {trip.cover_image ? (
-          <div className="relative h-48 md:h-56">
-            <img src={trip.cover_image} alt={trip.title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-4">
-              <div className="max-w-4xl mx-auto flex items-center gap-4">
-                <Link to="/" className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors backdrop-blur-sm">
-                  <ArrowLeft className="w-5 h-5 text-white" />
-                </Link>
-                <div className="flex-1">
-                  <h1 className="text-2xl font-bold text-white">{trip.title}</h1>
-                  {(trip.start_date || trip.end_date) && (
-                    <p className="text-white/80 text-sm">
-                      {trip.start_date && formatDateShort(trip.start_date)}
-                      {trip.start_date && trip.end_date && ' - '}
-                      {trip.end_date && formatDateShort(trip.end_date)}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
-            <Link to="/" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-              <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-            </Link>
-            <div className="flex-1">
-              <h1 className="text-xl font-bold text-gray-800 dark:text-white">{trip.title}</h1>
-              {(trip.start_date || trip.end_date) && (
-                <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  {trip.start_date && formatDateShort(trip.start_date)}
-                  {trip.start_date && trip.end_date && ' - '}
-                  {trip.end_date && formatDateShort(trip.end_date)}
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
-        <div className="max-w-4xl mx-auto px-4 py-2 flex items-center gap-2">
-          <button
-            onClick={() => setShowEditTrip(true)}
-            className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300 hover:text-blue-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            <Pencil className="w-4 h-4" />
-            <span className="hidden sm:inline">Editar viaje</span>
-          </button>
-          <button
-            onClick={() => setShowCoverEditor(true)}
-            className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300 hover:text-blue-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            <ImageIcon className="w-4 h-4" />
-            <span className="hidden sm:inline">Portada</span>
-          </button>
-          <ExportTripPDF trip={{ ...trip, days, members } as any} />
-        </div>
-
-        <div className="max-w-4xl mx-auto px-4 flex border-t overflow-x-auto no-scrollbar">
-          {tabConfig.map((tab) => {
-            const TabIcon = tab.icon;
-            const active = activeTab === tab.key;
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key as any)}
-                className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors shrink-0 ${
-                  active
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700'
-                }`}
-              >
-                <TabIcon className="w-4 h-4" />
-                <span className="font-medium whitespace-nowrap">{tab.label}</span>
-                {tab.key === 'members' && members.length > 0 && (
-                  <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs px-1.5 py-0.5 rounded-full">{members.length}</span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </header>
+      <TripDetailHeader
+        trip={trip}
+        activeTab={activeTab}
+        onTabChange={(tab) => setActiveTab(tab as any)}
+        isMobile={false}
+        displayName={displayName}
+        profile={profile}
+        onLogout={handleLogout}
+        onEditTrip={() => setShowEditTrip(true)}
+        onEditCover={() => setShowCoverEditor(true)}
+        members={members}
+        days={days}
+      />
 
       <main className="flex-1 max-w-4xl mx-auto px-4 py-6 w-full">
         {activeTab === 'members' ? (
@@ -973,113 +392,21 @@ export function TripDetailPage() {
             <ActivityTimeline tripId={trip.id} />
           </div>
         ) : (
-          <>
-            {trip.description && (
-              <p className="text-gray-600 dark:text-gray-300 mb-8">{trip.description}</p>
-            )}
-            <WeatherForecast trip={{ ...trip, days, members } as any} />
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                Itinerario
-              </h2>
-              <button
-                onClick={() => setShowAddDay(true)}
-                className="flex items-center gap-2 text-blue-500 hover:text-blue-600 font-medium"
-              >
-                <Plus className="w-4 h-4" />
-                Añadir Día
-              </button>
-            </div>
-
-            {days.length === 0 ? (
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center">
-                <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Compass className="w-8 h-8 text-blue-400" />
-                </div>
-                <p className="text-gray-500 dark:text-gray-400 mb-2">No hay días en el itinerario</p>
-                <p className="text-sm text-gray-400 mb-4">Empieza añadiendo los días de tu viaje</p>
-                <button onClick={() => setShowAddDay(true)} className="text-blue-500 hover:underline font-medium">Añade el primer día</button>
-              </div>
-            ) : (
-              <div className="space-y-6 w-full">
-                {days.map((day) => (
-                  <div key={day.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-                    <div className="bg-blue-50 dark:bg-gray-700/50 px-5 py-3 flex items-center justify-between">
-                      <div>
-                        <span className="text-sm text-blue-600 font-medium">Día {day.day_number}</span>
-                        <h3 className="font-semibold text-gray-800 dark:text-white capitalize">{formatDate(day.date)}</h3>
-                        {day.notes && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{day.notes}</p>}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Tooltip content="Editar día">
-                          <button onClick={() => setEditingDay(day)} className="p-2 text-gray-400 dark:text-gray-500 hover:text-blue-500 transition-colors">
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                        </Tooltip>
-                        <Tooltip content="Eliminar día">
-                          <button
-                            onClick={async () => {
-                              if (await confirm('¿Eliminar este día?')) {
-                                try { await deleteDay(day.id); showToast('Día eliminado'); } catch (err: any) { showToast(err.message || 'Error al eliminar el día', 'error'); }
-                              }
-                            }}
-                            className="p-2 text-gray-400 dark:text-gray-500 hover:text-red-500 transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </Tooltip>
-                      </div>
-                    </div>
-                    <div className="p-5">
-                      {day.events.length === 0 ? (
-                        <p className="text-gray-400 dark:text-gray-500 text-sm text-center py-4">No hay eventos añadidos a este día</p>
-                      ) : (
-                        <DndContext collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, day.id)}>
-                          <SortableContext items={day.events.map(ev => ev.id)} strategy={verticalListSortingStrategy}>
-                            <div className="space-y-3">
-                              {day.events.map((event) => (
-                                <SortableEvent
-                                  key={event.id}
-                                  event={event}
-                                  isMobile={false}
-                                  onEdit={() => setEditingEvent(event)}
-                                  onAddDetails={() => setEventDetails(event)}
-                                  onDelete={async () => {
-                                    if (await confirm('¿Eliminar este evento?')) {
-                                      await deleteEvent(event.id, day.id);
-                                      showToast('Evento eliminado');
-                                    }
-                                  }}
-                                  onOpenMaps={() => event.google_maps_url && window.open(event.google_maps_url, '_blank')}
-                                />
-                              ))}
-                            </div>
-                          </SortableContext>
-                        </DndContext>
-                      )}
-                      <button
-                        onClick={() => setShowAddEvent(day.id)}
-                        className="w-full mt-4 py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:border-blue-500 hover:text-blue-500 transition-colors flex items-center justify-center gap-2"
-                      >
-                        <Plus className="w-4 h-4" /> Añadir Evento
-                      </button>
-                      {day.events.length >= 2 && (
-                        <div className="flex gap-2 mt-3">
-                          <button onClick={() => optimizeDayOrder(day)} className="flex-1 flex items-center justify-center gap-2 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors text-sm font-medium">
-                            <Sparkles className="w-4 h-4" /> Optimizar orden
-                          </button>
-                          <button onClick={() => openDayInMaps(day)} className="flex-1 flex items-center justify-center gap-2 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium">
-                            <Route className="w-4 h-4" /> Ver en Maps
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
+          <TripItinerary
+            trip={trip}
+            days={days}
+            members={members}
+            isMobile={false}
+            onAddDayClick={() => setShowAddDay(true)}
+            onAddEventClick={(dayId) => setShowAddEvent(dayId)}
+            onEditEventClick={(event) => setEditingEvent(event)}
+            onViewEventDetails={(event) => setEventDetails(event)}
+            onEditDayClick={(day) => setEditingDay(day)}
+            onDeleteDay={deleteDay}
+            onDeleteEvent={deleteEvent}
+            onReorderEvents={reorderEvents}
+            onRefresh={refresh}
+          />
         )}
       </main>
 
@@ -1238,257 +565,18 @@ function EditTripForm({ trip, onSave }: { trip: { id: string; title: string; des
   );
 }
 
-function AddDayForm({ startDate, lastDate, onSave }: { startDate?: string; lastDate?: string; onSave: (date: string, notes?: string) => void }) {
-  const getDefaultDate = () => {
-    if (lastDate) { const d = new Date(lastDate); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0]; }
-    if (startDate) return startDate;
-    return new Date().toISOString().split('T')[0];
-  };
-  const [date, setDate] = useState(getDefaultDate());
-  const [notes, setNotes] = useState('');
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha del día</label>
-        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción (opcional)</label>
-        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" placeholder="Notas sobre este día..." />
-      </div>
-      <button onClick={() => onSave(date, notes || undefined)} className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600 active:bg-blue-700">
-        Añadir Día
-      </button>
-    </div>
-  );
-}
-
-function EditDayForm({ day, onSave }: { day: { id: string; date: string; notes?: string }; onSave: (updates: { date: string; notes?: string }) => void }) {
-  const [date, setDate] = useState(day.date);
-  const [notes, setNotes] = useState(day.notes || '');
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha del día</label>
-        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción (opcional)</label>
-        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" placeholder="Notas sobre este día..." />
-      </div>
-      <button onClick={() => onSave({ date, notes: notes || undefined })} className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600">
-        Guardar
-      </button>
-    </div>
-  );
-}
-
-function AddEventForm({ onSave }: { onSave: (data: { name: string; event_type: string; start_time?: string; end_time?: string }) => void }) {
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<{ name: string; event_type: string; start_time: string; end_time: string }>({
-    defaultValues: { event_type: 'activity', start_time: '', end_time: '' },
-  });
-  const selectedType = watch('event_type');
-
-  return (
-    <form onSubmit={handleSubmit(onSave)} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo de evento</label>
-        <div className="grid grid-cols-3 gap-2">
-          {eventTypes.map((type) => {
-            const Icon = type.icon;
-            return (
-              <button key={type.value} type="button" onClick={() => setValue('event_type', type.value)} className={`flex items-center gap-1.5 p-2.5 rounded-xl border-2 transition-all ${selectedType === type.value ? `${type.color} border-current` : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'}`}>
-                <Icon className="w-4 h-4" /> <span className="text-xs font-medium">{type.label}</span>
-              </button>
-            );
-          })}
-        </div>
-        <input type="hidden" {...register('event_type')} />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre <span className="text-red-500">*</span></label>
-        <input {...register('name', { required: 'El nombre es requerido' })} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder={selectedType === 'accommodation' ? 'Ej: Hotel O Malioboro' : selectedType === 'restaurant' ? 'Ej: Warung Nusantara' : selectedType === 'transport' ? 'Ej: Vuelo Madrid-Yakarta' : 'Ej: Templo Borobudur'} />
-        {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><Clock className="w-4 h-4 inline mr-1" />Inicio</label>
-          <input {...register('start_time')} type="time" className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><Clock className="w-4 h-4 inline mr-1" />Fin</label>
-          <input {...register('end_time')} type="time" className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        </div>
-      </div>
-      <button type="submit" className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600">Añadir</button>
-    </form>
-  );
-}
-
 function EditCoverForm({ trip, onSave }: { trip: { id: string; cover_image?: string }; onSave: (coverImage: string) => void }) {
   const [coverImage, setCoverImage] = useState(trip.cover_image || '');
 
   return (
     <div className="space-y-4">
       <CoverSelector value={coverImage} onChange={(url) => setCoverImage(url)} />
-      <button onClick={() => onSave(coverImage)} className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600">Guardar</button>
+      <button type="button" onClick={() => onSave(coverImage)} className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600">Guardar</button>
     </div>
   );
 }
 
-function EditEventContent({ event, members, onSave, onRefreshTrip }: {
-  event: TripEvent;
-  members: { id: string; user_id?: string; email: string; profile?: { full_name?: string; alias?: string; avatar_url?: string } }[];
-  onSave: (data: any, payerId?: string, participants?: string[]) => void;
-  onRefreshTrip?: () => void;
-}) {
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
-  const [payerId, setPayerId] = useState<string>(event.payer_id || '');
-  const [selectedParticipants, setSelectedParticipants] = useState<string[]>(event.participants || []);
-  const [selectedPlace, setSelectedPlace] = useState<{ address: string; latitude?: number; longitude?: number; google_maps_url?: string } | null>(null);
-
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<PlaceForm>({
-    resolver: zodResolver(placeSchema),
-    defaultValues: {
-      name: event.name, address: event.address || '', latitude: event.latitude, longitude: event.longitude,
-      notes: event.notes || '', event_type: event.event_type, start_time: event.start_time || '',
-      end_time: event.end_time || '', google_maps_url: event.google_maps_url || '', website_url: event.website_url || '',
-      cost_amount: event.cost_amount?.toString() || '', cost_currency: event.cost_currency || 'EUR',
-      cost_paid: event.cost_paid || false, booking_reference: event.booking_reference || '',
-      booking_status: event.booking_status || '', booking_platform: event.booking_platform || '',
-      booking_contact_name: event.booking_contact_name || '', booking_contact_phone: event.booking_contact_phone || '',
-    },
-  });
-
-  const selectedType = watch('event_type');
-
-  const loadAttachments = async () => {
-    try { const data = await getEventAttachments(event.id); setAttachments(data); } catch (err) { console.error(err); }
-  };
-  useEffect(() => { loadAttachments(); }, []);
-
-  const handleSubmitForm = (data: PlaceForm) => {
-    const finalData = { ...data, latitude: selectedPlace?.latitude, longitude: selectedPlace?.longitude, google_maps_url: selectedPlace?.google_maps_url || data.google_maps_url, address: selectedPlace?.address || data.address };
-    onSave(finalData, payerId, selectedParticipants);
-  };
-
-  return (
-    <form onSubmit={handleSubmit(handleSubmitForm)} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo de evento</label>
-        <div className="grid grid-cols-3 gap-2">
-          {eventTypes.map((type) => {
-            const Icon = type.icon;
-            return (
-              <button key={type.value} type="button" onClick={() => setValue('event_type', type.value)} className={`flex items-center gap-1.5 p-2.5 rounded-xl border-2 transition-all ${selectedType === type.value ? `${type.color} border-current` : 'border-gray-200 dark:border-gray-700'}`}>
-                <Icon className="w-4 h-4" /> <span className="text-xs font-medium">{type.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre</label>
-        <input {...register('name')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><Clock className="w-4 h-4 inline mr-1" />Inicio</label>
-          <input {...register('start_time')} type="time" className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><Clock className="w-4 h-4 inline mr-1" />Fin</label>
-          <input {...register('end_time')} type="time" className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        </div>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dirección</label>
-        <PlaceAutocomplete value={watch('address')} onSelect={(place) => { setSelectedPlace({ address: place.address, latitude: place.latitude, longitude: place.longitude, google_maps_url: place.google_maps_url }); setValue('address', place.address); }} placeholder="Buscar lugar..." />
-        <input {...register('address')} placeholder="O escribe manualmente" className="w-full mt-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><MapIcon className="w-4 h-4 inline mr-1" />Google Maps</label>
-          <input {...register('google_maps_url')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><Globe className="w-4 h-4 inline mr-1" />Web</label>
-          <input {...register('website_url')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        </div>
-      </div>
-      <button type="button" onClick={() => setShowAdvanced(!showAdvanced)} className="text-sm text-blue-500 hover:text-blue-600">{showAdvanced ? '- Ocultar' : '+ Más opciones'}</button>
-      {showAdvanced && (
-        <div className="space-y-4 pt-2 border-t dark:border-gray-700">
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><Euro className="w-4 h-4 inline mr-1" />Coste</label>
-              <input {...register('cost_amount')} type="number" step="0.01" className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0.00" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Moneda</label>
-              <select {...register('cost_currency')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="EUR">EUR</option><option value="USD">USD</option><option value="IDR">IDR</option><option value="GBP">GBP</option>
-              </select>
-            </div>
-            <div className="flex items-center pt-6">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" {...register('cost_paid')} className="w-4 h-4 text-blue-500 rounded" />
-                <span className="text-sm text-gray-600 dark:text-gray-300">Pagado</span>
-              </label>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><FileText className="w-4 h-4 inline mr-1" />Ref. Reserva</label>
-              <input {...register('booking_reference')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estado</label>
-              <select {...register('booking_status')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="">Sin reserva</option><option value="pending">Pendiente</option><option value="confirmed">Confirmado</option><option value="paid">Pagado</option><option value="cancelled">Cancelado</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      )}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notas</label>
-        <textarea {...register('notes')} rows={2} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" />
-      </div>
-      {showAdvanced && members.length > 0 && (
-        <div className="space-y-4 pt-2 border-t dark:border-gray-700">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"><Euro className="w-4 h-4 inline mr-1" />Pagador</label>
-            <select value={payerId} onChange={(e) => setPayerId(e.target.value)} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option value="">Seleccionar...</option>
-              {members.map((m) => (<option key={m.id} value={m.user_id || m.id}>{getMemberDisplayName(m)}</option>))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Participantes</label>
-            <div className="space-y-2">
-              {members.map((m) => (<label key={m.id} className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={selectedParticipants.includes(m.user_id || m.id)} onChange={(e) => { const uid = m.user_id || m.id; if (e.target.checked) setSelectedParticipants([...selectedParticipants, uid]); else setSelectedParticipants(selectedParticipants.filter(id => id !== uid)); }} className="w-4 h-4 text-blue-500 rounded" />
-                <span className="text-sm text-gray-600 dark:text-gray-300">{getMemberDisplayName(m)}</span>
-              </label>))}
-            </div>
-          </div>
-        </div>
-      )}
-      <div className="border-t dark:border-gray-700 pt-4">
-        <FileUploader eventId={event.id} attachments={attachments} onAttachmentsChange={() => { loadAttachments(); onRefreshTrip?.(); }} />
-      </div>
-      <button type="submit" className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600">Guardar</button>
-    </form>
-  );
-}
-
-function ChecklistSection({ tripId, isMobile }: { tripId: string; isMobile?: boolean }) {
+function ChecklistSection({ tripId }: { tripId: string }) {
   const [items, setItems] = useState<any[]>([]);
   const [newItem, setNewItem] = useState('');
   const [loading, setLoading] = useState(true);
@@ -1520,7 +608,7 @@ function ChecklistSection({ tripId, isMobile }: { tripId: string; isMobile?: boo
   const completedCount = items.filter(i => i.completed).length;
   const progress = items.length > 0 ? (completedCount / items.length) * 100 : 0;
 
-  const cardCls = isMobile ? 'bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4' : 'bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4';
+  const cardCls = 'bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4';
 
   return (
     <div className="space-y-4">
@@ -1544,7 +632,7 @@ function ChecklistSection({ tripId, isMobile }: { tripId: string; isMobile?: boo
       <div className={cardCls}>
         <div className="flex gap-2">
           <input type="text" value={newItem} onChange={(e) => setNewItem(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addItem()} placeholder="Añadir tarea..." className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
-          <button onClick={addItem} disabled={!newItem.trim()} className="px-4 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 disabled:bg-gray-300 transition-colors">
+          <button type="button" onClick={addItem} disabled={!newItem.trim()} aria-label="Añadir tarea" className="px-4 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 disabled:bg-gray-300 transition-colors">
             <Plus className="w-5 h-5" />
           </button>
         </div>
@@ -1560,23 +648,17 @@ function ChecklistSection({ tripId, isMobile }: { tripId: string; isMobile?: boo
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm divide-y divide-gray-100 dark:divide-gray-700">
           {items.map(item => (
             <div key={item.id} className="flex items-center gap-3 px-4 py-3">
-              <button onClick={() => toggleItem(item)} className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${item.completed ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 dark:border-gray-600'}`}>
+              <button type="button" onClick={() => toggleItem(item)} aria-label={item.completed ? 'Marcar como pendiente' : 'Marcar como completado'} className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${item.completed ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 dark:border-gray-600'}`}>
                 {item.completed && <Check className="w-3 h-3" />}
               </button>
               <span className={`flex-1 text-sm ${item.completed ? 'text-gray-400 line-through' : 'text-gray-800 dark:text-white'}`}>{item.description}</span>
-              <button onClick={() => deleteItem(item.id)} className="p-1 text-gray-400 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
+              <button type="button" onClick={() => deleteItem(item.id)} aria-label="Eliminar tarea" className="p-1 text-gray-400 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
             </div>
           ))}
         </div>
       )}
     </div>
   );
-}
-
-function getMemberDisplayName(member: { profile?: { full_name?: string; alias?: string }; email: string }): string {
-  if (member.profile?.full_name) return member.profile.full_name;
-  if (member.profile?.alias) return member.profile.alias;
-  return member.email.split('@')[0];
 }
 
 function QuickAddExpenseForm({ days, members, onSave }: {
@@ -1651,6 +733,7 @@ function QuickAddExpenseForm({ days, members, onSave }: {
         )}
       </div>
       <button
+        type="button"
         onClick={() => onSave(selectedDay, { name, event_type: 'activity', cost_amount: parseFloat(amount), cost_currency: 'EUR', expense_category: category, payer_id: payerId, participants: selectedParticipants.length > 0 ? selectedParticipants : undefined })}
         disabled={!name || !amount || !selectedDay || !payerId}
         className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
@@ -1679,7 +762,7 @@ function exportToCSV(events: any[], members: any[], days: any[]) {
 }
 
 function ExpensesSection({ days, members, onAddExpense, onAddDay, tripBudget, isMobile }: {
-  days: (Day & { events: TripEvent[] })[];
+  days: (any & { events: any[] })[];
   members: { id: string; user_id?: string; email: string; role: string; status: string; profile?: { full_name?: string; alias?: string; avatar_url?: string } }[];
   onAddExpense: () => void;
   onAddDay: () => void;
@@ -1696,8 +779,9 @@ function ExpensesSection({ days, members, onAddExpense, onAddDay, tripBudget, is
     return acc;
   }, {} as Record<string, number>);
 
-  const sortedCategories = Object.entries(categoryStats).sort(([, a], [, b]) => b - a).map(([cat, amount]) => ({
-    category: cat as ExpenseCategory, amount, percentage: totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0,
+  const catEntries = Object.entries(categoryStats) as [string, number][];
+  const sortedCategories = catEntries.sort((entryA, entryB) => entryB[1] - entryA[1]).map(([cat, expenseAmt]) => ({
+    category: cat as ExpenseCategory, amount: expenseAmt, percentage: totalExpenses > 0 ? (expenseAmt / totalExpenses) * 100 : 0,
   }));
 
   const memberStats = members.filter(m => m.status === 'accepted' && m.user_id).map(m => {
@@ -1734,12 +818,12 @@ function ExpensesSection({ days, members, onAddExpense, onAddDay, tripBudget, is
         <h2 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2"><Receipt className="w-5 h-5" /> Gastos</h2>
         <div className="flex items-center gap-2">
           {days.length === 0 ? (
-            <button onClick={onAddDay} className="flex items-center gap-1 text-blue-500 text-sm font-medium"><Plus className="w-4 h-4" /> Crear día</button>
+            <button type="button" onClick={onAddDay} className="flex items-center gap-1 text-blue-500 text-sm font-medium"><Plus className="w-4 h-4" /> Crear día</button>
           ) : (
             <>
-              <button onClick={onAddExpense} className="flex items-center gap-1.5 bg-blue-500 text-white px-4 py-2 rounded-xl font-medium text-sm hover:bg-blue-600"><Plus className="w-4 h-4" /> {isMobile ? '' : 'Añadir gasto'}</button>
+              <button type="button" onClick={onAddExpense} aria-label="Añadir gasto" className="flex items-center gap-1.5 bg-blue-500 text-white px-4 py-2 rounded-xl font-medium text-sm hover:bg-blue-600"><Plus className="w-4 h-4" /> {isMobile ? '' : 'Añadir gasto'}</button>
               {!isMobile && (
-                <button onClick={() => exportToCSV(eventsWithCost, members, days)} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium ${eventsWithCost.length > 0 ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-50'}`} disabled={eventsWithCost.length === 0}>
+                <button type="button" onClick={() => exportToCSV(eventsWithCost, members, days)} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium ${eventsWithCost.length > 0 ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-50'}`} disabled={eventsWithCost.length === 0}>
                   <Download className="w-4 h-4" /> Exportar
                 </button>
               )}
@@ -1874,104 +958,3 @@ function ExpensesSection({ days, members, onAddExpense, onAddDay, tripBudget, is
     </div>
   );
 }
-
-function EventDetailsContent({ event, members, onSave }: {
-  event: TripEvent;
-  members: { id: string; user_id?: string; email: string; profile?: { full_name?: string; alias?: string; avatar_url?: string } }[];
-  onSave: (updates: Partial<TripEvent>) => void;
-}) {
-  const [costAmount, setCostAmount] = useState(event.cost_amount?.toString() || '');
-  const [costCurrency, setCostCurrency] = useState(event.cost_currency || 'EUR');
-  const [costPaid, setCostPaid] = useState(event.cost_paid || false);
-  const [payerId, setPayerId] = useState(event.payer_id || '');
-  const [selectedParticipants, setSelectedParticipants] = useState<string[]>(event.participants || []);
-  const [address, setAddress] = useState(event.address || '');
-  const [googleMapsUrl, setGoogleMapsUrl] = useState(event.google_maps_url || '');
-  const [websiteUrl] = useState(event.website_url || '');
-  const [bookingReference, setBookingReference] = useState(event.booking_reference || '');
-  const [bookingStatus, setBookingStatus] = useState(event.booking_status || '');
-  const [notes, setNotes] = useState(event.notes || '');
-
-  const sharePerPerson = costAmount && selectedParticipants.length > 0 ? parseFloat(costAmount) / selectedParticipants.length : null;
-
-  return (
-    <div className="space-y-5">
-      <div>
-        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Gasto</h3>
-        <div className="flex gap-3">
-          <div className="flex-1">
-            <input type="number" value={costAmount} onChange={(e) => setCostAmount(e.target.value)} placeholder="0.00" step="0.01" className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-          </div>
-          <select value={costCurrency} onChange={(e) => setCostCurrency(e.target.value)} className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white">
-            <option value="EUR">€</option><option value="USD">$</option><option value="IDR">Rp</option><option value="GBP">£</option>
-          </select>
-        </div>
-        <div className="flex items-center gap-3 mt-2">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={costPaid} onChange={(e) => setCostPaid(e.target.checked)} className="w-4 h-4 text-blue-500 rounded" />
-            <span className="text-sm text-gray-600 dark:text-gray-300">Pagado</span>
-          </label>
-          {costAmount && selectedParticipants.length > 0 && (
-            <span className="text-xs text-gray-500">{sharePerPerson?.toFixed(2)}€/pers.</span>
-          )}
-        </div>
-      </div>
-
-      {members.length > 0 && (
-        <>
-          <div>
-            <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Pagador</h3>
-            <select value={payerId} onChange={(e) => setPayerId(e.target.value)} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white">
-              <option value="">Seleccionar...</option>
-              {members.map(m => (<option key={m.id} value={m.user_id || m.id}>{getMemberDisplayName(m)}</option>))}
-            </select>
-          </div>
-          <div>
-            <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Participantes</h3>
-            <div className="flex flex-wrap gap-2">
-              {members.map(m => {
-                const id = m.user_id || m.id;
-                const selected = selectedParticipants.includes(id);
-                return (
-                  <button key={m.id} type="button" onClick={() => setSelectedParticipants(prev => selected ? prev.filter(p => p !== id) : [...prev, id])} className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${selected ? 'bg-blue-500 text-white' : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300'}`}>
-                    {getMemberDisplayName(m)}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </>
-      )}
-
-      <div>
-        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Ubicación</h3>
-        <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Dirección" className="w-full mb-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        <input type="text" value={googleMapsUrl} onChange={(e) => setGoogleMapsUrl(e.target.value)} placeholder="URL Google Maps" className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-      </div>
-
-      <div>
-        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Reserva</h3>
-        <input type="text" value={bookingReference} onChange={(e) => setBookingReference(e.target.value)} placeholder="Referencia" className="w-full mb-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        <select value={bookingStatus} onChange={(e) => setBookingStatus(e.target.value)} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white">
-          <option value="">Sin reserva</option><option value="pending">Pendiente</option><option value="confirmed">Confirmado</option><option value="paid">Pagado</option><option value="cancelled">Cancelado</option>
-        </select>
-      </div>
-
-      <div>
-        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Notas</h3>
-        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" />
-      </div>
-
-      <button onClick={() => onSave({
-        cost_amount: costAmount ? parseFloat(costAmount) : undefined, cost_currency: costCurrency || 'EUR', cost_paid: costPaid,
-        payer_id: payerId || undefined, participants: selectedParticipants.length > 0 ? selectedParticipants : undefined,
-        address: address || undefined, google_maps_url: googleMapsUrl || undefined, website_url: websiteUrl || undefined,
-        booking_reference: bookingReference || undefined, booking_status: bookingStatus as any || undefined, notes: notes || undefined,
-      })} className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600">
-        Guardar
-      </button>
-    </div>
-  );
-}
-
-

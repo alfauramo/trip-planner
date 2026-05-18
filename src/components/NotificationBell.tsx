@@ -36,8 +36,10 @@ export function NotificationBell() {
   return (
     <div className="relative">
       <button
+        type="button"
         onClick={() => setShowDropdown(!showDropdown)}
         className="relative p-2 text-gray-600 hover:text-blue-500 transition-colors"
+        aria-label="Notificaciones"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
@@ -58,6 +60,7 @@ export function NotificationBell() {
               <h3 className="font-semibold text-gray-800">Notificaciones</h3>
               {unreadCount > 0 && (
                 <button
+                  type="button"
                   onClick={markAllAsRead}
                   className="text-xs text-blue-500 hover:text-blue-600 flex items-center gap-1"
                 >
@@ -78,6 +81,7 @@ export function NotificationBell() {
                   {notifications.map(notification => (
                     <button
                       key={notification.id}
+                      type="button"
                       onClick={() => handleNotificationClick(notification)}
                       className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${
                         !notification.read ? 'bg-blue-50/50' : ''
