@@ -12,8 +12,7 @@ dist
 dist-ssr
 *.local
 .env
-telegram-bot/.env
-telegram-bot/.offset
+telegram-bot/
 
 # Editor directories and files
 .vscode/*
