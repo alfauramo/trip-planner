@@ -95,6 +95,28 @@ input[type='date']::-webkit-calendar-picker-indicator {
   animation: fade-in 0.2s ease-out;
 }
 
+@keyframes slide-down {
+  from {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up-toast {
+  from {
+    transform: translateY(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 .animate-slide-in {
   animation: slide-down 0.3s ease-out;
 }
@@ -207,20 +229,4 @@ input[type='date']::-webkit-calendar-picker-indicator {
 .event-card:hover {
   @apply shadow-md;
   transform: translateX(2px);
-}
-
-.gradient-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-.gradient-card-2 {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-.gradient-card-3 {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-.gradient-card-4 {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-}
-.gradient-card-5 {
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
 }

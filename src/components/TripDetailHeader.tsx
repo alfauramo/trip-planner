@@ -18,6 +18,7 @@ import { NotificationBell } from './NotificationBell';
 import { ThemeToggle } from './ThemeToggle';
 import { Tooltip } from './Tooltip';
 import { ExportTripPDF } from './ExportTripPDF';
+import { useToast } from './Toast';
 
 const tabConfig = [
   { key: 'itinerary', label: 'Itinerario', icon: Calendar },
@@ -62,6 +63,7 @@ export function TripDetailHeader({
   days: any[];
 }) {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const formatDateShort = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
@@ -74,13 +76,16 @@ export function TripDetailHeader({
   const handleShare = () => {
     const url = `${window.location.origin}/trip-planner/trips/${trip.id}`;
     if (navigator.share) navigator.share({ title: trip.title, url }).catch(() => {});
-    else navigator.clipboard.writeText(url);
+    else {
+      navigator.clipboard.writeText(url);
+      showToast('Enlace copiado al portapapeles');
+    }
   };
 
   if (isMobile) {
     return (
       <header className="sticky top-0 z-20 bg-white dark:bg-gray-900">
-        <div className="relative h-44 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500">
+        <div className="relative h-36 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500">
           {trip.cover_image && (
             <>
               <img

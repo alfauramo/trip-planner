@@ -16,6 +16,7 @@ import { SwipeableRow } from '../components/SwipeableRow';
 import { useIsMobile } from '../hooks/useMediaQuery';
 import { usePullToRefresh } from '../hooks/usePullToRefresh';
 import { hapticLight, hapticMedium } from '../lib/haptic';
+import { useToast } from '../components/Toast';
 
 export function DashboardPage() {
   const { trips, loading, deleteTrip, fetchTrips: refreshTrips } = useTrips();
@@ -23,6 +24,7 @@ export function DashboardPage() {
   const { confirm } = useConfirm();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { showToast } = useToast();
   const [showNewTrip, setShowNewTrip] = useState(false);
 
   const handleRefresh = useCallback(async () => {
@@ -71,6 +73,7 @@ export function DashboardPage() {
       }
     } else {
       await navigator.clipboard.writeText(url);
+      showToast('Enlace copiado al portapapeles');
     }
   };
 
@@ -190,9 +193,9 @@ export function DashboardPage() {
                             {(trip.start_date || trip.end_date) && (
                               <div className="date-badge">
                                 <Calendar className="w-3 h-3 inline mr-1" />
-                                {trip.start_date && formatDate(trip.start_date).split(' ').slice(0, 2).join(' ')}
+                                {trip.start_date && formatDate(trip.start_date)}
                                 {trip.start_date && trip.end_date && ' - '}
-                                {trip.end_date && formatDate(trip.end_date).split(' ').slice(0, 2).join(' ')}
+                                {trip.end_date && formatDate(trip.end_date)}
                               </div>
                             )}
                           </div>
