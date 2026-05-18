@@ -7,8 +7,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-      style={{ color: theme === 'dark' ? '#9ca3af' : undefined }}
+      className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors active:scale-95"
       aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
       type="button"
     >
