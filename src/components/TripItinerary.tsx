@@ -21,6 +21,7 @@ import { supabase } from '../lib/supabase';
 import { getEventAttachments } from '../lib/attachments';
 import { useToast } from './Toast';
 import { useConfirm } from './ConfirmModal';
+import { EventComments } from './EventComments';
 
 const eventTypes = [
   { value: 'activity', label: 'Actividad', icon: MapIcon, color: 'bg-blue-100 text-blue-600' },
@@ -718,20 +719,26 @@ export function TripItinerary({
               <div className={isMobile ? 'space-y-2' : 'space-y-3'}>
                 {day.events.map((event: TripEvent) => {
                   const eventContent = (
-                    <SortableEvent
-                      key={event.id}
-                      event={event}
-                      isMobile={isMobile}
-                      onEdit={() => onEditEventClick(event)}
-                      onAddDetails={() => onViewEventDetails(event)}
-                      onDelete={async () => {
-                        if (await confirm('¿Eliminar este evento?')) {
-                          await onDeleteEvent(event.id, day.id);
-                          showToast('Evento eliminado');
-                        }
-                      }}
-                      onOpenMaps={() => event.google_maps_url && window.open(event.google_maps_url, '_blank')}
-                    />
+                    <>
+                      <SortableEvent
+                        key={event.id}
+                        event={event}
+                        isMobile={isMobile}
+                        onEdit={() => onEditEventClick(event)}
+                        onAddDetails={() => onViewEventDetails(event)}
+                        onDelete={async () => {
+                          if (await confirm('¿Eliminar este evento?')) {
+                            await onDeleteEvent(event.id, day.id);
+                            showToast('Evento eliminado');
+                          }
+                        }}
+                        onOpenMaps={() => event.google_maps_url && window.open(event.google_maps_url, '_blank')}
+                      />
+                      <details className="mt-1">
+                        <summary className="text-xs text-gray-400 cursor-pointer hover:text-blue-500 select-none">Comentarios</summary>
+                        <EventComments eventId={event.id} />
+                      </details>
+                    </>
                   );
                   if (isMobile) {
                     return (

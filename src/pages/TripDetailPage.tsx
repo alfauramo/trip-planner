@@ -14,7 +14,7 @@ import { LoadingOverlay, DetailSkeleton } from '../components/Loading';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { TripEvent, EXPENSE_CATEGORIES, ExpenseCategory } from '../types';
+import { TripEvent, EXPENSE_CATEGORIES, ExpenseCategory, TripMember } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { Footer } from '../components/Footer';
@@ -28,6 +28,7 @@ import {
   TripItinerary, AddDayForm, EditDayForm, AddEventForm,
   EditEventContent, EventDetailsContent, getMemberDisplayName
 } from '../components/TripItinerary';
+import { ExpenseCharts } from '../components/ExpenseCharts';
 
 const tripSchema = z.object({
   title: z.string().min(1, 'El título es requerido'),
@@ -763,7 +764,7 @@ function exportToCSV(events: any[], members: any[], days: any[]) {
 
 function ExpensesSection({ days, members, onAddExpense, onAddDay, tripBudget, isMobile }: {
   days: (any & { events: any[] })[];
-  members: { id: string; user_id?: string; email: string; role: string; status: string; profile?: { full_name?: string; alias?: string; avatar_url?: string } }[];
+  members: TripMember[];
   onAddExpense: () => void;
   onAddDay: () => void;
   tripBudget?: number;
@@ -856,6 +857,17 @@ function ExpensesSection({ days, members, onAddExpense, onAddDay, tripBudget, is
           </div>
         )}
       </div>
+
+      {eventsWithCost.length > 0 && isMobile && (
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+          <div className="px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border-b">
+            <h3 className="font-semibold text-sm text-gray-800 dark:text-white">Resumen visual</h3>
+          </div>
+          <div className="p-3">
+            <ExpenseCharts events={allEvents} members={members} />
+          </div>
+        </div>
+      )}
 
       {eventsWithCost.length > 0 && (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">

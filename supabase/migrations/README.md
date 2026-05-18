@@ -8,6 +8,7 @@ Convention: Supabase-style timestamped migrations.
 2. `20240102000000_enhanced_schema.sql` - RLS policies, triggers, indexes, edge function setup
 3. `20240103000000_members_and_invitations.sql` - trip_members, trip_invitations tables and policies
 4. `20240104000000_fix_columns.sql` - Column fixes, constraints, cleanup
+5. `20240105000000_event_comments.sql` - Event comments/chat table with RLS policies
 
 ## How to Apply a New Migration
 
