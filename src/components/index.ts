@@ -22,3 +22,5 @@ export { PlaceAutocomplete } from './PlaceAutocomplete';
 export { ExportTripPDF } from './ExportTripPDF';
 export { ExpenseCharts } from './ExpenseCharts';
 export { EventComments } from './EventComments';
+export { OptimizedImage } from './OptimizedImage';
+export { AIItineraryGenerator } from './AIItineraryGenerator';

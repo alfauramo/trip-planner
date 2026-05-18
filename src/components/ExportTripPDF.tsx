@@ -18,7 +18,7 @@ export function ExportTripPDF({ trip }: ExportPDFProps) {
 
     const formatTime = (time?: string) => time || '-';
 
-    let html = `
+    const html = `
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -63,14 +63,18 @@ export function ExportTripPDF({ trip }: ExportPDFProps) {
     </div>
   </div>
 
-  ${trip.days.map((day) => `
+  ${trip.days
+    .map(
+      (day) => `
     <div class="day">
       <div class="day-header">
         <div class="day-title">Día ${day.day_number}</div>
         <div class="day-date">${formatDate(day.date)}</div>
       </div>
       ${day.notes ? `<div class="notes">📝 ${day.notes}</div>` : ''}
-      ${day.events.map(event => `
+      ${day.events
+        .map(
+          (event) => `
         <div class="event">
           <div class="event-header">
             <span class="event-name">${event.name}</span>
@@ -80,16 +84,24 @@ export function ExportTripPDF({ trip }: ExportPDFProps) {
           ${event.cost_amount ? `<div class="event-cost">💰 €${event.cost_amount} ${event.cost_paid ? '(Pagado)' : ''}</div>` : ''}
           ${event.notes ? `<div class="notes">📝 ${event.notes}</div>` : ''}
         </div>
-      `).join('')}
+      `,
+        )
+        .join('')}
     </div>
-  `).join('')}
+  `,
+    )
+    .join('')}
   
-  ${trip.total_budget ? `
+  ${
+    trip.total_budget
+      ? `
     <div class="budget">
       <div class="budget-title">💰 Resumen del presupuesto</div>
       <div class="total">€${trip.total_budget}</div>
     </div>
-  ` : ''}
+  `
+      : ''
+  }
 
   <div class="footer">
     Generado por Trip Planner • ${new Date().toLocaleDateString('es-ES')}

@@ -17,11 +17,7 @@ export function useTripDetail(tripId: string) {
   const query = useQuery({
     queryKey,
     queryFn: async (): Promise<TripDetailData> => {
-      const { data: tripData, error: tripError } = await supabase
-        .from('trips')
-        .select('*')
-        .eq('id', tripId)
-        .single();
+      const { data: tripData, error: tripError } = await supabase.from('trips').select('*').eq('id', tripId).single();
 
       if (tripError) throw tripError;
 
@@ -33,9 +29,7 @@ export function useTripDetail(tripId: string) {
 
       if (daysError) throw daysError;
 
-      const sortedDaysData = (daysData || []).sort((a, b) =>
-        new Date(a.date).getTime() - new Date(b.date).getTime()
-      );
+      const sortedDaysData = (daysData || []).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
       const daysWithEvents = await Promise.all(
         sortedDaysData.map(async (day) => {
@@ -47,17 +41,14 @@ export function useTripDetail(tripId: string) {
 
           if (eventsError) throw eventsError;
 
-          const eventIds = (eventsData || []).map(e => e.id);
-          let attachmentsByEvent: Record<string, any[]> = {};
+          const eventIds = (eventsData || []).map((e) => e.id);
+          const attachmentsByEvent: Record<string, any[]> = {};
 
           if (eventIds.length > 0) {
-            const { data: attachmentsData } = await supabase
-              .from('attachments')
-              .select('*')
-              .in('event_id', eventIds);
+            const { data: attachmentsData } = await supabase.from('attachments').select('*').in('event_id', eventIds);
 
             if (attachmentsData) {
-              attachmentsData.forEach(att => {
+              attachmentsData.forEach((att) => {
                 if (!attachmentsByEvent[att.event_id]) {
                   attachmentsByEvent[att.event_id] = [];
                 }
@@ -66,13 +57,13 @@ export function useTripDetail(tripId: string) {
             }
           }
 
-          const eventsWithAttachments = (eventsData || []).map(event => ({
+          const eventsWithAttachments = (eventsData || []).map((event) => ({
             ...event,
-            attachments: attachmentsByEvent[event.id] || []
+            attachments: attachmentsByEvent[event.id] || [],
           }));
 
           return { ...day, events: eventsWithAttachments };
-        })
+        }),
       );
 
       const { data: membersData, error: membersError } = await supabase
@@ -87,8 +78,8 @@ export function useTripDetail(tripId: string) {
 
       let membersWithProfiles: TripMember[] = [];
       if (membersData && membersData.length > 0) {
-        const userIds = membersData.map(m => m.user_id).filter(Boolean);
-        let profilesMap: Record<string, any> = {};
+        const userIds = membersData.map((m) => m.user_id).filter(Boolean);
+        const profilesMap: Record<string, any> = {};
 
         if (userIds.length > 0) {
           const { data: profilesData } = await supabase
@@ -97,15 +88,15 @@ export function useTripDetail(tripId: string) {
             .in('id', userIds);
 
           if (profilesData) {
-            profilesData.forEach(p => {
+            profilesData.forEach((p) => {
               profilesMap[p.id] = p;
             });
           }
         }
 
-        membersWithProfiles = membersData.map(m => ({
+        membersWithProfiles = membersData.map((m) => ({
           ...m,
-          profile: m.user_id ? profilesMap[m.user_id] : null
+          profile: m.user_id ? profilesMap[m.user_id] : null,
         }));
       }
 
@@ -131,9 +122,7 @@ export function useTripDetail(tripId: string) {
 
       const newDate = new Date(date);
       let calculatedDayNumber = 1;
-      const sortedDays = [...existingDays].sort((a, b) =>
-        new Date(a.date).getTime() - new Date(b.date).getTime()
-      );
+      const sortedDays = [...existingDays].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
       for (const day of sortedDays) {
         const existingDate = new Date(day.date);
@@ -152,17 +141,14 @@ export function useTripDetail(tripId: string) {
 
       if (error) throw error;
 
-      const allDays = [...existingDays, { ...data, events: [] }].sort((a, b) =>
-        new Date(a.date).getTime() - new Date(b.date).getTime()
+      const allDays = [...existingDays, { ...data, events: [] }].sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
       );
 
       for (let i = 0; i < allDays.length; i++) {
         const expectedDayNumber = i + 1;
         if (allDays[i].day_number !== expectedDayNumber) {
-          await supabase
-            .from('days')
-            .update({ day_number: expectedDayNumber })
-            .eq('id', allDays[i].id);
+          await supabase.from('days').update({ day_number: expectedDayNumber }).eq('id', allDays[i].id);
         }
       }
 
@@ -182,7 +168,7 @@ export function useTripDetail(tripId: string) {
       if (previousData) {
         queryClient.setQueryData<TripDetailData>(queryKey, {
           ...previousData,
-          days: previousData.days.map(d => d.id === dayId ? { ...d, ...updates } : d),
+          days: previousData.days.map((d) => (d.id === dayId ? { ...d, ...updates } : d)),
         });
       }
       return { previousData };
@@ -221,10 +207,21 @@ export function useTripDetail(tripId: string) {
       if (previousData) {
         queryClient.setQueryData<TripDetailData>(queryKey, {
           ...previousData,
-          days: previousData.days.map(d =>
+          days: previousData.days.map((d) =>
             d.id === dayId
-              ? { ...d, events: [...d.events, { ...eventData, id: 'temp-' + Date.now(), day_id: dayId, order: (d.events.length || 0) + 1 } as TripEvent] }
-              : d
+              ? {
+                  ...d,
+                  events: [
+                    ...d.events,
+                    {
+                      ...eventData,
+                      id: 'temp-' + Date.now(),
+                      day_id: dayId,
+                      order: (d.events.length || 0) + 1,
+                    } as TripEvent,
+                  ],
+                }
+              : d,
           ),
         });
       }
@@ -249,9 +246,9 @@ export function useTripDetail(tripId: string) {
       if (previousData) {
         queryClient.setQueryData<TripDetailData>(queryKey, {
           ...previousData,
-          days: previousData.days.map(d => ({
+          days: previousData.days.map((d) => ({
             ...d,
-            events: d.events.map(e => (e.id === eventId ? { ...e, ...updates } : e)),
+            events: d.events.map((e) => (e.id === eventId ? { ...e, ...updates } : e)),
           })),
         });
       }
@@ -282,11 +279,11 @@ export function useTripDetail(tripId: string) {
       if (previousData) {
         queryClient.setQueryData<TripDetailData>(queryKey, {
           ...previousData,
-          days: previousData.days.map(d => {
+          days: previousData.days.map((d) => {
             if (d.id !== dayId) return d;
             const reorderedEvents = eventIds
               .map((id, index) => {
-                const event = d.events.find(e => e.id === id);
+                const event = d.events.find((e) => e.id === id);
                 return event ? { ...event, order: index + 1 } : null;
               })
               .filter(Boolean) as TripEvent[];
@@ -315,8 +312,8 @@ export function useTripDetail(tripId: string) {
       if (previousData) {
         queryClient.setQueryData<TripDetailData>(queryKey, {
           ...previousData,
-          days: previousData.days.map(d =>
-            d.id === dayId ? { ...d, events: d.events.filter(e => e.id !== eventId) } : d
+          days: previousData.days.map((d) =>
+            d.id === dayId ? { ...d, events: d.events.filter((e) => e.id !== eventId) } : d,
           ),
         });
       }
@@ -342,7 +339,7 @@ export function useTripDetail(tripId: string) {
       if (previousData) {
         queryClient.setQueryData<TripDetailData>(queryKey, {
           ...previousData,
-          days: previousData.days.filter(d => d.id !== dayId),
+          days: previousData.days.filter((d) => d.id !== dayId),
         });
       }
       return { previousData };
@@ -359,11 +356,7 @@ export function useTripDetail(tripId: string) {
     mutationFn: async ({ email, role }: { email: string; role: 'viewer' | 'editor' }) => {
       if (!user) return;
 
-      const { data: existingUser } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', email)
-        .single();
+      const { data: existingUser } = await supabase.from('profiles').select('id').eq('email', email).single();
 
       if (existingUser) {
         const { error } = await supabase
@@ -394,7 +387,7 @@ export function useTripDetail(tripId: string) {
       if (previousData) {
         queryClient.setQueryData<TripDetailData>(queryKey, {
           ...previousData,
-          members: previousData.members.filter(m => m.id !== memberId),
+          members: previousData.members.filter((m) => m.id !== memberId),
         });
       }
       return { previousData };
@@ -409,10 +402,7 @@ export function useTripDetail(tripId: string) {
 
   const updateMemberRoleMutation = useMutation({
     mutationFn: async ({ memberId, role }: { memberId: string; role: 'viewer' | 'editor' }) => {
-      const { error } = await supabase
-        .from('trip_members')
-        .update({ role })
-        .eq('id', memberId);
+      const { error } = await supabase.from('trip_members').update({ role }).eq('id', memberId);
 
       if (error) throw error;
     },
@@ -422,7 +412,7 @@ export function useTripDetail(tripId: string) {
       if (previousData) {
         queryClient.setQueryData<TripDetailData>(queryKey, {
           ...previousData,
-          members: previousData.members.map(m => m.id === memberId ? { ...m, role } : m),
+          members: previousData.members.map((m) => (m.id === memberId ? { ...m, role } : m)),
         });
       }
       return { previousData };

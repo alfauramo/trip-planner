@@ -7,3 +7,5 @@ export { usePullToRefresh } from './usePullToRefresh';
 export { useSwipe } from './useSwipe';
 export { useIsMobile } from './useMediaQuery';
 export { useRealtimeSync } from './useRealtimeSync';
+export { usePushNotifications } from './usePushNotifications';
+export { useAIItinerary } from './useAIItinerary';

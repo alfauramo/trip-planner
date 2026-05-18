@@ -2,12 +2,16 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 
 export default defineConfig({
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       includeAssets: ['favicon.svg', 'icons.svg', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
         name: 'Trip Planner',
@@ -47,12 +51,21 @@ export default defineConfig({
         ],
       },
     }),
-  ],
+    process.env.SENTRY_AUTH_TOKEN
+      ? sentryVitePlugin({
+          org: process.env.SENTRY_ORG,
+          project: process.env.SENTRY_PROJECT,
+          authToken: process.env.SENTRY_AUTH_TOKEN,
+          sourcemaps: { assets: ['./dist/**'] },
+        })
+      : null,
+  ].filter(Boolean),
   base: '/trip-planner/',
   server: {
     port: 5173,
   },
   build: {
+    sourcemap: true,
     chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
@@ -70,5 +83,6 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
     css: true,
+    exclude: ['e2e/**', 'node_modules/**'],
   },
 });
