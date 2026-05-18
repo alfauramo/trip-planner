@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 
 export interface Notification {
@@ -13,25 +14,26 @@ export interface Notification {
 }
 
 export function useNotifications(userId: string | undefined) {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
+    queryKey: ['notifications', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', userId!)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!userId,
+  });
 
   useEffect(() => {
     if (!userId) return;
-
-    const fetchNotifications = async () => {
-      const { data } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(10);
-      
-      setNotifications(data || []);
-      setLoading(false);
-    };
-
-    fetchNotifications();
 
     const subscription = supabase
       .channel('notifications')
@@ -41,35 +43,78 @@ export function useNotifications(userId: string | undefined) {
         table: 'notifications',
         filter: `user_id=eq.${userId}`,
       }, () => {
-        fetchNotifications();
+        queryClient.invalidateQueries({ queryKey: ['notifications', userId] });
       })
       .subscribe();
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [userId]);
+  }, [userId, queryClient]);
 
+  const notifications = query.data || [];
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const markAsRead = async (id: string) => {
-    await supabase
-      .from('notifications')
-      .update({ read: true })
-      .eq('id', id);
-    
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-  };
+  const markAsReadMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('id', id);
 
-  const markAllAsRead = async () => {
-    await supabase
-      .from('notifications')
-      .update({ read: true })
-      .eq('user_id', userId)
-      .eq('read', false);
-    
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-  };
+      if (error) throw error;
+    },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['notifications', userId] });
+      const previous = queryClient.getQueryData<Notification[]>(['notifications', userId]);
+      if (previous) {
+        queryClient.setQueryData<Notification[]>(['notifications', userId], (old) =>
+          old?.map(n => n.id === id ? { ...n, read: true } : n)
+        );
+      }
+      return { previous };
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['notifications', userId], context.previous);
+      }
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['notifications', userId] }),
+  });
 
-  return { notifications, unreadCount, loading, markAsRead, markAllAsRead };
+  const markAllAsReadMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('user_id', userId)
+        .eq('read', false);
+
+      if (error) throw error;
+    },
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ['notifications', userId] });
+      const previous = queryClient.getQueryData<Notification[]>(['notifications', userId]);
+      if (previous) {
+        queryClient.setQueryData<Notification[]>(['notifications', userId], (old) =>
+          old?.map(n => ({ ...n, read: true }))
+        );
+      }
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['notifications', userId], context.previous);
+      }
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['notifications', userId] }),
+  });
+
+  return {
+    notifications,
+    unreadCount,
+    loading: query.isLoading,
+    markAsRead: async (id: string) => { await markAsReadMutation.mutateAsync(id); },
+    markAllAsRead: async () => { await markAllAsReadMutation.mutateAsync(); },
+  };
 }

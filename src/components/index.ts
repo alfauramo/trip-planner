@@ -20,3 +20,5 @@ export { PackingList } from './PackingList';
 export { ActivityTimeline } from './ActivityTimeline';
 export { PlaceAutocomplete } from './PlaceAutocomplete';
 export { ExportTripPDF } from './ExportTripPDF';
+export { ExpenseCharts } from './ExpenseCharts';
+export { EventComments } from './EventComments';

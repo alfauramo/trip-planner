@@ -1,34 +1,26 @@
-import { useState, useEffect, useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { Trip } from '../types';
 import { useAuth } from '../context/AuthContext';
 
 export function useTrips() {
   const { user } = useAuth();
-  const [trips, setTrips] = useState<Trip[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const hasFetched = useRef(false);
+  const queryClient = useQueryClient();
 
-  const fetchTrips = async (force = false) => {
-    if (!user) return;
-    if (!force && hasFetched.current && trips.length > 0) return;
-    
-    setLoading(true);
-    setError(null);
-    
-    try {
+  const query = useQuery({
+    queryKey: ['trips', user?.id],
+    queryFn: async () => {
       const { data: ownedTrips, error: ownedError } = await supabase
         .from('trips')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('user_id', user!.id);
 
       if (ownedError) throw ownedError;
 
       const { data: memberTrips, error: memberError } = await supabase
         .from('trip_members')
         .select('trip_id')
-        .eq('user_id', user.id)
+        .eq('user_id', user!.id)
         .eq('status', 'accepted');
 
       if (memberError) throw memberError;
@@ -36,77 +28,104 @@ export function useTrips() {
       let sharedTrips: Trip[] = [];
       if (memberTrips && memberTrips.length > 0) {
         const tripIds = memberTrips.map(m => m.trip_id);
-        const { data: tripsData } = await supabase
+        const { data: tripsData, error: tripsError } = await supabase
           .from('trips')
           .select('*')
           .in('id', tripIds);
+
+        if (tripsError) throw tripsError;
         sharedTrips = tripsData || [];
       }
 
       const allTrips = [...(ownedTrips || []), ...sharedTrips];
-      const uniqueTrips = allTrips.filter((trip, index, self) => 
-        index === self.findIndex(t => t.id === trip.id)
-      );
+      return allTrips
+        .filter((trip, index, self) => index === self.findIndex(t => t.id === trip.id))
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    },
+    enabled: !!user,
+  });
 
-      uniqueTrips.sort((a, b) => 
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
+  const createMutation = useMutation({
+    mutationFn: async (trip: Partial<Trip>) => {
+      const { data, error } = await supabase
+        .from('trips')
+        .insert([{ ...trip, user_id: user!.id }])
+        .select()
+        .single();
 
-      setTrips(uniqueTrips);
-      hasFetched.current = true;
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+      if (error) throw error;
+
+      const { error: memberError } = await supabase
+        .from('trip_members')
+        .insert([{ trip_id: data.id, user_id: user!.id, email: user!.email, role: 'owner', status: 'accepted' }]);
+
+      if (memberError) throw memberError;
+
+      return data;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trips'] }),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Trip> }) => {
+      const { error } = await supabase.from('trips').update(updates).eq('id', id);
+      if (error) throw error;
+    },
+    onMutate: async ({ id, updates }) => {
+      await queryClient.cancelQueries({ queryKey: ['trips'] });
+      const previousTrips = queryClient.getQueryData<Trip[]>(['trips', user?.id]);
+      if (previousTrips) {
+        queryClient.setQueryData<Trip[]>(['trips', user?.id], (old) =>
+          old?.map(t => (t.id === id ? { ...t, ...updates } : t))
+        );
+      }
+      return { previousTrips };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previousTrips) {
+        queryClient.setQueryData(['trips', user?.id], context.previousTrips);
+      }
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['trips'] }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('trips').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['trips'] });
+      const previousTrips = queryClient.getQueryData<Trip[]>(['trips', user?.id]);
+      if (previousTrips) {
+        queryClient.setQueryData<Trip[]>(['trips', user?.id], (old) =>
+          old?.filter(t => t.id !== id)
+        );
+      }
+      return { previousTrips };
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previousTrips) {
+        queryClient.setQueryData(['trips', user?.id], context.previousTrips);
+      }
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['trips'] }),
+  });
+
+  return {
+    trips: query.data || [],
+    loading: query.isLoading,
+    error: query.error?.message || null,
+    fetchTrips: async () => { await query.refetch(); },
+    createTrip: async (trip: Partial<Trip>) => {
+      if (!user) return null;
+      return createMutation.mutateAsync(trip);
+    },
+    updateTrip: async (id: string, updates: Partial<Trip>) => {
+      await updateMutation.mutateAsync({ id, updates });
+    },
+    deleteTrip: async (id: string) => {
+      await deleteMutation.mutateAsync(id);
+    },
   };
-
-  const createTrip = async (trip: Partial<Trip>) => {
-    if (!user) return null;
-    
-    const { data, error } = await supabase
-      .from('trips')
-      .insert([{ ...trip, user_id: user.id }])
-      .select()
-      .single();
-
-    if (error) throw error;
-    
-    await supabase
-      .from('trip_members')
-      .insert([{
-        trip_id: data.id,
-        user_id: user.id,
-        email: user.email,
-        role: 'owner',
-        status: 'accepted'
-      }]);
-    
-    await fetchTrips(true);
-    
-    return data;
-  };
-
-  const updateTrip = async (id: string, updates: Partial<Trip>) => {
-    const { error } = await supabase
-      .from('trips')
-      .update(updates)
-      .eq('id', id);
-
-    if (error) throw error;
-    setTrips((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
-  };
-
-  const deleteTrip = async (id: string) => {
-    const { error } = await supabase.from('trips').delete().eq('id', id);
-    if (error) throw error;
-    setTrips((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  useEffect(() => {
-    hasFetched.current = false;
-    fetchTrips();
-  }, [user?.id]);
-
-  return { trips, loading, error, fetchTrips: () => fetchTrips(true), createTrip, updateTrip, deleteTrip };
 }

@@ -1,9 +1,11 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ErrorBoundary, ProtectedRoute, MobileNav, LoadingPage } from './components';
-import { useIsMobile } from './hooks';
+import { useIsMobile, useRealtimeSync } from './hooks';
+import { queryClient, persister } from './lib/queryClient';
 
 const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import('./pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
@@ -17,6 +19,7 @@ const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ defaul
 function AppRoutes() {
   const { user } = useAuth();
   const isMobile = useIsMobile();
+  useRealtimeSync();
   const showMobileNav = isMobile && user;
 
   return (
@@ -44,13 +47,15 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter basename="/trip-planner">
-      <ThemeProvider>
-        <AuthProvider>
-          <ErrorBoundary>
-            <AppRoutes />
-          </ErrorBoundary>
-        </AuthProvider>
-      </ThemeProvider>
+      <PersistQueryClientProvider client={queryClient} persistOptions={{ persister, maxAge: 1000 * 60 * 60 * 24 }}>
+        <ThemeProvider>
+          <AuthProvider>
+            <ErrorBoundary>
+              <AppRoutes />
+            </ErrorBoundary>
+          </AuthProvider>
+        </ThemeProvider>
+      </PersistQueryClientProvider>
     </BrowserRouter>
   );
 }

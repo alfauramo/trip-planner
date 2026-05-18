@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 
@@ -21,42 +21,40 @@ export interface TripActivity {
 
 export function useTripActivities(tripId: string) {
   const { user } = useAuth();
-  const [activities, setActivities] = useState<TripActivity[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const fetchActivities = useCallback(async () => {
-    if (!tripId) return;
+  const query = useQuery({
+    queryKey: ['trip-activities', tripId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('trip_activities')
+        .select(`
+          *,
+          profile:user_id (full_name, alias, avatar_url)
+        `)
+        .eq('trip_id', tripId)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-    setLoading(true);
-    const { data } = await supabase
-      .from('trip_activities')
-      .select(`
-        *,
-        profile:user_id (full_name, alias, avatar_url)
-      `)
-      .eq('trip_id', tripId)
-      .order('created_at', { ascending: false })
-      .limit(50);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!tripId,
+  });
 
-    setActivities(data || []);
-    setLoading(false);
-  }, [tripId]);
+  const logActivityMutation = useMutation({
+    mutationFn: async ({
+      action, entityType, entityId, entityName, details,
+    }: {
+      action: string;
+      entityType: string;
+      entityId?: string;
+      entityName?: string;
+      details?: Record<string, any>;
+    }) => {
+      if (!user || !tripId) return;
 
-  useEffect(() => {
-    fetchActivities();
-  }, [fetchActivities]);
-
-  const logActivity = async (
-    action: string,
-    entityType: string,
-    entityId?: string,
-    entityName?: string,
-    details?: Record<string, any>
-  ) => {
-    if (!user || !tripId) return;
-
-    await supabase.from('trip_activities').insert([
-      {
+      const { error } = await supabase.from('trip_activities').insert([{
         trip_id: tripId,
         user_id: user.id,
         action,
@@ -64,17 +62,26 @@ export function useTripActivities(tripId: string) {
         entity_id: entityId,
         entity_name: entityName,
         details,
-      },
-    ]);
+      }]);
 
-    fetchActivities();
-  };
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trip-activities', tripId] }),
+  });
 
   return {
-    activities,
-    loading,
-    logActivity,
-    refresh: fetchActivities,
+    activities: query.data || [],
+    loading: query.isLoading,
+    logActivity: async (
+      action: string,
+      entityType: string,
+      entityId?: string,
+      entityName?: string,
+      details?: Record<string, any>
+    ) => {
+      await logActivityMutation.mutateAsync({ action, entityType, entityId, entityName, details });
+    },
+    refresh: async () => { await query.refetch(); },
   };
 }
 

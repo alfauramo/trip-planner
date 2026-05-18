@@ -6,3 +6,4 @@ export { useTripActivities } from './useTripActivities';
 export { usePullToRefresh } from './usePullToRefresh';
 export { useSwipe } from './useSwipe';
 export { useIsMobile } from './useMediaQuery';
+export { useRealtimeSync } from './useRealtimeSync';
