@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { VitePWA } from 'vite-plugin-pwa'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   plugins: [
@@ -52,10 +52,23 @@ export default defineConfig({
   server: {
     port: 5173,
   },
+  build: {
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes('@dnd-kit')) return 'vendor-dnd';
+          if (id.includes('leaflet') || id.includes('react-leaflet')) return 'vendor-maps';
+          if (id.includes('recharts')) return 'vendor-charts';
+          if (id.includes('@tanstack/react-query')) return 'vendor-query';
+        },
+      },
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
     css: true,
   },
-})
+});
