@@ -3,10 +3,26 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  Calendar, Plus, Compass, Pencil, Trash2, GripVertical,
-  Sparkles, Route, FileText, ExternalLink, Edit2,
-  Clock, Euro, Globe, MapIcon, Hotel, Plane, Utensils,
-  ShoppingBag, CheckSquare
+  Calendar,
+  Plus,
+  Compass,
+  Pencil,
+  Trash2,
+  GripVertical,
+  Sparkles,
+  Route,
+  FileText,
+  ExternalLink,
+  Edit2,
+  Clock,
+  Euro,
+  Globe,
+  MapIcon,
+  Hotel,
+  Plane,
+  Utensils,
+  ShoppingBag,
+  CheckSquare,
 } from 'lucide-react';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -55,7 +71,10 @@ const placeSchema = z.object({
 
 type PlaceForm = z.infer<typeof placeSchema>;
 
-export function getMemberDisplayName(member: { profile?: { full_name?: string; alias?: string }; email: string }): string {
+export function getMemberDisplayName(member: {
+  profile?: { full_name?: string; alias?: string };
+  email: string;
+}): string {
   if (member.profile?.full_name) return member.profile.full_name;
   if (member.profile?.alias) return member.profile.alias;
   return member.email.split('@')[0];
@@ -63,13 +82,17 @@ export function getMemberDisplayName(member: { profile?: { full_name?: string; a
 
 export function formatDateShort(dateString: string) {
   return new Date(dateString).toLocaleDateString('es-ES', {
-    day: 'numeric', month: 'short', year: 'numeric',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
   });
 }
 
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString('es-ES', {
-    weekday: 'long', day: 'numeric', month: 'long',
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
   });
 }
 
@@ -88,9 +111,7 @@ export function SortableEvent({
   onOpenMaps?: () => void;
   isMobile: boolean;
 }) {
-  const {
-    attributes, listeners, setNodeRef, transform, transition, isDragging,
-  } = useSortable({ id: event.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: event.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -98,118 +119,218 @@ export function SortableEvent({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const typeConfig = eventTypes.find(t => t.value === event.event_type) || eventTypes[0];
+  const typeConfig = eventTypes.find((t) => t.value === event.event_type) || eventTypes[0];
   const EventIcon = typeConfig.icon;
 
-  const hasDetails = event.cost_amount || event.address || event.google_maps_url ||
-                     event.booking_reference || event.participants?.length || event.notes;
+  const hasDetails =
+    event.cost_amount ||
+    event.address ||
+    event.google_maps_url ||
+    event.booking_reference ||
+    event.participants?.length ||
+    event.notes;
 
   if (isMobile) {
     return (
-      <div ref={setNodeRef} style={style} className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl group">
-        <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:text-gray-300">
-          <GripVertical className="w-4 h-4" />
-        </button>
-        <div className={`p-1.5 rounded-lg ${typeConfig.color}`}>
-          <EventIcon className="w-4 h-4" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5">
-            <p className="font-medium text-gray-800 dark:text-white text-sm truncate">{event.name}</p>
-            {event.start_time && (
-              <span className="shrink-0 text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">
-                {event.start_time}
-              </span>
-            )}
+      <div ref={setNodeRef} style={style} className="flex items-start gap-3 pl-0 event-card">
+        <div className="flex flex-col items-center pt-1.5">
+          <button
+            {...attributes}
+            {...listeners}
+            className="cursor-grab active:cursor-grabbing text-gray-300 dark:text-gray-600 hover:text-gray-400"
+          >
+            <GripVertical className="w-4 h-4" />
+          </button>
+          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-sm ${typeConfig.color}`}>
+            <EventIcon className="w-4 h-4" />
           </div>
-          {event.address && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{event.address}</p>
-          )}
         </div>
-        <div className="flex items-center gap-0.5">
-          <button onClick={onAddDetails} className="p-1.5 text-gray-400 hover:text-blue-500">
-            <FileText className="w-3.5 h-3.5" />
-          </button>
-          <button onClick={onDelete} className="p-1.5 text-gray-400 hover:text-red-500">
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
+        <div className="flex-1 min-w-0 bg-white dark:bg-gray-800 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <p className="font-semibold text-gray-800 dark:text-white text-sm">{event.name}</p>
+                {event.booking_status === 'confirmed' && (
+                  <span className="text-[10px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded font-medium">
+                    Confirmado
+                  </span>
+                )}
+                {event.booking_status === 'paid' && (
+                  <span className="text-[10px] bg-green-100 text-green-600 px-1.5 py-0.5 rounded font-medium">
+                    Pagado
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                {event.start_time && (
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> {event.start_time}
+                    {event.end_time && `-${event.end_time}`}
+                  </span>
+                )}
+                {event.address && <span className="truncate max-w-[140px]">{event.address}</span>}
+                {event.cost_amount && event.cost_amount > 0 && (
+                  <span>
+                    {event.cost_amount}€{!event.cost_paid && '*'}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 mt-2 pt-2 border-t border-gray-50 dark:border-gray-700/50">
+            <button
+              onClick={onAddDetails}
+              className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+            >
+              <FileText className="w-3 h-3" />
+              {hasDetails ? 'Detalles' : 'Completar'}
+            </button>
+            {event.google_maps_url && (
+              <button
+                onClick={onOpenMaps}
+                className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+              >
+                <ExternalLink className="w-3 h-3" />
+                Maps
+              </button>
+            )}
+            <button
+              onClick={onEdit}
+              className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+            >
+              <Edit2 className="w-3 h-3" />
+              Editar
+            </button>
+            <button
+              onClick={onDelete}
+              className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors ml-auto"
+            >
+              <Trash2 className="w-3 h-3" />
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div ref={setNodeRef} style={style} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg group">
-      <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:text-gray-300">
-        <GripVertical className="w-4 h-4" />
-      </button>
-      <div className={`p-2 rounded-lg ${typeConfig.color}`}>
-        <EventIcon className="w-4 h-4" />
-      </div>
-      <div className="flex-1">
-        <div className="flex items-center gap-2">
-          <p className="font-medium text-gray-800 dark:text-white">{event.name}</p>
-          {event.start_time && (
-            <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded">
-              {event.start_time}{event.end_time && ` - ${event.end_time}`}
-            </span>
-          )}
-          {event.booking_status && event.booking_status !== 'pending' && (
-            <span className={`text-xs px-2 py-0.5 rounded ${
-              event.booking_status === 'paid' ? 'bg-green-100 text-green-600' :
-              event.booking_status === 'confirmed' ? 'bg-orange-100 text-orange-600' :
-              'bg-red-100 text-red-600'
-            }`}>
-              {event.booking_status === 'paid' ? 'Pagado' :
-               event.booking_status === 'confirmed' ? 'Confirmado' : 'Cancelado'}
-            </span>
-          )}
+    <div ref={setNodeRef} style={style} className="flex items-start gap-4 event-card group">
+      <div className="flex flex-col items-center pt-3">
+        <button
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing text-gray-300 dark:text-gray-600 hover:text-gray-400 mb-1"
+        >
+          <GripVertical className="w-4 h-4" />
+        </button>
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${typeConfig.color}`}>
+          <EventIcon className="w-5 h-5" />
         </div>
-        {event.address && (
-          <p className="text-sm text-gray-500 dark:text-gray-400">{event.address}</p>
-        )}
-        {event.notes && (
-          <p className="text-sm text-gray-400 mt-1">{event.notes}</p>
-        )}
-        {(event.cost_amount && event.cost_amount > 0) && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            {event.cost_amount} {event.cost_currency} {!event.cost_paid && '(pendiente)'}
-          </p>
+        {event.start_time && (
+          <span className="text-[11px] font-medium text-gray-400 mt-1.5 whitespace-nowrap">{event.start_time}</span>
         )}
       </div>
-      <div className="flex items-center gap-1">
-        {event.google_maps_url && (
-          <Tooltip content="Abrir en Google Maps">
-            <button onClick={onOpenMaps} className="p-1 text-gray-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
-              <ExternalLink className="w-4 h-4" />
-            </button>
-          </Tooltip>
-        )}
-        <Tooltip content={hasDetails ? 'Ver/editar detalles' : 'Añadir detalles'}>
-          <button onClick={onAddDetails} className={`p-1 opacity-0 group-hover:opacity-100 transition-opacity ${
-            hasDetails ? 'text-green-500 hover:text-green-600' : 'text-gray-400 hover:text-blue-500'
-          }`}>
-            <FileText className="w-4 h-4" />
-          </button>
-        </Tooltip>
-        <Tooltip content="Editar nombre u hora">
-          <button onClick={onEdit} className="p-1 text-gray-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Edit2 className="w-4 h-4" />
-          </button>
-        </Tooltip>
-        <Tooltip content="Eliminar evento">
-          <button onClick={onDelete} className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </Tooltip>
+      <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 group-hover:shadow-md transition-shadow">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4 className="font-semibold text-gray-800 dark:text-white">{event.name}</h4>
+              {event.booking_status === 'confirmed' && (
+                <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-medium">
+                  Confirmado
+                </span>
+              )}
+              {event.booking_status === 'paid' && (
+                <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-medium">Pagado</span>
+              )}
+              {event.event_type === 'transport' && event.end_time && (
+                <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-medium">
+                  {event.start_time} - {event.end_time}
+                </span>
+              )}
+            </div>
+            {event.address && (
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+                <MapIcon className="w-3.5 h-3.5 shrink-0" />
+                {event.address}
+              </p>
+            )}
+            {event.notes && <p className="text-sm text-gray-400 dark:text-gray-500 mt-1.5 italic">"{event.notes}"</p>}
+            <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
+              {event.cost_amount && event.cost_amount > 0 && (
+                <span className="flex items-center gap-1">
+                  <Euro className="w-3 h-3" /> {event.cost_amount} {event.cost_currency}
+                  {!event.cost_paid && <span className="text-yellow-500">(pendiente)</span>}
+                </span>
+              )}
+              {event.booking_reference && (
+                <span className="flex items-center gap-1">
+                  <FileText className="w-3 h-3" /> Ref: {event.booking_reference}
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            {event.google_maps_url && (
+              <Tooltip content="Google Maps">
+                <button
+                  onClick={onOpenMaps}
+                  className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </button>
+              </Tooltip>
+            )}
+            <Tooltip content={hasDetails ? 'Detalles' : 'Añadir detalles'}>
+              <button
+                onClick={onAddDetails}
+                className={`p-2 rounded-lg transition-all ${
+                  hasDetails
+                    ? 'text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20'
+                    : 'text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                }`}
+              >
+                <FileText className="w-4 h-4" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Editar">
+              <button
+                onClick={onEdit}
+                className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Eliminar">
+              <button
+                onClick={onDelete}
+                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </Tooltip>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-export function AddDayForm({ startDate, lastDate, onSave }: { startDate?: string; lastDate?: string; onSave: (date: string, notes?: string) => void }) {
+export function AddDayForm({
+  startDate,
+  lastDate,
+  onSave,
+}: {
+  startDate?: string;
+  lastDate?: string;
+  onSave: (date: string, notes?: string) => void;
+}) {
   const getDefaultDate = () => {
-    if (lastDate) { const d = new Date(lastDate); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0]; }
+    if (lastDate) {
+      const d = new Date(lastDate);
+      d.setDate(d.getDate() + 1);
+      return d.toISOString().split('T')[0];
+    }
     if (startDate) return startDate;
     return new Date().toISOString().split('T')[0];
   };
@@ -220,20 +341,42 @@ export function AddDayForm({ startDate, lastDate, onSave }: { startDate?: string
     <div className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha del día</label>
-        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción (opcional)</label>
-        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" placeholder="Notas sobre este día..." />
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Descripción (opcional)
+        </label>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          rows={3}
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          placeholder="Notas sobre este día..."
+        />
       </div>
-      <button onClick={() => onSave(date, notes || undefined)} className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600 active:bg-blue-700">
+      <button
+        onClick={() => onSave(date, notes || undefined)}
+        className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600 active:bg-blue-700"
+      >
         Añadir Día
       </button>
     </div>
   );
 }
 
-export function EditDayForm({ day, onSave }: { day: { id: string; date: string; notes?: string }; onSave: (updates: { date: string; notes?: string }) => void }) {
+export function EditDayForm({
+  day,
+  onSave,
+}: {
+  day: { id: string; date: string; notes?: string };
+  onSave: (updates: { date: string; notes?: string }) => void;
+}) {
   const [date, setDate] = useState(day.date);
   const [notes, setNotes] = useState(day.notes || '');
 
@@ -241,21 +384,47 @@ export function EditDayForm({ day, onSave }: { day: { id: string; date: string; 
     <div className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha del día</label>
-        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción (opcional)</label>
-        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" placeholder="Notas sobre este día..." />
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Descripción (opcional)
+        </label>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          rows={3}
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          placeholder="Notas sobre este día..."
+        />
       </div>
-      <button onClick={() => onSave({ date, notes: notes || undefined })} className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600">
+      <button
+        onClick={() => onSave({ date, notes: notes || undefined })}
+        className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600"
+      >
         Guardar
       </button>
     </div>
   );
 }
 
-export function AddEventForm({ onSave }: { onSave: (data: { name: string; event_type: string; start_time?: string; end_time?: string }) => void }) {
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<{ name: string; event_type: string; start_time: string; end_time: string }>({
+export function AddEventForm({
+  onSave,
+}: {
+  onSave: (data: { name: string; event_type: string; start_time?: string; end_time?: string }) => void;
+}) {
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<{ name: string; event_type: string; start_time: string; end_time: string }>({
     defaultValues: { event_type: 'activity', start_time: '', end_time: '' },
   });
   const selectedType = watch('event_type');
@@ -268,7 +437,12 @@ export function AddEventForm({ onSave }: { onSave: (data: { name: string; event_
           {eventTypes.map((type) => {
             const Icon = type.icon;
             return (
-              <button key={type.value} type="button" onClick={() => setValue('event_type', type.value)} className={`flex items-center gap-1.5 p-2.5 rounded-xl border-2 transition-all ${selectedType === type.value ? `${type.color} border-current` : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'}`}>
+              <button
+                key={type.value}
+                type="button"
+                onClick={() => setValue('event_type', type.value)}
+                className={`flex items-center gap-1.5 p-2.5 rounded-xl border-2 transition-all ${selectedType === type.value ? `${type.color} border-current` : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'}`}
+              >
                 <Icon className="w-4 h-4" /> <span className="text-xs font-medium">{type.label}</span>
               </button>
             );
@@ -277,29 +451,68 @@ export function AddEventForm({ onSave }: { onSave: (data: { name: string; event_
         <input type="hidden" {...register('event_type')} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre <span className="text-red-500">*</span></label>
-        <input {...register('name', { required: 'El nombre es requerido' })} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder={selectedType === 'accommodation' ? 'Ej: Hotel O Malioboro' : selectedType === 'restaurant' ? 'Ej: Warung Nusantara' : selectedType === 'transport' ? 'Ej: Vuelo Madrid-Yakarta' : 'Ej: Templo Borobudur'} />
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Nombre <span className="text-red-500">*</span>
+        </label>
+        <input
+          {...register('name', { required: 'El nombre es requerido' })}
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder={
+            selectedType === 'accommodation'
+              ? 'Ej: Hotel O Malioboro'
+              : selectedType === 'restaurant'
+                ? 'Ej: Warung Nusantara'
+                : selectedType === 'transport'
+                  ? 'Ej: Vuelo Madrid-Yakarta'
+                  : 'Ej: Templo Borobudur'
+          }
+        />
         {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><Clock className="w-4 h-4 inline mr-1" />Inicio</label>
-          <input {...register('start_time')} type="time" className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <Clock className="w-4 h-4 inline mr-1" />
+            Inicio
+          </label>
+          <input
+            {...register('start_time')}
+            type="time"
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><Clock className="w-4 h-4 inline mr-1" />Fin</label>
-          <input {...register('end_time')} type="time" className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <Clock className="w-4 h-4 inline mr-1" />
+            Fin
+          </label>
+          <input
+            {...register('end_time')}
+            type="time"
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
         </div>
       </div>
-      <button type="submit" className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600">Añadir</button>
+      <button type="submit" className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600">
+        Añadir
+      </button>
     </form>
   );
 }
 
-export function EditEventContent({ event, members, onSave, onRefreshTrip }: {
+export function EditEventContent({
+  event,
+  members,
+  onSave,
+  onRefreshTrip,
+}: {
   event: TripEvent;
-  members: { id: string; user_id?: string; email: string; profile?: { full_name?: string; alias?: string; avatar_url?: string } }[];
+  members: {
+    id: string;
+    user_id?: string;
+    email: string;
+    profile?: { full_name?: string; alias?: string; avatar_url?: string };
+  }[];
   onSave: (data: any, payerId?: string, participants?: string[]) => void;
   onRefreshTrip?: () => void;
 }) {
@@ -307,30 +520,65 @@ export function EditEventContent({ event, members, onSave, onRefreshTrip }: {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [payerId, setPayerId] = useState<string>(event.payer_id || '');
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>(event.participants || []);
-  const [selectedPlace, setSelectedPlace] = useState<{ address: string; latitude?: number; longitude?: number; google_maps_url?: string } | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<{
+    address: string;
+    latitude?: number;
+    longitude?: number;
+    google_maps_url?: string;
+  } | null>(null);
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<PlaceForm>({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<PlaceForm>({
     resolver: zodResolver(placeSchema),
     defaultValues: {
-      name: event.name, address: event.address || '', latitude: event.latitude, longitude: event.longitude,
-      notes: event.notes || '', event_type: event.event_type, start_time: event.start_time || '',
-      end_time: event.end_time || '', google_maps_url: event.google_maps_url || '', website_url: event.website_url || '',
-      cost_amount: event.cost_amount?.toString() || '', cost_currency: event.cost_currency || 'EUR',
-      cost_paid: event.cost_paid || false, booking_reference: event.booking_reference || '',
-      booking_status: event.booking_status || '', booking_platform: event.booking_platform || '',
-      booking_contact_name: event.booking_contact_name || '', booking_contact_phone: event.booking_contact_phone || '',
+      name: event.name,
+      address: event.address || '',
+      latitude: event.latitude,
+      longitude: event.longitude,
+      notes: event.notes || '',
+      event_type: event.event_type,
+      start_time: event.start_time || '',
+      end_time: event.end_time || '',
+      google_maps_url: event.google_maps_url || '',
+      website_url: event.website_url || '',
+      cost_amount: event.cost_amount?.toString() || '',
+      cost_currency: event.cost_currency || 'EUR',
+      cost_paid: event.cost_paid || false,
+      booking_reference: event.booking_reference || '',
+      booking_status: event.booking_status || '',
+      booking_platform: event.booking_platform || '',
+      booking_contact_name: event.booking_contact_name || '',
+      booking_contact_phone: event.booking_contact_phone || '',
     },
   });
 
   const selectedType = watch('event_type');
 
   const loadAttachments = async () => {
-    try { const data = await getEventAttachments(event.id); setAttachments(data); } catch (err) { console.error(err); }
+    try {
+      const data = await getEventAttachments(event.id);
+      setAttachments(data);
+    } catch (err) {
+      console.error(err);
+    }
   };
-  useEffect(() => { loadAttachments(); }, []);
+  useEffect(() => {
+    loadAttachments();
+  }, []);
 
   const handleSubmitForm = (data: PlaceForm) => {
-    const finalData = { ...data, latitude: selectedPlace?.latitude, longitude: selectedPlace?.longitude, google_maps_url: selectedPlace?.google_maps_url || data.google_maps_url, address: selectedPlace?.address || data.address };
+    const finalData = {
+      ...data,
+      latitude: selectedPlace?.latitude,
+      longitude: selectedPlace?.longitude,
+      google_maps_url: selectedPlace?.google_maps_url || data.google_maps_url,
+      address: selectedPlace?.address || data.address,
+    };
     onSave(finalData, payerId, selectedParticipants);
   };
 
@@ -342,7 +590,12 @@ export function EditEventContent({ event, members, onSave, onRefreshTrip }: {
           {eventTypes.map((type) => {
             const Icon = type.icon;
             return (
-              <button key={type.value} type="button" onClick={() => setValue('event_type', type.value)} className={`flex items-center gap-1.5 p-2.5 rounded-xl border-2 transition-all ${selectedType === type.value ? `${type.color} border-current` : 'border-gray-200 dark:border-gray-700'}`}>
+              <button
+                key={type.value}
+                type="button"
+                onClick={() => setValue('event_type', type.value)}
+                className={`flex items-center gap-1.5 p-2.5 rounded-xl border-2 transition-all ${selectedType === type.value ? `${type.color} border-current` : 'border-gray-200 dark:border-gray-700'}`}
+              >
                 <Icon className="w-4 h-4" /> <span className="text-xs font-medium">{type.label}</span>
               </button>
             );
@@ -351,46 +604,112 @@ export function EditEventContent({ event, members, onSave, onRefreshTrip }: {
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre</label>
-        <input {...register('name')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        <input
+          {...register('name')}
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
         {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><Clock className="w-4 h-4 inline mr-1" />Inicio</label>
-          <input {...register('start_time')} type="time" className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <Clock className="w-4 h-4 inline mr-1" />
+            Inicio
+          </label>
+          <input
+            {...register('start_time')}
+            type="time"
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><Clock className="w-4 h-4 inline mr-1" />Fin</label>
-          <input {...register('end_time')} type="time" className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <Clock className="w-4 h-4 inline mr-1" />
+            Fin
+          </label>
+          <input
+            {...register('end_time')}
+            type="time"
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
         </div>
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dirección</label>
-        <PlaceAutocomplete value={watch('address')} onSelect={(place) => { setSelectedPlace({ address: place.address, latitude: place.latitude, longitude: place.longitude, google_maps_url: place.google_maps_url }); setValue('address', place.address); }} placeholder="Buscar lugar..." />
-        <input {...register('address')} placeholder="O escribe manualmente" className="w-full mt-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        <PlaceAutocomplete
+          value={watch('address')}
+          onSelect={(place) => {
+            setSelectedPlace({
+              address: place.address,
+              latitude: place.latitude,
+              longitude: place.longitude,
+              google_maps_url: place.google_maps_url,
+            });
+            setValue('address', place.address);
+          }}
+          placeholder="Buscar lugar..."
+        />
+        <input
+          {...register('address')}
+          placeholder="O escribe manualmente"
+          className="w-full mt-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><MapIcon className="w-4 h-4 inline mr-1" />Google Maps</label>
-          <input {...register('google_maps_url')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <MapIcon className="w-4 h-4 inline mr-1" />
+            Google Maps
+          </label>
+          <input
+            {...register('google_maps_url')}
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><Globe className="w-4 h-4 inline mr-1" />Web</label>
-          <input {...register('website_url')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <Globe className="w-4 h-4 inline mr-1" />
+            Web
+          </label>
+          <input
+            {...register('website_url')}
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
         </div>
       </div>
-      <button type="button" onClick={() => setShowAdvanced(!showAdvanced)} className="text-sm text-blue-500 hover:text-blue-600">{showAdvanced ? '- Ocultar' : '+ Más opciones'}</button>
+      <button
+        type="button"
+        onClick={() => setShowAdvanced(!showAdvanced)}
+        className="text-sm text-blue-500 hover:text-blue-600"
+      >
+        {showAdvanced ? '- Ocultar' : '+ Más opciones'}
+      </button>
       {showAdvanced && (
         <div className="space-y-4 pt-2 border-t dark:border-gray-700">
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><Euro className="w-4 h-4 inline mr-1" />Coste</label>
-              <input {...register('cost_amount')} type="number" step="0.01" className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0.00" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <Euro className="w-4 h-4 inline mr-1" />
+                Coste
+              </label>
+              <input
+                {...register('cost_amount')}
+                type="number"
+                step="0.01"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="0.00"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Moneda</label>
-              <select {...register('cost_currency')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="EUR">EUR</option><option value="USD">USD</option><option value="IDR">IDR</option><option value="GBP">GBP</option>
+              <select
+                {...register('cost_currency')}
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="EUR">EUR</option>
+                <option value="USD">USD</option>
+                <option value="IDR">IDR</option>
+                <option value="GBP">GBP</option>
               </select>
             </div>
             <div className="flex items-center pt-6">
@@ -402,13 +721,26 @@ export function EditEventContent({ event, members, onSave, onRefreshTrip }: {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><FileText className="w-4 h-4 inline mr-1" />Ref. Reserva</label>
-              <input {...register('booking_reference')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <FileText className="w-4 h-4 inline mr-1" />
+                Ref. Reserva
+              </label>
+              <input
+                {...register('booking_reference')}
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estado</label>
-              <select {...register('booking_status')} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="">Sin reserva</option><option value="pending">Pendiente</option><option value="confirmed">Confirmado</option><option value="paid">Pagado</option><option value="cancelled">Cancelado</option>
+              <select
+                {...register('booking_status')}
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Sin reserva</option>
+                <option value="pending">Pendiente</option>
+                <option value="confirmed">Confirmado</option>
+                <option value="paid">Pagado</option>
+                <option value="cancelled">Cancelado</option>
               </select>
             </div>
           </div>
@@ -416,39 +748,83 @@ export function EditEventContent({ event, members, onSave, onRefreshTrip }: {
       )}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notas</label>
-        <textarea {...register('notes')} rows={2} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" />
+        <textarea
+          {...register('notes')}
+          rows={2}
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+        />
       </div>
       {showAdvanced && members.length > 0 && (
         <div className="space-y-4 pt-2 border-t dark:border-gray-700">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"><Euro className="w-4 h-4 inline mr-1" />Pagador</label>
-            <select value={payerId} onChange={(e) => setPayerId(e.target.value)} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <Euro className="w-4 h-4 inline mr-1" />
+              Pagador
+            </label>
+            <select
+              value={payerId}
+              onChange={(e) => setPayerId(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
               <option value="">Seleccionar...</option>
-              {members.map((m) => (<option key={m.id} value={m.user_id || m.id}>{getMemberDisplayName(m)}</option>))}
+              {members.map((m) => (
+                <option key={m.id} value={m.user_id || m.id}>
+                  {getMemberDisplayName(m)}
+                </option>
+              ))}
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Participantes</label>
             <div className="space-y-2">
-              {members.map((m) => (<label key={m.id} className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={selectedParticipants.includes(m.user_id || m.id)} onChange={(e) => { const uid = m.user_id || m.id; if (e.target.checked) setSelectedParticipants([...selectedParticipants, uid]); else setSelectedParticipants(selectedParticipants.filter(id => id !== uid)); }} className="w-4 h-4 text-blue-500 rounded" />
-                <span className="text-sm text-gray-600 dark:text-gray-300">{getMemberDisplayName(m)}</span>
-              </label>))}
+              {members.map((m) => (
+                <label key={m.id} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={selectedParticipants.includes(m.user_id || m.id)}
+                    onChange={(e) => {
+                      const uid = m.user_id || m.id;
+                      if (e.target.checked) setSelectedParticipants([...selectedParticipants, uid]);
+                      else setSelectedParticipants(selectedParticipants.filter((id) => id !== uid));
+                    }}
+                    className="w-4 h-4 text-blue-500 rounded"
+                  />
+                  <span className="text-sm text-gray-600 dark:text-gray-300">{getMemberDisplayName(m)}</span>
+                </label>
+              ))}
             </div>
           </div>
         </div>
       )}
       <div className="border-t dark:border-gray-700 pt-4">
-        <FileUploader eventId={event.id} attachments={attachments} onAttachmentsChange={() => { loadAttachments(); onRefreshTrip?.(); }} />
+        <FileUploader
+          eventId={event.id}
+          attachments={attachments}
+          onAttachmentsChange={() => {
+            loadAttachments();
+            onRefreshTrip?.();
+          }}
+        />
       </div>
-      <button type="submit" className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600">Guardar</button>
+      <button type="submit" className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600">
+        Guardar
+      </button>
     </form>
   );
 }
 
-export function EventDetailsContent({ event, members, onSave }: {
+export function EventDetailsContent({
+  event,
+  members,
+  onSave,
+}: {
   event: TripEvent;
-  members: { id: string; user_id?: string; email: string; profile?: { full_name?: string; alias?: string; avatar_url?: string } }[];
+  members: {
+    id: string;
+    user_id?: string;
+    email: string;
+    profile?: { full_name?: string; alias?: string; avatar_url?: string };
+  }[];
   onSave: (updates: Partial<TripEvent>) => void;
 }) {
   const [costAmount, setCostAmount] = useState(event.cost_amount?.toString() || '');
@@ -463,7 +839,8 @@ export function EventDetailsContent({ event, members, onSave }: {
   const [bookingStatus, setBookingStatus] = useState(event.booking_status || '');
   const [notes, setNotes] = useState(event.notes || '');
 
-  const sharePerPerson = costAmount && selectedParticipants.length > 0 ? parseFloat(costAmount) / selectedParticipants.length : null;
+  const sharePerPerson =
+    costAmount && selectedParticipants.length > 0 ? parseFloat(costAmount) / selectedParticipants.length : null;
 
   return (
     <div className="space-y-5">
@@ -471,15 +848,34 @@ export function EventDetailsContent({ event, members, onSave }: {
         <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Gasto</h3>
         <div className="flex gap-3">
           <div className="flex-1">
-            <input type="number" value={costAmount} onChange={(e) => setCostAmount(e.target.value)} placeholder="0.00" step="0.01" className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            <input
+              type="number"
+              value={costAmount}
+              onChange={(e) => setCostAmount(e.target.value)}
+              placeholder="0.00"
+              step="0.01"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
           </div>
-          <select value={costCurrency} onChange={(e) => setCostCurrency(e.target.value)} className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white">
-            <option value="EUR">€</option><option value="USD">$</option><option value="IDR">Rp</option><option value="GBP">£</option>
+          <select
+            value={costCurrency}
+            onChange={(e) => setCostCurrency(e.target.value)}
+            className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white"
+          >
+            <option value="EUR">€</option>
+            <option value="USD">$</option>
+            <option value="IDR">Rp</option>
+            <option value="GBP">£</option>
           </select>
         </div>
         <div className="flex items-center gap-3 mt-2">
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={costPaid} onChange={(e) => setCostPaid(e.target.checked)} className="w-4 h-4 text-blue-500 rounded" />
+            <input
+              type="checkbox"
+              checked={costPaid}
+              onChange={(e) => setCostPaid(e.target.checked)}
+              className="w-4 h-4 text-blue-500 rounded"
+            />
             <span className="text-sm text-gray-600 dark:text-gray-300">Pagado</span>
           </label>
           {costAmount && selectedParticipants.length > 0 && (
@@ -492,19 +888,34 @@ export function EventDetailsContent({ event, members, onSave }: {
         <>
           <div>
             <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Pagador</h3>
-            <select value={payerId} onChange={(e) => setPayerId(e.target.value)} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white">
+            <select
+              value={payerId}
+              onChange={(e) => setPayerId(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white"
+            >
               <option value="">Seleccionar...</option>
-              {members.map(m => (<option key={m.id} value={m.user_id || m.id}>{getMemberDisplayName(m)}</option>))}
+              {members.map((m) => (
+                <option key={m.id} value={m.user_id || m.id}>
+                  {getMemberDisplayName(m)}
+                </option>
+              ))}
             </select>
           </div>
           <div>
             <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Participantes</h3>
             <div className="flex flex-wrap gap-2">
-              {members.map(m => {
+              {members.map((m) => {
                 const id = m.user_id || m.id;
                 const selected = selectedParticipants.includes(id);
                 return (
-                  <button key={m.id} type="button" onClick={() => setSelectedParticipants(prev => selected ? prev.filter(p => p !== id) : [...prev, id])} className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${selected ? 'bg-blue-500 text-white' : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300'}`}>
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() =>
+                      setSelectedParticipants((prev) => (selected ? prev.filter((p) => p !== id) : [...prev, id]))
+                    }
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${selected ? 'bg-blue-500 text-white' : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300'}`}
+                  >
                     {getMemberDisplayName(m)}
                   </button>
                 );
@@ -516,29 +927,72 @@ export function EventDetailsContent({ event, members, onSave }: {
 
       <div>
         <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Ubicación</h3>
-        <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Dirección" className="w-full mb-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        <input type="text" value={googleMapsUrl} onChange={(e) => setGoogleMapsUrl(e.target.value)} placeholder="URL Google Maps" className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        <input
+          type="text"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          placeholder="Dirección"
+          className="w-full mb-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+        <input
+          type="text"
+          value={googleMapsUrl}
+          onChange={(e) => setGoogleMapsUrl(e.target.value)}
+          placeholder="URL Google Maps"
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
       </div>
 
       <div>
         <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Reserva</h3>
-        <input type="text" value={bookingReference} onChange={(e) => setBookingReference(e.target.value)} placeholder="Referencia" className="w-full mb-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        <select value={bookingStatus} onChange={(e) => setBookingStatus(e.target.value)} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white">
-          <option value="">Sin reserva</option><option value="pending">Pendiente</option><option value="confirmed">Confirmado</option><option value="paid">Pagado</option><option value="cancelled">Cancelado</option>
+        <input
+          type="text"
+          value={bookingReference}
+          onChange={(e) => setBookingReference(e.target.value)}
+          placeholder="Referencia"
+          className="w-full mb-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+        <select
+          value={bookingStatus}
+          onChange={(e) => setBookingStatus(e.target.value)}
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white"
+        >
+          <option value="">Sin reserva</option>
+          <option value="pending">Pendiente</option>
+          <option value="confirmed">Confirmado</option>
+          <option value="paid">Pagado</option>
+          <option value="cancelled">Cancelado</option>
         </select>
       </div>
 
       <div>
         <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Notas</h3>
-        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" />
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          rows={3}
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+        />
       </div>
 
-      <button onClick={() => onSave({
-        cost_amount: costAmount ? parseFloat(costAmount) : undefined, cost_currency: costCurrency || 'EUR', cost_paid: costPaid,
-        payer_id: payerId || undefined, participants: selectedParticipants.length > 0 ? selectedParticipants : undefined,
-        address: address || undefined, google_maps_url: googleMapsUrl || undefined, website_url: websiteUrl || undefined,
-        booking_reference: bookingReference || undefined, booking_status: bookingStatus as any || undefined, notes: notes || undefined,
-      })} className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600">
+      <button
+        onClick={() =>
+          onSave({
+            cost_amount: costAmount ? parseFloat(costAmount) : undefined,
+            cost_currency: costCurrency || 'EUR',
+            cost_paid: costPaid,
+            payer_id: payerId || undefined,
+            participants: selectedParticipants.length > 0 ? selectedParticipants : undefined,
+            address: address || undefined,
+            google_maps_url: googleMapsUrl || undefined,
+            website_url: websiteUrl || undefined,
+            booking_reference: bookingReference || undefined,
+            booking_status: (bookingStatus as any) || undefined,
+            notes: notes || undefined,
+          })
+        }
+        className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600"
+      >
         Guardar
       </button>
     </div>
@@ -546,9 +1000,19 @@ export function EventDetailsContent({ event, members, onSave }: {
 }
 
 export function TripItinerary({
-  trip, days, members, isMobile,
-  onAddDayClick, onAddEventClick, onEditEventClick, onViewEventDetails,
-  onEditDayClick, onDeleteDay, onDeleteEvent, onReorderEvents, onRefresh,
+  trip,
+  days,
+  members,
+  isMobile,
+  onAddDayClick,
+  onAddEventClick,
+  onEditEventClick,
+  onViewEventDetails,
+  onEditDayClick,
+  onDeleteDay,
+  onDeleteEvent,
+  onReorderEvents,
+  onRefresh,
 }: {
   trip: { id: string; description?: string; start_date?: string };
   days: (Day & { events: TripEvent[] })[];
@@ -570,15 +1034,18 @@ export function TripItinerary({
   const handleDragEnd = async (event: DragEndEvent, dayId: string) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const day = days.find(d => d.id === dayId);
+    const day = days.find((d) => d.id === dayId);
     if (!day) return;
-    const oldIndex = day.events.findIndex(e => e.id === active.id);
-    const newIndex = day.events.findIndex(e => e.id === over.id);
+    const oldIndex = day.events.findIndex((e) => e.id === active.id);
+    const newIndex = day.events.findIndex((e) => e.id === over.id);
     if (oldIndex === -1 || newIndex === -1) return;
     const newEvents = [...day.events];
     const [movedItem] = newEvents.splice(oldIndex, 1);
     newEvents.splice(newIndex, 0, movedItem);
-    await onReorderEvents(dayId, newEvents.map(e => e.id));
+    await onReorderEvents(
+      dayId,
+      newEvents.map((e) => e.id),
+    );
   };
 
   const optimizeDayOrder = async (day: any) => {
@@ -606,8 +1073,10 @@ export function TripItinerary({
         for (let i = 0; i < points.length; i++) {
           if (!visited[i]) {
             const dist = haversineDistance(
-              points[current].latitude, points[current].longitude,
-              points[i].latitude, points[i].longitude
+              points[current].latitude,
+              points[current].longitude,
+              points[i].latitude,
+              points[i].longitude,
             );
             if (dist < nearestDist) {
               nearestDist = dist;
@@ -621,7 +1090,7 @@ export function TripItinerary({
           current = nearestIdx;
         }
       }
-      return order.map(idx => points[idx]);
+      return order.map((idx) => points[idx]);
     };
     const optimizedOrder = optimize(eventsWithCoords);
     const updates = optimizedOrder.map((event: any, idx: number) => ({
@@ -636,8 +1105,8 @@ export function TripItinerary({
   };
 
   const openDayInMaps = (day: any) => {
-    const eventsWithLocation = day.events.filter((e: any) =>
-      (e.latitude && e.longitude) || e.google_maps_url || e.address
+    const eventsWithLocation = day.events.filter(
+      (e: any) => (e.latitude && e.longitude) || e.google_maps_url || e.address,
     );
     if (eventsWithLocation.length === 0) {
       showToast('No hay eventos con ubicación', 'error');
@@ -663,44 +1132,77 @@ export function TripItinerary({
   };
 
   const renderDayCard = (day: any) => (
-    <div key={day.id} className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden ${isMobile ? '' : ''}`}>
-      <div className={`bg-blue-50 dark:bg-gray-700/50 ${isMobile ? 'px-4 py-2.5' : 'px-5 py-3'} flex items-center justify-between`}>
-        <div className={`${isMobile ? 'min-w-0 flex-1' : ''}`}>
-          <span className={`text-blue-600 font-medium ${isMobile ? 'text-xs' : 'text-sm'}`}>Día {day.day_number}</span>
-          <h3 className={`font-semibold text-gray-800 dark:text-white ${isMobile ? 'text-sm capitalize' : 'capitalize'}`}>
-            {formatDate(day.date)}
-          </h3>
-          {day.notes && (
-            <p className={`text-gray-500 dark:text-gray-400 ${isMobile ? 'text-xs mt-0.5 truncate' : 'text-sm mt-1'}`}>{day.notes}</p>
-          )}
+    <div
+      key={day.id}
+      className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700/50"
+    >
+      <div className="relative px-4 py-3.5 flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800 border-b border-gray-100 dark:border-gray-700/50">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+            {day.day_number}
+          </div>
+          <div>
+            <h3 className={`font-semibold text-gray-800 dark:text-white ${isMobile ? 'text-sm' : 'text-base'}`}>
+              {formatDate(day.date)}
+            </h3>
+            {day.notes && (
+              <p className={`text-gray-500 dark:text-gray-400 ${isMobile ? 'text-xs mt-0.5' : 'text-sm mt-0.5'}`}>
+                {day.notes}
+              </p>
+            )}
+          </div>
         </div>
         <div className={`flex items-center ${isMobile ? 'gap-0.5 shrink-0' : 'gap-1'}`}>
           {isMobile ? (
             <>
-              <button onClick={() => onEditDayClick(day)} className="p-1.5 text-gray-400 hover:text-blue-500">
+              <button
+                onClick={() => onEditDayClick(day)}
+                className="p-1.5 text-gray-400 hover:text-blue-500 rounded-lg hover:bg-white/50 dark:hover:bg-gray-700 transition-colors"
+                aria-label="Editar día"
+              >
                 <Pencil className="w-3.5 h-3.5" />
               </button>
-              <button onClick={async () => {
-                if (await confirm('¿Eliminar este día?')) {
-                  try { await onDeleteDay(day.id); showToast('Día eliminado'); } catch (err: any) { showToast(err.message || 'Error', 'error'); }
-                }
-              }} className="p-1.5 text-gray-400 hover:text-red-500">
+              <button
+                onClick={async () => {
+                  if (await confirm('¿Eliminar este día?')) {
+                    try {
+                      await onDeleteDay(day.id);
+                      showToast('Día eliminado');
+                    } catch (err: any) {
+                      showToast(err.message || 'Error', 'error');
+                    }
+                  }
+                }}
+                className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-white/50 dark:hover:bg-gray-700 transition-colors"
+                aria-label="Eliminar día"
+              >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
             </>
           ) : (
             <>
               <Tooltip content="Editar día">
-                <button onClick={() => onEditDayClick(day)} className="p-2 text-gray-400 dark:text-gray-500 hover:text-blue-500 transition-colors">
+                <button
+                  onClick={() => onEditDayClick(day)}
+                  className="p-2 text-gray-400 dark:text-gray-500 hover:text-blue-500 hover:bg-white/50 dark:hover:bg-gray-700 rounded-lg transition-all"
+                >
                   <Pencil className="w-4 h-4" />
                 </button>
               </Tooltip>
               <Tooltip content="Eliminar día">
-                <button onClick={async () => {
-                  if (await confirm('¿Eliminar este día?')) {
-                    try { await onDeleteDay(day.id); showToast('Día eliminado'); } catch (err: any) { showToast(err.message || 'Error al eliminar el día', 'error'); }
-                  }
-                }} className="p-2 text-gray-400 dark:text-gray-500 hover:text-red-500 transition-colors">
+                <button
+                  onClick={async () => {
+                    if (await confirm('¿Eliminar este día?')) {
+                      try {
+                        await onDeleteDay(day.id);
+                        showToast('Día eliminado');
+                      } catch (err: any) {
+                        showToast(err.message || 'Error al eliminar el día', 'error');
+                      }
+                    }
+                  }}
+                  className="p-2 text-gray-400 dark:text-gray-500 hover:text-red-500 hover:bg-white/50 dark:hover:bg-gray-700 rounded-lg transition-all"
+                >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </Tooltip>
@@ -708,15 +1210,15 @@ export function TripItinerary({
           )}
         </div>
       </div>
-      <div className={isMobile ? 'p-3' : 'p-5'}>
+      <div className={`${isMobile ? 'p-4' : 'p-5'}`}>
         {day.events.length === 0 ? (
-          <p className={`text-gray-400 dark:text-gray-500 text-center ${isMobile ? 'text-xs py-3' : 'text-sm py-4'}`}>
-            {isMobile ? 'No hay eventos en este día' : 'No hay eventos añadidos a este día'}
+          <p className={`text-gray-400 dark:text-gray-500 text-center ${isMobile ? 'text-xs py-4' : 'text-sm py-6'}`}>
+            No hay eventos en este día
           </p>
         ) : (
           <DndContext collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, day.id)}>
             <SortableContext items={day.events.map((ev: TripEvent) => ev.id)} strategy={verticalListSortingStrategy}>
-              <div className={isMobile ? 'space-y-2' : 'space-y-3'}>
+              <div className={`${isMobile ? 'space-y-3' : 'space-y-4'}`}>
                 {day.events.map((event: TripEvent) => {
                   const eventContent = (
                     <>
@@ -734,20 +1236,25 @@ export function TripItinerary({
                         }}
                         onOpenMaps={() => event.google_maps_url && window.open(event.google_maps_url, '_blank')}
                       />
-                      <details className="mt-1">
-                        <summary className="text-xs text-gray-400 cursor-pointer hover:text-blue-500 select-none">Comentarios</summary>
+                      <details className="ml-12">
+                        <summary className="text-xs text-gray-400 cursor-pointer hover:text-blue-500 select-none py-1">
+                          Comentarios
+                        </summary>
                         <EventComments eventId={event.id} />
                       </details>
                     </>
                   );
                   if (isMobile) {
                     return (
-                      <SwipeableRow key={event.id} onDelete={async () => {
-                        if (await confirm('¿Eliminar este evento?')) {
-                          await onDeleteEvent(event.id, day.id);
-                          showToast('Evento eliminado');
-                        }
-                      }}>
+                      <SwipeableRow
+                        key={event.id}
+                        onDelete={async () => {
+                          if (await confirm('¿Eliminar este evento?')) {
+                            await onDeleteEvent(event.id, day.id);
+                            showToast('Evento eliminado');
+                          }
+                        }}
+                      >
                         {eventContent}
                       </SwipeableRow>
                     );
@@ -760,23 +1267,30 @@ export function TripItinerary({
         )}
         <button
           onClick={() => onAddEventClick(day.id)}
-          className={`w-full border-2 border-dashed border-gray-200 dark:border-gray-700 text-gray-400 hover:border-blue-400 hover:text-blue-500 transition-colors flex items-center justify-center gap-1.5 ${
-            isMobile ? 'mt-2 py-2.5 rounded-xl text-sm' : 'mt-4 py-2 rounded-lg'
+          className={`w-full border-2 border-dashed border-gray-200 dark:border-gray-700 text-gray-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all flex items-center justify-center gap-1.5 font-medium ${
+            isMobile ? 'mt-3 py-3 rounded-xl text-sm' : 'mt-4 py-2.5 rounded-xl'
           }`}
         >
           <Plus className="w-4 h-4" />
           Añadir Evento
         </button>
         {day.events.length >= 2 && (
-          <div className={`flex gap-2 ${isMobile ? 'mt-2' : 'mt-3'}`}>
-            <button onClick={() => optimizeDayOrder(day)} className={`flex-1 flex items-center justify-center gap-1.5 py-2 bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors font-medium ${
-              isMobile ? 'rounded-xl text-xs' : 'rounded-lg text-sm'
-            }`}>
-              <Sparkles className={`${isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} /> {isMobile ? 'Optimizar' : 'Optimizar orden'}
+          <div className={`flex gap-2 ${isMobile ? 'mt-3' : 'mt-3'}`}>
+            <button
+              onClick={() => optimizeDayOrder(day)}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-gradient-to-r from-purple-50 to-pink-50 text-purple-600 hover:from-purple-100 hover:to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 dark:text-purple-400 transition-all font-medium ${
+                isMobile ? 'rounded-xl text-xs' : 'rounded-xl text-sm'
+              }`}
+            >
+              <Sparkles className={`${isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />{' '}
+              {isMobile ? 'Optimizar' : 'Optimizar orden'}
             </button>
-            <button onClick={() => openDayInMaps(day)} className={`flex-1 flex items-center justify-center gap-1.5 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors font-medium ${
-              isMobile ? 'rounded-xl text-xs' : 'rounded-lg text-sm'
-            }`}>
+            <button
+              onClick={() => openDayInMaps(day)}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-600 hover:from-blue-100 hover:to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 dark:text-blue-400 transition-all font-medium ${
+                isMobile ? 'rounded-xl text-xs' : 'rounded-xl text-sm'
+              }`}
+            >
               <Route className={`${isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} /> {isMobile ? 'Maps' : 'Ver en Maps'}
             </button>
           </div>
@@ -787,7 +1301,9 @@ export function TripItinerary({
 
   const emptyState = (
     <div className={`bg-white dark:bg-gray-800 rounded-xl text-center shadow-sm ${isMobile ? 'p-8' : 'p-8'}`}>
-      <div className={`bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4 ${isMobile ? 'w-14 h-14' : 'w-16 h-16'}`}>
+      <div
+        className={`bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4 ${isMobile ? 'w-14 h-14' : 'w-16 h-16'}`}
+      >
         <Compass className={`text-blue-400 ${isMobile ? 'w-7 h-7' : 'w-8 h-8'}`} />
       </div>
       <p className={`text-gray-500 dark:text-gray-400 font-medium ${isMobile ? 'text-sm mb-1' : 'mb-2'}`}>
@@ -804,15 +1320,15 @@ export function TripItinerary({
 
   return (
     <>
-      {trip.description && !isMobile && (
-        <p className="text-gray-600 dark:text-gray-300 mb-8">{trip.description}</p>
-      )}
+      {trip.description && !isMobile && <p className="text-gray-600 dark:text-gray-300 mb-8">{trip.description}</p>}
       {trip.description && isMobile && (
         <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">{trip.description}</p>
       )}
       <WeatherForecast trip={{ ...trip, days, members } as any} />
       <div className={`flex items-center justify-between ${isMobile ? 'mb-4 mt-4' : 'mb-6'}`}>
-        <h2 className={`font-semibold text-gray-800 dark:text-white flex items-center gap-1.5 ${isMobile ? 'text-base' : 'text-lg gap-2'}`}>
+        <h2
+          className={`font-semibold text-gray-800 dark:text-white flex items-center gap-1.5 ${isMobile ? 'text-base' : 'text-lg gap-2'}`}
+        >
           <Calendar className={isMobile ? 'w-4 h-4' : 'w-5 h-5'} />
           Itinerario
         </h2>
@@ -825,10 +1341,10 @@ export function TripItinerary({
         </button>
       </div>
 
-      {days.length === 0 ? emptyState : (
-        <div className={isMobile ? 'space-y-3' : 'space-y-6 w-full'}>
-          {days.map(renderDayCard)}
-        </div>
+      {days.length === 0 ? (
+        emptyState
+      ) : (
+        <div className={isMobile ? 'space-y-3' : 'space-y-6 w-full'}>{days.map(renderDayCard)}</div>
       )}
     </>
   );

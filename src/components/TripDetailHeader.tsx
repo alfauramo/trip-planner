@@ -1,7 +1,18 @@
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Share2, Plane, Pencil, ImageIcon, LogOut,
-  Calendar, Receipt, Users, CheckSquare, Package, MapIcon, Clock
+  ArrowLeft,
+  Share2,
+  Plane,
+  Pencil,
+  ImageIcon,
+  LogOut,
+  Calendar,
+  Receipt,
+  Users,
+  CheckSquare,
+  Package,
+  MapIcon,
+  Clock,
 } from 'lucide-react';
 import { NotificationBell } from './NotificationBell';
 import { ThemeToggle } from './ThemeToggle';
@@ -19,10 +30,26 @@ const tabConfig = [
 ] as const;
 
 export function TripDetailHeader({
-  trip, activeTab, onTabChange, isMobile, displayName, profile,
-  onLogout, onEditTrip, onEditCover, members, days
+  trip,
+  activeTab,
+  onTabChange,
+  isMobile,
+  displayName,
+  profile,
+  onLogout,
+  onEditTrip,
+  onEditCover,
+  members,
+  days,
 }: {
-  trip: { id: string; title: string; description?: string; start_date?: string; end_date?: string; cover_image?: string };
+  trip: {
+    id: string;
+    title: string;
+    description?: string;
+    start_date?: string;
+    end_date?: string;
+    cover_image?: string;
+  };
   activeTab: string;
   onTabChange: (tab: string) => void;
   isMobile: boolean;
@@ -38,7 +65,9 @@ export function TripDetailHeader({
 
   const formatDateShort = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
-      day: 'numeric', month: 'short', year: 'numeric',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
     });
   };
 
@@ -50,44 +79,52 @@ export function TripDetailHeader({
 
   if (isMobile) {
     return (
-      <header className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 sticky top-0 z-20">
-        <div className="px-4 py-2.5 flex items-center gap-3">
-          <Link to="/" className="p-1.5 -ml-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-            <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-          </Link>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-base font-semibold text-gray-900 dark:text-white truncate">{trip.title}</h1>
+      <header className="sticky top-0 z-20 bg-white dark:bg-gray-900">
+        <div className="relative h-44 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500">
+          {trip.cover_image && (
+            <>
+              <img
+                src={trip.cover_image}
+                alt={trip.title}
+                loading="lazy"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+            </>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+          <div className="absolute top-0 left-0 right-0 px-4 pt-3 flex items-center justify-between">
+            <Link to="/" className="p-2 -ml-2 rounded-xl bg-white/20 backdrop-blur-sm text-white">
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={handleShare}
+                aria-label="Compartir"
+                className="p-2 rounded-xl bg-white/20 backdrop-blur-sm text-white"
+              >
+                <Share2 className="w-4 h-4" />
+              </button>
+              <ThemeToggle />
+            </div>
+          </div>
+          <div className="absolute bottom-3 left-4 right-4">
+            <h1 className="text-xl font-bold text-white drop-shadow-sm">{trip.title}</h1>
             {(trip.start_date || trip.end_date) && (
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-white/80 mt-0.5">
                 {trip.start_date && formatDateShort(trip.start_date)}
-                {trip.start_date && trip.end_date && ' - '}
+                {trip.start_date && trip.end_date && ' — '}
                 {trip.end_date && formatDateShort(trip.end_date)}
               </p>
             )}
           </div>
-          <div className="flex items-center gap-1">
-            <button type="button" onClick={handleShare} aria-label="Compartir" className="p-1.5 text-gray-500 hover:text-blue-500 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-              <Share2 className="w-4 h-4" />
-            </button>
-            <NotificationBell />
-            <ThemeToggle />
-          </div>
         </div>
 
-        {trip.cover_image && (
-          <div className="relative h-36">
-            <img
-              src={trip.cover_image}
-              alt={trip.title}
-              loading="lazy"
-              className="w-full h-full object-cover"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-          </div>
-        )}
-
-        <div className="px-4 py-1.5 flex items-center gap-1 border-t dark:border-gray-700 overflow-x-auto no-scrollbar">
+        <div className="px-4 py-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar border-b dark:border-gray-800">
           {tabConfig.map((tab) => {
             const TabIcon = tab.icon;
             const active = activeTab === tab.key;
@@ -96,10 +133,10 @@ export function TripDetailHeader({
                 key={tab.key}
                 type="button"
                 onClick={() => onTabChange(tab.key as any)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors shrink-0 ${
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all shrink-0 ${
                   active
-                    ? 'bg-blue-500 text-white shadow-sm'
-                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20'
+                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
               >
                 <TabIcon className="w-3.5 h-3.5" />
@@ -113,14 +150,14 @@ export function TripDetailHeader({
   }
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-20">
-      <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center">
-          <Link to="/" className="flex items-center gap-2">
-            <Plane className="w-7 h-7 text-blue-500" />
-            <span className="text-lg font-bold text-gray-800 dark:text-white hidden sm:block">Trip Planner</span>
-          </Link>
-        </div>
+    <header className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-20">
+      <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-md">
+            <Plane className="w-5 h-5 text-white" />
+          </div>
+          <span className="text-lg font-bold text-gray-800 dark:text-white">Trip Planner</span>
+        </Link>
         <div className="flex items-center gap-2">
           <NotificationBell />
           <ThemeToggle />
@@ -128,40 +165,75 @@ export function TripDetailHeader({
             <button
               type="button"
               onClick={() => navigate('/profile')}
-              className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
             >
               {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt={displayName} loading="lazy" className="w-8 h-8 rounded-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                <img
+                  src={profile.avatar_url}
+                  alt={displayName}
+                  loading="lazy"
+                  className="w-8 h-8 rounded-full object-cover ring-2 ring-gray-100 dark:ring-gray-700"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-medium">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-medium ring-2 ring-gray-100 dark:ring-gray-700">
                   {displayName.charAt(0).toUpperCase()}
                 </div>
               )}
-              <span className="text-sm font-medium text-gray-700 hidden sm:block">{displayName}</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden sm:block">
+                {displayName}
+              </span>
             </button>
           </Tooltip>
           <Tooltip content="Cerrar sesión">
-            <button type="button" onClick={onLogout} aria-label="Cerrar sesión" className="p-2 text-gray-600 dark:text-gray-300 hover:text-red-500 transition-colors">
+            <button
+              type="button"
+              onClick={onLogout}
+              aria-label="Cerrar sesión"
+              className="p-2 text-gray-500 dark:text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
+            >
               <LogOut className="w-5 h-5" />
             </button>
           </Tooltip>
         </div>
       </div>
-      {trip.cover_image ? (
-        <div className="relative h-48 md:h-56">
-          <img src={trip.cover_image} alt={trip.title} loading="lazy" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-4">
-            <div className="max-w-4xl mx-auto flex items-center gap-4">
-              <Link to="/" className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors backdrop-blur-sm">
-                <ArrowLeft className="w-5 h-5 text-white" />
+
+      <div className="relative h-56 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500">
+        {trip.cover_image && (
+          <>
+            <img
+              src={trip.cover_image}
+              alt={trip.title}
+              loading="lazy"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+          </>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0">
+          <div className="max-w-5xl mx-auto px-4 pb-5">
+            <div className="flex items-center gap-4">
+              <Link
+                to="/"
+                className="p-2 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
               </Link>
               <div className="flex-1">
-                <h1 className="text-2xl font-bold text-white">{trip.title}</h1>
+                <h1 className="text-3xl font-bold text-white drop-shadow-sm">{trip.title}</h1>
+                {trip.description && (
+                  <p className="text-sm text-white/70 mt-1 max-w-xl line-clamp-1">{trip.description}</p>
+                )}
                 {(trip.start_date || trip.end_date) && (
-                  <p className="text-white/80 text-sm">
+                  <p className="text-sm text-white/80 mt-1">
                     {trip.start_date && formatDateShort(trip.start_date)}
-                    {trip.start_date && trip.end_date && ' - '}
+                    {trip.start_date && trip.end_date && ' — '}
                     {trip.end_date && formatDateShort(trip.end_date)}
                   </p>
                 )}
@@ -169,30 +241,19 @@ export function TripDetailHeader({
             </div>
           </div>
         </div>
-      ) : (
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Link to="/" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-            <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-          </Link>
-          <div className="flex-1">
-            <h1 className="text-xl font-bold text-gray-800 dark:text-white">{trip.title}</h1>
-            {(trip.start_date || trip.end_date) && (
-              <p className="text-gray-500 dark:text-gray-400 text-sm">
-                {trip.start_date && formatDateShort(trip.start_date)}
-                {trip.start_date && trip.end_date && ' - '}
-                {trip.end_date && formatDateShort(trip.end_date)}
-              </p>
-            )}
+        {!trip.cover_image && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <Plane className="w-20 h-20 text-white/20" />
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-2 flex items-center gap-2">
+      <div className="max-w-5xl mx-auto px-4 py-2 flex items-center gap-2 border-b dark:border-gray-800">
         <button
           type="button"
           onClick={onEditTrip}
           aria-label="Editar viaje"
-          className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300 hover:text-blue-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-blue-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
         >
           <Pencil className="w-4 h-4" />
           <span className="hidden sm:inline">Editar viaje</span>
@@ -201,15 +262,25 @@ export function TripDetailHeader({
           type="button"
           onClick={onEditCover}
           aria-label="Editar portada"
-          className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300 hover:text-blue-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-blue-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
         >
           <ImageIcon className="w-4 h-4" />
           <span className="hidden sm:inline">Portada</span>
         </button>
         <ExportTripPDF trip={{ ...trip, days, members } as any} />
+        <div className="flex-1" />
+        <button
+          type="button"
+          onClick={handleShare}
+          aria-label="Compartir"
+          className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-blue-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+        >
+          <Share2 className="w-4 h-4" />
+          <span className="hidden sm:inline">Compartir</span>
+        </button>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 flex border-t overflow-x-auto no-scrollbar">
+      <div className="max-w-5xl mx-auto px-4 flex overflow-x-auto no-scrollbar">
         {tabConfig.map((tab) => {
           const TabIcon = tab.icon;
           const active = activeTab === tab.key;
@@ -218,16 +289,18 @@ export function TripDetailHeader({
               key={tab.key}
               type="button"
               onClick={() => onTabChange(tab.key as any)}
-              className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors shrink-0 ${
+              className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-all shrink-0 ${
                 active
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700'
+                  ? 'border-blue-500 text-blue-600 font-medium'
+                  : 'border-transparent text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
             >
               <TabIcon className="w-4 h-4" />
-              <span className="font-medium whitespace-nowrap">{tab.label}</span>
+              <span className="whitespace-nowrap text-sm">{tab.label}</span>
               {tab.key === 'members' && members.length > 0 && (
-                <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs px-1.5 py-0.5 rounded-full">{members.length}</span>
+                <span className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs px-1.5 py-0.5 rounded-full font-medium">
+                  {members.length}
+                </span>
               )}
             </button>
           );

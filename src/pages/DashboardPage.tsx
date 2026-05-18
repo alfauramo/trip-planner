@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { NewTripForm } from '../components/NewTripForm';
-import { Plus, Calendar, LogOut, Plane, ArrowRight, Share2, Compass, RefreshCw } from 'lucide-react';
+import { Plus, Calendar, LogOut, Plane, ArrowRight, Share2, Compass, RefreshCw, Trash2 } from 'lucide-react';
+import { type TripMember } from '../types';
 import { useTrips } from '../hooks/useTrips';
 import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../components/ConfirmModal';
@@ -164,13 +165,13 @@ export function DashboardPage() {
                   </button>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {trips.map((trip) => (
                     <SwipeableRow key={trip.id} onDelete={() => handleDeleteTrip(trip.id)} disabled={!isMobile}>
-                      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden active:scale-[0.98] transition-transform">
-                        <Link to={`/trips/${trip.id}`} className="flex gap-3 p-3" onClick={() => hapticLight()}>
-                          {trip.cover_image ? (
-                            <div className="w-20 h-20 rounded-lg bg-gray-100 dark:bg-gray-700 overflow-hidden shrink-0">
+                      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden card-hover">
+                        <Link to={`/trips/${trip.id}`} className="block" onClick={() => hapticLight()}>
+                          <div className="relative h-36 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
+                            {trip.cover_image ? (
                               <img
                                 src={trip.cover_image}
                                 alt={trip.title}
@@ -180,54 +181,52 @@ export function DashboardPage() {
                                   (e.target as HTMLImageElement).style.display = 'none';
                                 }}
                               />
-                            </div>
-                          ) : (
-                            <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shrink-0">
-                              <Plane className="w-8 h-8 text-white/50" />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-gray-800 dark:text-white truncate">{trip.title}</h3>
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Plane className="w-12 h-12 text-white/30" />
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                            {(trip.start_date || trip.end_date) && (
+                              <div className="date-badge">
+                                <Calendar className="w-3 h-3 inline mr-1" />
+                                {trip.start_date && formatDate(trip.start_date).split(' ').slice(0, 2).join(' ')}
+                                {trip.start_date && trip.end_date && ' - '}
+                                {trip.end_date && formatDate(trip.end_date).split(' ').slice(0, 2).join(' ')}
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-4">
+                            <h3 className="font-semibold text-gray-800 dark:text-white">{trip.title}</h3>
                             {trip.description && (
-                              <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1 mt-0.5">
+                              <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1 mt-1">
                                 {trip.description}
                               </p>
                             )}
-                            <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
-                              {(trip.start_date || trip.end_date) && (
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="w-3 h-3" />
-                                  <span>
-                                    {trip.start_date && formatDate(trip.start_date).split(' ').slice(0, 2).join(' ')}
-                                    {trip.start_date && trip.end_date && ' - '}
-                                    {trip.end_date && formatDate(trip.end_date).split(' ').slice(0, 2).join(' ')}
-                                  </span>
-                                </div>
-                              )}
-                              {trip.trip_members && trip.trip_members.length > 0 && (
-                                <span>{trip.trip_members.length} miembros</span>
-                              )}
+                            <div className="flex items-center justify-between mt-3">
+                              <div>
+                                {trip.trip_members && trip.trip_members.length > 0 && (
+                                  <div className="avatar-stack">
+                                    {trip.trip_members.slice(0, 4).map((m: TripMember, i: number) => (
+                                      <div
+                                        key={i}
+                                        className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-[10px] font-medium shadow-sm"
+                                      >
+                                        {(m.email || '?').charAt(0).toUpperCase()}
+                                      </div>
+                                    ))}
+                                    {trip.trip_members.length > 4 && (
+                                      <div className="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-[10px] font-medium text-gray-500 dark:text-gray-300 shadow-sm">
+                                        +{trip.trip_members.length - 4}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                              <ArrowRight className="w-4 h-4 text-gray-300 dark:text-gray-600" />
                             </div>
                           </div>
-                          <ArrowRight className="w-5 h-5 text-gray-300 dark:text-gray-600 self-center" />
                         </Link>
-                        <div className="px-3 pb-2 flex justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleShare(trip)}
-                            aria-label="Compartir"
-                            className="text-xs text-gray-400 hover:text-blue-500 px-2 py-1 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
-                          >
-                            <Share2 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteTrip(trip.id)}
-                            className="text-xs text-gray-400 hover:text-red-500 px-2 py-1 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
-                          >
-                            Eliminar
-                          </button>
-                        </div>
                       </div>
                     </SwipeableRow>
                   ))}
@@ -360,15 +359,15 @@ export function DashboardPage() {
             </button>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-5 md:grid-cols-2">
             {trips.map((trip) => (
               <div
                 key={trip.id}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow group"
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden card-hover group"
               >
                 <Link to={`/trips/${trip.id}`} className="block">
-                  {trip.cover_image ? (
-                    <div className="aspect-video bg-gray-100 dark:bg-gray-700 overflow-hidden">
+                  <div className="relative aspect-video bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
+                    {trip.cover_image ? (
                       <img
                         src={trip.cover_image}
                         alt={trip.title}
@@ -378,51 +377,74 @@ export function DashboardPage() {
                           (e.target as HTMLImageElement).style.display = 'none';
                         }}
                       />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Plane className="w-16 h-16 text-white/30" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                    {(trip.start_date || trip.end_date) && (
+                      <div className="date-badge">
+                        <Calendar className="w-3 h-3 inline mr-1" />
+                        {trip.start_date && formatDate(trip.start_date)}
+                        {trip.start_date && trip.end_date && ' - '}
+                        {trip.end_date && formatDate(trip.end_date)}
+                      </div>
+                    )}
+                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleShare(trip);
+                        }}
+                        aria-label="Compartir"
+                        className="p-2 bg-white/90 dark:bg-gray-800/90 rounded-lg text-gray-600 dark:text-gray-300 hover:text-blue-500 backdrop-blur-sm"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleDeleteTrip(trip.id);
+                        }}
+                        aria-label="Eliminar viaje"
+                        className="p-2 bg-white/90 dark:bg-gray-800/90 rounded-lg text-gray-600 dark:text-gray-300 hover:text-red-500 backdrop-blur-sm"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
-                  ) : (
-                    <div className="aspect-video bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                      <Plane className="w-12 h-12 text-white/50" />
-                    </div>
-                  )}
+                  </div>
                   <div className="p-5">
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-white">{trip.title}</h3>
                     {trip.description && (
                       <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{trip.description}</p>
                     )}
-                    <div className="flex items-center gap-4 mt-4 text-sm text-gray-500 dark:text-gray-400">
-                      {(trip.start_date || trip.end_date) && (
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          <span>
-                            {trip.start_date && formatDate(trip.start_date)}
-                            {trip.start_date && trip.end_date && ' - '}
-                            {trip.end_date && formatDate(trip.end_date)}
-                          </span>
-                        </div>
-                      )}
-                      {trip.trip_members && trip.trip_members.length > 0 && (
-                        <span>{trip.trip_members.length} miembro(s)</span>
-                      )}
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                        {trip.trip_members && trip.trip_members.length > 0 && (
+                          <div className="avatar-stack">
+                            {trip.trip_members.slice(0, 4).map((m: TripMember, i: number) => (
+                              <div
+                                key={i}
+                                className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-medium shadow-sm"
+                              >
+                                {(m.email || '?').charAt(0).toUpperCase()}
+                              </div>
+                            ))}
+                            {trip.trip_members.length > 4 && (
+                              <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-xs font-medium text-gray-500 dark:text-gray-300 shadow-sm">
+                                +{trip.trip_members.length - 4}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <ArrowRight className="w-5 h-5 text-gray-300 dark:text-gray-600" />
                     </div>
                   </div>
                 </Link>
-                <div className="border-t dark:border-gray-700 px-5 py-3 flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleShare(trip)}
-                    aria-label="Compartir"
-                    className="text-sm text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-1"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteTrip(trip.id)}
-                    className="text-sm text-red-500 dark:text-red-400 hover:underline"
-                  >
-                    Eliminar
-                  </button>
-                </div>
               </div>
             ))}
           </div>

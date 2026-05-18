@@ -55,7 +55,9 @@ export function EventComments({ eventId }: EventCommentsProps) {
     }
 
     loadComments();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [eventId]);
 
   const handleSubmit = useCallback(async () => {
@@ -71,7 +73,7 @@ export function EventComments({ eventId }: EventCommentsProps) {
       user_name: 'Tú',
     };
 
-    setComments(prev => [...prev, optimistic]);
+    setComments((prev) => [...prev, optimistic]);
     setNewComment('');
 
     try {
@@ -81,7 +83,7 @@ export function EventComments({ eventId }: EventCommentsProps) {
 
       if (error) throw error;
     } catch {
-      setComments(prev => prev.filter(c => c.id !== optimistic.id));
+      setComments((prev) => prev.filter((c) => c.id !== optimistic.id));
     } finally {
       setSending(false);
     }
@@ -99,7 +101,8 @@ export function EventComments({ eventId }: EventCommentsProps) {
           <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400">Comentarios</h3>
         </div>
         <p className="text-xs text-gray-400 dark:text-gray-500">
-          Los comentarios no están disponibles
+          Los comentarios no están disponibles. Ejecuta la migración{' '}
+          <code className="text-gray-500">event_comments</code> en Supabase.
         </p>
       </div>
     );
@@ -114,9 +117,7 @@ export function EventComments({ eventId }: EventCommentsProps) {
 
       <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
         {comments.length === 0 && (
-          <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">
-            No hay comentarios todavía
-          </p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">No hay comentarios todavía</p>
         )}
         {comments.map((comment) => (
           <div key={comment.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
@@ -153,11 +154,7 @@ export function EventComments({ eventId }: EventCommentsProps) {
           disabled={sending || !newComment.trim()}
           className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 flex items-center justify-center"
         >
-          {sending ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Send className="w-4 h-4" />
-          )}
+          {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
         </button>
       </div>
     </div>
