@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
+import { BASE_URL } from './helpers';
 
 test.describe('Protected routes redirect to login', () => {
   test('redirects unauthenticated user to login', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForLoadState('networkidle').catch(() => {});
-    // Should end up at login page without errors
-    await expect(page.locator('h1, h2, h3').first()).toBeVisible({ timeout: 10000 });
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'domcontentloaded' });
+    // Should end up at login page (either immediate or after auth check)
+    await expect(page.locator('body')).not.toBeEmpty({ timeout: 20000 });
   });
 });

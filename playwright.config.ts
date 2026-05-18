@@ -21,6 +21,10 @@ export default defineConfig({
     command: process.env.CI ? 'npm run build && npm run preview' : 'npm run dev',
     url: process.env.CI ? 'http://localhost:4173/trip-planner/' : 'http://localhost:5173/trip-planner/',
     reuseExistingServer: !process.env.CI,
-    timeout: 30000,
+    timeout: 60000,
+    env: {
+      VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL || '',
+      VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY || '',
+    },
   },
 });

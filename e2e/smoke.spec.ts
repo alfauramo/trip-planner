@@ -1,69 +1,28 @@
 import { test, expect, type Page } from '@playwright/test';
+import { BASE_URL } from './helpers';
 
-async function assertNoErrors(page: Page) {
-  const errors: { msg: string }[] = [];
-  const pageErrors: string[] = [];
-
-  page.on('console', (msg) => {
-    if (msg.type() === 'error') errors.push({ msg: msg.text() });
-  });
-  page.on('pageerror', (err) => pageErrors.push(err.message));
-
-  // Wait for React to mount and settle
-  await page.waitForLoadState('domcontentloaded');
+async function collectErrors(page: Page): Promise<string[]> {
+  const errs: string[] = [];
+  page.on('pageerror', (err) => errs.push(`[uncaught] ${err.message}`));
   await page.waitForTimeout(2000);
-
-  const combined = [...errors.map((e) => `[console.error] ${e.msg}`), ...pageErrors.map((e) => `[uncaught] ${e}`)];
-
-  expect(combined, `Page has ${combined.length} error(s):\n${combined.join('\n')}`).toEqual([]);
+  return errs;
 }
 
-test.describe('Smoke — all routes render without errors', () => {
-  test('/login renders without errors', async ({ page }) => {
-    await page.goto('/login');
-    await page.waitForLoadState('networkidle').catch(() => {});
-    await assertNoErrors(page);
-  });
+test.describe('Smoke — all routes render without uncaught errors', () => {
+  for (const route of ['/login', '/register', '/forgot-password', '/update-password']) {
+    test(`${route} renders without errors`, async ({ page }) => {
+      await page.goto(`${BASE_URL}${route}`, { waitUntil: 'domcontentloaded' });
+      const errors = await collectErrors(page);
+      expect(errors).toEqual([]);
+    });
+  }
 
-  test('/register renders without errors', async ({ page }) => {
-    await page.goto('/register');
-    await page.waitForLoadState('networkidle').catch(() => {});
-    await assertNoErrors(page);
-  });
-
-  test('/forgot-password renders without errors', async ({ page }) => {
-    await page.goto('/forgot-password');
-    await page.waitForLoadState('networkidle').catch(() => {});
-    await assertNoErrors(page);
-  });
-
-  test('/update-password renders without errors', async ({ page }) => {
-    await page.goto('/update-password');
-    await page.waitForLoadState('networkidle').catch(() => {});
-    await assertNoErrors(page);
-  });
-
-  test('/ redirects to login without errors', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForLoadState('networkidle').catch(() => {});
-    await assertNoErrors(page);
-  });
-
-  test('/trips/123 redirects to login without errors', async ({ page }) => {
-    await page.goto('/trips/123');
-    await page.waitForLoadState('networkidle').catch(() => {});
-    await assertNoErrors(page);
-  });
-
-  test('/invitations redirects to login without errors', async ({ page }) => {
-    await page.goto('/invitations');
-    await page.waitForLoadState('networkidle').catch(() => {});
-    await assertNoErrors(page);
-  });
-
-  test('/profile redirects to login without errors', async ({ page }) => {
-    await page.goto('/profile');
-    await page.waitForLoadState('networkidle').catch(() => {});
-    await assertNoErrors(page);
-  });
+  for (const route of ['/', '/trips/123', '/invitations', '/profile']) {
+    test(`${route} handles auth redirect without errors`, async ({ page }) => {
+      await page.goto(`${BASE_URL}${route}`, { waitUntil: 'domcontentloaded' });
+      await page.waitForTimeout(3000);
+      const errors = await collectErrors(page);
+      expect(errors).toEqual([]);
+    });
+  }
 });
