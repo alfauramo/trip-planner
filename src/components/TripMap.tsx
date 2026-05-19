@@ -1,11 +1,12 @@
 import { useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { MapPin, ExternalLink } from 'lucide-react';
 import { TripEvent } from '../types';
 import 'leaflet/dist/leaflet.css';
 
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -19,7 +20,7 @@ interface TripMapProps {
   onEventClick?: (event: TripEvent) => void;
 }
 
-const defaultCenter = { lat: 40.416775, lng: -3.703790 };
+const defaultCenter = { lat: 40.416775, lng: -3.70379 };
 
 const eventTypeColors: Record<string, string> = {
   activity: '#3B82F6',
@@ -51,25 +52,21 @@ const createCustomIcon = (color: string) => {
 
 function MapBoundsUpdater({ events }: { events: TripEvent[] }) {
   const map = useMap();
-  
+
   useEffect(() => {
-    const validEvents = events.filter(e => e.latitude && e.longitude);
+    const validEvents = events.filter((e) => e.latitude && e.longitude);
     if (validEvents.length > 0) {
-      const bounds = L.latLngBounds(
-        validEvents.map(e => [e.latitude!, e.longitude!] as [number, number])
-      );
+      const bounds = L.latLngBounds(validEvents.map((e) => [e.latitude!, e.longitude!] as [number, number]));
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
     }
   }, [events, map]);
-  
+
   return null;
 }
 
 export function TripMap({ events, center, zoom = 12, onEventClick }: TripMapProps) {
-  const eventsWithCoords = useMemo(() => 
-    events.filter(e => e.latitude && e.longitude),
-    [events]
-  );
+  const { t } = useTranslation();
+  const eventsWithCoords = useMemo(() => events.filter((e) => e.latitude && e.longitude), [events]);
 
   const mapCenter = useMemo(() => {
     if (center) return center;
@@ -87,13 +84,11 @@ export function TripMap({ events, center, zoom = 12, onEventClick }: TripMapProp
 
   if (eventsWithCoords.length === 0) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg">
+      <div className="w-full h-full flex items-center justify-center bg-stone-100 dark:bg-stone-700 rounded-lg">
         <div className="text-center p-6">
-          <MapPin className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
-          <p className="text-gray-600 dark:text-gray-300 font-medium">No hay eventos con ubicación</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Añade direcciones a tus eventos para verlos en el mapa
-          </p>
+          <MapPin className="w-12 h-12 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
+          <p className="text-stone-600 dark:text-stone-300 font-medium">{t('event.noLocations')}</p>
+          <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">{t('event.noLocations.desc')}</p>
         </div>
       </div>
     );
@@ -111,9 +106,9 @@ export function TripMap({ events, center, zoom = 12, onEventClick }: TripMapProp
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        
+
         <MapBoundsUpdater events={eventsWithCoords} />
-        
+
         {eventsWithCoords.map((event) => (
           <Marker
             key={event.id}
@@ -125,12 +120,10 @@ export function TripMap({ events, center, zoom = 12, onEventClick }: TripMapProp
           >
             <Popup>
               <div className="min-w-[180px]">
-                <h3 className="font-semibold text-gray-900">{event.name}</h3>
-                {event.address && (
-                  <p className="text-sm text-gray-600 mt-1">{event.address}</p>
-                )}
+                <h3 className="font-semibold text-stone-900">{event.name}</h3>
+                {event.address && <p className="text-sm text-stone-600 mt-1">{event.address}</p>}
                 {event.start_time && (
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-stone-500 mt-1">
                     {event.start_time}
                     {event.end_time && ` - ${event.end_time}`}
                   </p>
@@ -140,10 +133,10 @@ export function TripMap({ events, center, zoom = 12, onEventClick }: TripMapProp
                     href={event.google_maps_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mt-2"
+                    className="inline-flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-700 mt-2"
                   >
                     <ExternalLink className="w-3 h-3" />
-                    Ver en OSM
+                    {t('event.viewOSM')}
                   </a>
                 )}
               </div>
@@ -152,18 +145,17 @@ export function TripMap({ events, center, zoom = 12, onEventClick }: TripMapProp
         ))}
       </MapContainer>
 
-      <div className="absolute top-3 left-3 bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 z-[1000]">
-        <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">Leyenda</div>
+      <div className="absolute top-3 left-3 bg-white dark:bg-stone-800 rounded-lg shadow-md p-3 z-[1000]">
+        <div className="text-xs font-medium text-stone-600 dark:text-stone-400 mb-2">{t('event.legend')}</div>
         <div className="space-y-1">
-          {Object.entries(eventTypeColors).slice(0, 5).map(([type, color]) => (
-            <div key={type} className="flex items-center gap-2 text-xs">
-              <span
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: color }}
-              />
-              <span className="capitalize text-gray-700 dark:text-gray-300">{type}</span>
-            </div>
-          ))}
+          {Object.entries(eventTypeColors)
+            .slice(0, 5)
+            .map(([type, color]) => (
+              <div key={type} className="flex items-center gap-2 text-xs">
+                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
+                <span className="capitalize text-stone-700 dark:text-stone-300">{type}</span>
+              </div>
+            ))}
         </div>
       </div>
     </div>

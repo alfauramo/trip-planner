@@ -47,7 +47,14 @@ export function usePackingList(tripId: string) {
       if (previous) {
         queryClient.setQueryData<PackingItem[]>(['packing-list', tripId], (old) => [
           ...(old || []),
-          { ...newItem, id: 'temp-' + Date.now(), trip_id: tripId, packed: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+          {
+            ...newItem,
+            id: 'temp-' + Date.now(),
+            trip_id: tripId,
+            packed: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
         ]);
       }
       return { previous };
@@ -61,24 +68,17 @@ export function usePackingList(tripId: string) {
   });
 
   const togglePackedMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const existing = queryClient.getQueryData<PackingItem[]>(['packing-list', tripId]);
-      const item = existing?.find(i => i.id === id);
-      if (!item) return;
-
-      const { error } = await supabase
-        .from('packing_items')
-        .update({ packed: !item.packed })
-        .eq('id', id);
+    mutationFn: async (item: PackingItem) => {
+      const { error } = await supabase.from('packing_items').update({ packed: !item.packed }).eq('id', item.id);
 
       if (error) throw error;
     },
-    onMutate: async (id) => {
+    onMutate: async (item: PackingItem) => {
       await queryClient.cancelQueries({ queryKey: ['packing-list', tripId] });
       const previous = queryClient.getQueryData<PackingItem[]>(['packing-list', tripId]);
       if (previous) {
         queryClient.setQueryData<PackingItem[]>(['packing-list', tripId], (old) =>
-          old?.map(i => i.id === id ? { ...i, packed: !i.packed } : i)
+          old?.map((i) => (i.id === item.id ? { ...i, packed: !item.packed } : i)),
         );
       }
       return { previous };
@@ -93,10 +93,7 @@ export function usePackingList(tripId: string) {
 
   const deleteItemMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('packing_items')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from('packing_items').delete().eq('id', id);
 
       if (error) throw error;
     },
@@ -104,9 +101,7 @@ export function usePackingList(tripId: string) {
       await queryClient.cancelQueries({ queryKey: ['packing-list', tripId] });
       const previous = queryClient.getQueryData<PackingItem[]>(['packing-list', tripId]);
       if (previous) {
-        queryClient.setQueryData<PackingItem[]>(['packing-list', tripId], (old) =>
-          old?.filter(i => i.id !== id)
-        );
+        queryClient.setQueryData<PackingItem[]>(['packing-list', tripId], (old) => old?.filter((i) => i.id !== id));
       }
       return { previous };
     },
@@ -154,7 +149,7 @@ export function usePackingList(tripId: string) {
 
       const { data, error } = await supabase
         .from('packing_items')
-        .insert(itemsToAdd.map(item => ({ ...item, trip_id: tripId, quantity: 1 })))
+        .insert(itemsToAdd.map((item) => ({ ...item, trip_id: tripId, quantity: 1 })))
         .select();
 
       if (error) throw error;
@@ -178,9 +173,16 @@ export function usePackingList(tripId: string) {
     loading: query.isLoading,
     addItem: async (name: string, category: string = 'general', quantity: number = 1) =>
       addItemMutation.mutateAsync({ name, category, quantity }),
-    togglePacked: async (id: string) => togglePackedMutation.mutateAsync(id),
+    togglePacked: async (id: string) => {
+      const items = queryClient.getQueryData<PackingItem[]>(['packing-list', tripId]);
+      const item = items?.find((i) => i.id === id);
+      if (!item) return;
+      return togglePackedMutation.mutateAsync(item);
+    },
     deleteItem: async (id: string) => deleteItemMutation.mutateAsync(id),
     addTemplateItems: async (template: string) => addTemplateItemsMutation.mutateAsync(template),
-    refresh: async () => { await query.refetch(); },
+    refresh: async () => {
+      await query.refetch();
+    },
   };
 }

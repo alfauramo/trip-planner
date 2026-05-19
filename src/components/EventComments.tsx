@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { MessageSquare, Send, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Comment {
   id: string;
@@ -16,11 +17,19 @@ interface EventCommentsProps {
 }
 
 export function EventComments({ eventId }: EventCommentsProps) {
+  const { t } = useTranslation();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [tableExists, setTableExists] = useState<boolean | null>(null);
+  const sendingRef = useRef(false);
+  const tableExistsRef = useRef<boolean | null>(null);
+  const eventIdRef = useRef(eventId);
+
+  sendingRef.current = sending;
+  tableExistsRef.current = tableExists;
+  eventIdRef.current = eventId;
 
   useEffect(() => {
     let mounted = true;
@@ -61,33 +70,34 @@ export function EventComments({ eventId }: EventCommentsProps) {
   }, [eventId]);
 
   const handleSubmit = useCallback(async () => {
-    if (!newComment.trim() || sending || !tableExists) return;
+    const text = newComment.trim();
+    if (!text || sendingRef.current || !tableExistsRef.current) return;
     setSending(true);
 
     const optimistic: Comment = {
       id: crypto.randomUUID(),
-      event_id: eventId,
+      event_id: eventIdRef.current,
       user_id: 'local',
-      content: newComment.trim(),
+      content: text,
       created_at: new Date().toISOString(),
-      user_name: 'Tú',
+      user_name: t('comments.you'),
     };
 
     setComments((prev) => [...prev, optimistic]);
-    setNewComment('');
 
     try {
       const { error } = await supabase
         .from('event_comments')
-        .insert({ event_id: eventId, content: optimistic.content });
+        .insert({ event_id: eventIdRef.current, content: optimistic.content });
 
       if (error) throw error;
+      setNewComment('');
     } catch {
       setComments((prev) => prev.filter((c) => c.id !== optimistic.id));
     } finally {
       setSending(false);
     }
-  }, [newComment, sending, tableExists, eventId]);
+  }, [newComment, t]);
 
   if (loading) {
     return null;
@@ -95,37 +105,37 @@ export function EventComments({ eventId }: EventCommentsProps) {
 
   if (!tableExists) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 opacity-60">
+      <div className="card p-5 opacity-60">
         <div className="flex items-center gap-2 mb-3">
-          <MessageSquare className="w-4 h-4 text-gray-400" />
-          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400">Comentarios</h3>
+          <MessageSquare className="w-4 h-4 text-stone-400" />
+          <h3 className="text-sm font-semibold text-stone-500 dark:text-stone-400">{t('comments.title')}</h3>
         </div>
-        <p className="text-xs text-gray-400 dark:text-gray-500">
-          Los comentarios no están disponibles. Ejecuta la migración{' '}
-          <code className="text-gray-500">event_comments</code> en Supabase.
-        </p>
+        <p className="text-xs text-stone-400 dark:text-stone-500">{t('comments.notAvailable')}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
+    <div className="card p-5">
       <div className="flex items-center gap-2 mb-4">
-        <MessageSquare className="w-4 h-4 text-blue-500" />
-        <h3 className="text-sm font-semibold text-gray-800 dark:text-white">Comentarios</h3>
+        <MessageSquare className="w-4 h-4 text-emerald-600" />
+        <h3 className="text-sm font-semibold text-stone-800 dark:text-white">{t('comments.title')}</h3>
       </div>
 
       <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
         {comments.length === 0 && (
-          <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">No hay comentarios todavía</p>
+          <p className="text-xs text-stone-400 dark:text-stone-500 text-center py-4">{t('comments.empty')}</p>
         )}
         {comments.map((comment) => (
-          <div key={comment.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+          <div
+            key={comment.id}
+            className="bg-stone-50 dark:bg-stone-700 rounded-lg p-3 transition-all duration-150 hover:bg-stone-100 dark:hover:bg-stone-600"
+          >
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                {comment.user_name || 'Usuario'}
+              <span className="text-xs font-medium text-stone-700 dark:text-stone-300">
+                {comment.user_name || t('comments.user')}
               </span>
-              <span className="text-[10px] text-gray-400 dark:text-gray-500">
+              <span className="text-[10px] text-stone-400 dark:text-stone-500">
                 {new Date(comment.created_at).toLocaleDateString('es-ES', {
                   day: 'numeric',
                   month: 'short',
@@ -134,7 +144,7 @@ export function EventComments({ eventId }: EventCommentsProps) {
                 })}
               </span>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-300">{comment.content}</p>
+            <p className="text-sm text-stone-600 dark:text-stone-300">{comment.content}</p>
           </div>
         ))}
       </div>
@@ -145,14 +155,14 @@ export function EventComments({ eventId }: EventCommentsProps) {
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-          placeholder="Añadir comentario..."
-          className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder={t('comments.placeholder')}
+          className="flex-1 px-3 py-2 text-sm border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-700 text-stone-800 dark:text-white placeholder-gray-400 dark:placeholder-stone-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-150"
           disabled={sending}
         />
         <button
           onClick={handleSubmit}
           disabled={sending || !newComment.trim()}
-          className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 flex items-center justify-center"
+          className="btn-primary px-3 py-2 rounded-lg"
         >
           {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
         </button>

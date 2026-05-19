@@ -1,5 +1,6 @@
 import { useState, createContext, useContext, ReactNode } from 'react';
 import { useIsMobile } from '../hooks/useMediaQuery';
+import { useTranslation } from 'react-i18next';
 
 interface ConfirmContextType {
   confirm: (message: string) => Promise<boolean>;
@@ -7,31 +8,36 @@ interface ConfirmContextType {
 
 const ConfirmContext = createContext<ConfirmContextType | null>(null);
 
-function ConfirmDialog({ message, onConfirm, onCancel }: { message: string; onConfirm: () => void; onCancel: () => void }) {
+function ConfirmDialog({
+  message,
+  onConfirm,
+  onCancel,
+}: {
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
   const isMobile = useIsMobile();
+  const { t } = useTranslation();
 
   if (isMobile) {
     return (
       <div className="fixed inset-0 z-[100] flex flex-col justify-end">
-        <div className="fixed inset-0 bg-black/50" onClick={onCancel} />
-        <div className="relative bg-white dark:bg-gray-800 rounded-t-2xl shadow-2xl animate-slide-up">
-          <div className="px-5 pt-6 pb-2">
-            <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Confirmar acción</h3>
-            <p className="text-gray-600 dark:text-gray-400">{message}</p>
+        <div className="overlay-backdrop z-auto" onClick={onCancel} />
+        <div className="sheet-mobile">
+          <div className="shrink-0 flex items-center justify-center px-5 pt-6 pb-2">
+            <div className="sheet-handle mb-2" />
+          </div>
+          <div className="px-5">
+            <h3 className="overlay-title mb-2">{t('common.confirm')}</h3>
+            <p className="text-sm text-stone-500 dark:text-stone-400">{message}</p>
           </div>
           <div className="flex flex-col gap-2 px-5 pb-6 pt-4">
-            <button
-              onClick={onConfirm}
-              className="w-full py-3 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 active:bg-red-700 transition-colors"
-            >
-              Eliminar
+            <button onClick={onConfirm} className="btn-danger w-full justify-center">
+              {t('common.delete')}
             </button>
-            <button
-              onClick={onCancel}
-              className="w-full py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-            >
-              Cancelar
+            <button onClick={onCancel} className="btn-secondary w-full justify-center">
+              {t('common.cancel')}
             </button>
           </div>
         </div>
@@ -40,22 +46,16 @@ function ConfirmDialog({ message, onConfirm, onCancel }: { message: string; onCo
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[100]">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-sm w-full p-6 animate-fade-in">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Confirmar acción</h3>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">{message}</p>
+    <div className="overlay-backdrop flex items-center justify-center p-4 z-[100]">
+      <div className="card p-6 max-w-sm animate-fade-in">
+        <h3 className="overlay-title mb-2">{t('common.confirm')}</h3>
+        <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">{message}</p>
         <div className="flex gap-3">
-          <button
-            onClick={onCancel}
-            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-          >
-            Cancelar
+          <button onClick={onCancel} className="btn-secondary flex-1 justify-center">
+            {t('common.cancel')}
           </button>
-          <button
-            onClick={onConfirm}
-            className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors"
-          >
-            Eliminar
+          <button onClick={onConfirm} className="btn-danger flex-1 justify-center">
+            {t('common.delete')}
           </button>
         </div>
       </div>
@@ -89,9 +89,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
   return (
     <ConfirmContext.Provider value={{ confirm }}>
       {children}
-      {isOpen && (
-        <ConfirmDialog message={message} onConfirm={handleConfirm} onCancel={handleCancel} />
-      )}
+      {isOpen && <ConfirmDialog message={message} onConfirm={handleConfirm} onCancel={handleCancel} />}
     </ConfirmContext.Provider>
   );
 }

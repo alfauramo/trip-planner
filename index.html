@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#3b82f6" />
+    <meta name="theme-color" content="#059669" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -14,9 +14,48 @@
     <link rel="apple-touch-icon" href="/pwa-192x192.png" />
     <link rel="manifest" href="/trip-planner/manifest.webmanifest" />
     <title>Trip Planner</title>
+    <meta name="description" content="Planifica y organiza tus viajes de forma inteligente. Crea itinerarios, gestiona gastos y comparte con amigos." />
+    <meta name="keywords" content="viajes, planificación, itinerario, gastos, viaje en grupo" />
+    <meta name="author" content="Trip Planner" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Trip Planner" />
+    <meta property="og:description" content="Planifica y organiza tus viajes de forma inteligente. Crea itinerarios, gestiona gastos y comparte con amigos." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://otalfre.github.io/trip-planner/" />
+    <meta property="og:image" content="https://otalfre.github.io/trip-planner/pwa-512x512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:locale" content="es_ES" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Trip Planner" />
+    <meta name="twitter:description" content="Planifica y organiza tus viajes de forma inteligente." />
+    <meta name="twitter:image" content="https://otalfre.github.io/trip-planner/pwa-512x512.png" />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Trip Planner",
+      "url": "https://otalfre.github.io/trip-planner/",
+      "description": "Planifica y organiza tus viajes de forma inteligente. Crea itinerarios, gestiona gastos y comparte con amigos.",
+      "applicationCategory": "TravelApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires JavaScript",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
     <script>!function(){const e=localStorage.getItem('theme');(e==='dark'||(!e&&window.matchMedia('(prefers-color-scheme:dark)').matches))&&document.documentElement.classList.add('dark')}();</script>
   </head>
-  <body class="overscroll-behavior-y-none">
+  <body class="overscroll-behavior-y-none transition-theme">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

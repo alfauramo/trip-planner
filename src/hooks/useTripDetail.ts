@@ -31,40 +31,52 @@ export function useTripDetail(tripId: string) {
 
       const sortedDaysData = (daysData || []).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-      const daysWithEvents = await Promise.all(
-        sortedDaysData.map(async (day) => {
-          const { data: eventsData, error: eventsError } = await supabase
-            .from('events')
-            .select('*')
-            .eq('day_id', day.id)
-            .order('order');
+      const dayIds = sortedDaysData.map((d) => d.id);
+      let allEvents: TripEvent[] = [];
+      const attachmentsByEvent: Record<
+        string,
+        { id: string; event_id: string; name: string; type: string; url: string; created_at: string }[]
+      > = {};
 
-          if (eventsError) throw eventsError;
+      if (dayIds.length > 0) {
+        const { data: eventsData, error: eventsError } = await supabase
+          .from('events')
+          .select('*')
+          .in('day_id', dayIds)
+          .order('order');
 
-          const eventIds = (eventsData || []).map((e) => e.id);
-          const attachmentsByEvent: Record<string, any[]> = {};
+        if (eventsError) throw eventsError;
+        allEvents = eventsData || [];
 
-          if (eventIds.length > 0) {
-            const { data: attachmentsData } = await supabase.from('attachments').select('*').in('event_id', eventIds);
+        const allEventIds = allEvents.map((e) => e.id);
+        if (allEventIds.length > 0) {
+          const { data: attachmentsData } = await supabase.from('attachments').select('*').in('event_id', allEventIds);
 
-            if (attachmentsData) {
-              attachmentsData.forEach((att) => {
-                if (!attachmentsByEvent[att.event_id]) {
-                  attachmentsByEvent[att.event_id] = [];
-                }
-                attachmentsByEvent[att.event_id].push(att);
-              });
-            }
+          if (attachmentsData) {
+            attachmentsData.forEach((att) => {
+              if (!attachmentsByEvent[att.event_id]) {
+                attachmentsByEvent[att.event_id] = [];
+              }
+              attachmentsByEvent[att.event_id].push(att);
+            });
           }
+        }
+      }
 
-          const eventsWithAttachments = (eventsData || []).map((event) => ({
-            ...event,
-            attachments: attachmentsByEvent[event.id] || [],
-          }));
+      const eventsByDay: Record<string, TripEvent[]> = {};
+      for (const event of allEvents) {
+        if (!eventsByDay[event.day_id]) eventsByDay[event.day_id] = [];
+        eventsByDay[event.day_id].push(event);
+      }
 
-          return { ...day, events: eventsWithAttachments };
-        }),
-      );
+      const daysWithEvents = sortedDaysData.map((day) => {
+        const dayEvents = eventsByDay[day.id] || [];
+        const eventsWithAttachments = dayEvents.map((event) => ({
+          ...event,
+          attachments: attachmentsByEvent[event.id] || [],
+        }));
+        return { ...day, events: eventsWithAttachments };
+      });
 
       const { data: membersData, error: membersError } = await supabase
         .from('trip_members')
@@ -79,7 +91,10 @@ export function useTripDetail(tripId: string) {
       let membersWithProfiles: TripMember[] = [];
       if (membersData && membersData.length > 0) {
         const userIds = membersData.map((m) => m.user_id).filter(Boolean);
-        const profilesMap: Record<string, any> = {};
+        const profilesMap: Record<
+          string,
+          { id: string; full_name?: string | null; alias?: string | null; avatar_url?: string | null }
+        > = {};
 
         if (userIds.length > 0) {
           const { data: profilesData } = await supabase
@@ -329,7 +344,6 @@ export function useTripDetail(tripId: string) {
 
   const deleteDayMutation = useMutation({
     mutationFn: async (dayId: string) => {
-      await supabase.from('events').delete().eq('day_id', dayId);
       const { error } = await supabase.from('days').delete().eq('id', dayId);
       if (error) throw error;
     },
@@ -356,7 +370,7 @@ export function useTripDetail(tripId: string) {
     mutationFn: async ({ email, role }: { email: string; role: 'viewer' | 'editor' }) => {
       if (!user) return;
 
-      const { data: existingUser } = await supabase.from('profiles').select('id').eq('email', email).single();
+      const { data: existingUser } = await supabase.from('profiles').select('id').eq('email', email).maybeSingle();
 
       if (existingUser) {
         const { error } = await supabase
@@ -365,7 +379,7 @@ export function useTripDetail(tripId: string) {
 
         if (error) throw error;
       } else {
-        const token = Math.random().toString(36).substring(2);
+        const token = crypto.randomUUID();
         const { error } = await supabase
           .from('trip_invitations')
           .insert([{ trip_id: tripId, email, role, invited_by: user.id, token }]);

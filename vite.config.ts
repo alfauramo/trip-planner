@@ -17,7 +17,7 @@ export default defineConfig({
         name: 'Trip Planner',
         short_name: 'Trip Planner',
         description: 'Planifica y organiza tus viajes',
-        theme_color: '#3b82f6',
+        theme_color: '#059669',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',

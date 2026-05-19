@@ -24,26 +24,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    setProfile(data);
+    try {
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
+      if (error) throw error;
+      setProfile(data);
+    } catch {
+      setProfile(null);
+    }
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
-        setProfile(null);
-      }
-      setLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchProfile(session.user.id);
+        } else {
+          setProfile(null);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+        setUser(null);
+      });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT') {
         setUser(null);
         setProfile(null);
@@ -51,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session.user);
       } else if (event === 'SIGNED_IN' && session?.user) {
         setUser(session.user);
-        fetchProfile(session.user.id);
+        fetchProfile(session.user.id).catch(() => {});
       }
     });
 
@@ -91,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resetPassword = async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/update-password`,
+      redirectTo: `${window.location.origin}/trip-planner/update-password`,
     });
     if (error) throw error;
   };
@@ -102,7 +111,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, refreshProfile, signUp, signIn, signInWithGoogle, signOut, resetPassword, updatePassword }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        profile,
+        loading,
+        refreshProfile,
+        signUp,
+        signIn,
+        signInWithGoogle,
+        signOut,
+        resetPassword,
+        updatePassword,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

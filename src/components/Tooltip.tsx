@@ -17,15 +17,15 @@ export function Tooltip({ content, children }: TooltipProps) {
       const rect = triggerRef.current.getBoundingClientRect();
       const TOOLTIP_HEIGHT = 32;
       const MARGIN = 8;
-      
+
       let above = true;
       let y = rect.top - MARGIN;
-      
+
       if (y < TOOLTIP_HEIGHT + MARGIN) {
         above = false;
         y = rect.bottom + MARGIN;
       }
-      
+
       setPosition({
         x: rect.left + rect.width / 2,
         y,
@@ -36,7 +36,7 @@ export function Tooltip({ content, children }: TooltipProps) {
 
   return (
     <>
-      <div 
+      <div
         ref={triggerRef}
         className="relative inline-block"
         onMouseEnter={() => setVisible(true)}
@@ -45,22 +45,23 @@ export function Tooltip({ content, children }: TooltipProps) {
       >
         {children}
       </div>
-      {visible && createPortal(
-        <div 
-          ref={tooltipRef}
-          className="fixed z-[9999] pointer-events-none"
-          style={{ 
-            left: position.x, 
-            top: position.y,
-            transform: `translate(-50%, ${position.above ? '-100%' : '0'})`
-          }}
-        >
-          <div className="bg-gray-900 text-white text-xs px-2.5 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
-            {content}
-          </div>
-        </div>,
-        document.body
-      )}
+      {visible &&
+        createPortal(
+          <div
+            ref={tooltipRef}
+            className="fixed z-[9999] pointer-events-none"
+            style={{
+              left: position.x,
+              top: position.y,
+              transform: `translate(-50%, ${position.above ? '-100%' : '0'})`,
+            }}
+          >
+            <div className="bg-stone-900 text-white text-xs px-2.5 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
+              {content}
+            </div>
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

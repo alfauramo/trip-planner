@@ -1,20 +1,23 @@
 import { Link } from 'react-router-dom';
 import { Plane } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function Footer() {
+  const { t } = useTranslation();
   return (
-    <footer className="bg-white dark:bg-gray-800 border-t dark:border-gray-700 mt-auto">
-      <div className="max-w-4xl mx-auto px-4 py-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-gray-500 dark:text-gray-400">
+    <footer className="bg-white/90 dark:bg-stone-950/90 backdrop-blur-xl border-t border-stone-100 dark:border-stone-800 mt-auto">
+      <div className="max-w-6xl mx-auto px-6 py-5">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-stone-500 dark:text-stone-400">
           <div className="flex items-center gap-2">
-            <Plane className="w-4 h-4" />
-            <span>Trip Planner</span>
+            <Plane className="w-4 h-4 text-emerald-500" />
+            <span className="font-medium">{t('app.name')}</span>
           </div>
-          
-          <span>Hecho por Alf</span>
-          
-          <Link to="/profile" className="hover:text-blue-500 dark:hover:text-blue-400 transition-colors">
-            Mi perfil
+          <span>{t('footer.madeBy')}</span>
+          <Link
+            to="/profile"
+            className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-medium"
+          >
+            {t('nav.profile')}
           </Link>
         </div>
       </div>

@@ -1,6 +1,8 @@
 import { ReactNode, useEffect, useRef, useState, useCallback } from 'react';
+import { X } from 'lucide-react';
 import { useIsMobile } from '../hooks/useMediaQuery';
 import { hapticMedium } from '../lib/haptic';
+import { useTranslation } from 'react-i18next';
 
 interface BottomSheetProps {
   children: ReactNode;
@@ -13,69 +15,82 @@ export function BottomSheet({ children, onClose, title }: BottomSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
   const [offsetY, setOffsetY] = useState(0);
+  const offsetYRef = useRef(0);
+  const draggingRef = useRef(false);
   const startY = useRef(0);
+  const { t } = useTranslation();
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = '' };
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, []);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (sheetRef.current && sheetRef.current.scrollTop > 0) return;
     startY.current = e.touches[0].clientY;
+    draggingRef.current = true;
     setDragging(true);
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!dragging) return;
+    if (!draggingRef.current) return;
     const diff = e.touches[0].clientY - startY.current;
-    if (diff > 0) setOffsetY(Math.min(diff, 200));
-  }, [dragging]);
+    if (diff > 0) {
+      const clamped = Math.min(diff, 200);
+      offsetYRef.current = clamped;
+      setOffsetY(clamped);
+    }
+  }, []);
 
   const handleTouchEnd = useCallback(() => {
-    if (!dragging) return;
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
     setDragging(false);
-    if (offsetY > 120) {
+    if (offsetYRef.current > 120) {
       hapticMedium();
       onClose();
     } else {
+      offsetYRef.current = 0;
       setOffsetY(0);
     }
-  }, [dragging, offsetY, onClose]);
+  }, []);
 
   if (isMobile) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col justify-end">
-        <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose} />
+      <div
+        className="overlay-backdrop flex flex-col justify-end"
+        onClick={(e) => e.target === e.currentTarget && onClose()}
+      >
         <div
           ref={sheetRef}
-          className="relative bg-white dark:bg-gray-800 rounded-t-2xl shadow-2xl max-h-[85vh] flex flex-col animate-slide-up overflow-hidden"
-          style={{ transform: dragging ? `translateY(${offsetY}px)` : offsetY > 0 ? `translateY(${offsetY}px)` : '', transition: dragging ? 'none' : 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)' }}
+          className="sheet-mobile"
+          style={{
+            transform: dragging ? `translateY(${offsetY}px)` : offsetY > 0 ? `translateY(${offsetY}px)` : '',
+            transition: dragging ? 'none' : 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
+          }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          <div className="shrink-0 flex items-center justify-between px-5 pt-2 pb-1">
+          <div className="shrink-0 flex items-center justify-center px-5 py-2">
             <div
-              className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto cursor-grab active:cursor-grabbing"
+              className="sheet-handle"
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
             />
           </div>
           {title && (
-            <div className="shrink-0 flex items-center justify-between px-5 pb-3 border-b dark:border-gray-700">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h2>
-              <button type="button" onClick={onClose} aria-label="Cerrar" className="p-1.5 -mr-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+            <div className="shrink-0 flex items-center justify-between px-5 pb-3 border-b border-stone-100 dark:border-stone-800">
+              <h2 className="overlay-title">{title}</h2>
+              <button type="button" onClick={onClose} aria-label={t('common.close')} className="sheet-close-btn">
+                <X className="w-5 h-5" />
               </button>
             </div>
           )}
-          <div className="overflow-y-auto p-5 flex-1">
-            {children}
-          </div>
+          <div className="overflow-y-auto p-5 flex-1">{children}</div>
         </div>
       </div>
     );
@@ -83,17 +98,15 @@ export function BottomSheet({ children, onClose, title }: BottomSheetProps) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 animate-fade-in"
+      className="overlay-backdrop flex items-center justify-center p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
+      <div className="sheet-desktop">
         {title && (
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h2>
-            <button type="button" onClick={onClose} aria-label="Cerrar" className="p-1 text-gray-400 hover:text-gray-600">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+            <h2 className="overlay-title">{title}</h2>
+            <button type="button" onClick={onClose} aria-label={t('common.close')} className="btn-icon">
+              <X className="w-5 h-5" />
             </button>
           </div>
         )}

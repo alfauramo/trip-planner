@@ -27,57 +27,65 @@ function AppRoutes() {
   const showMobileNav = isMobile && user;
 
   return (
-    <div className={showMobileNav ? 'pb-16' : ''}>
-      <Suspense fallback={<LoadingPage />}>
-        <ErrorBoundary>
-          <Routes>
-            <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage />} />
-            <Route path="/register" element={user ? <Navigate to="/" replace /> : <RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/update-password" element={<UpdatePasswordPage />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <DashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/trips/:id"
-              element={
-                <ProtectedRoute>
-                  <TripDetailPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/invitations"
-              element={
-                <ProtectedRoute>
-                  <InvitationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/invite/:tripId"
-              element={
-                <ProtectedRoute>
-                  <InvitationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </ErrorBoundary>
-      </Suspense>
+    <div className={`animate-fade-in ${showMobileNav ? 'pb-16' : ''}`}>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[999] focus:px-4 focus:py-2 focus:bg-emerald-600 focus:text-white focus:rounded-xl focus:text-sm focus:font-medium focus:shadow-lg"
+      >
+        Saltar al contenido principal
+      </a>
+      <main id="main-content">
+        <Suspense fallback={<LoadingPage />}>
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage />} />
+              <Route path="/register" element={user ? <Navigate to="/" replace /> : <RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/update-password" element={<UpdatePasswordPage />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/trips/:id"
+                element={
+                  <ProtectedRoute>
+                    <TripDetailPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/invitations"
+                element={
+                  <ProtectedRoute>
+                    <InvitationsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/invite/:tripId"
+                element={
+                  <ProtectedRoute>
+                    <InvitationsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </ErrorBoundary>
+        </Suspense>
+      </main>
       {showMobileNav && <MobileNav />}
     </div>
   );

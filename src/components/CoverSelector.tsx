@@ -1,4 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, X } from 'lucide-react';
+import { ImageWithFallback } from './ImageWithFallback';
+import { Modal } from './Modal';
+import { useToast } from './Toast';
+import { compressImage } from '../lib/image-utils';
 
 interface Country {
   code: string;
@@ -54,20 +60,20 @@ interface CoverSelectorProps {
 }
 
 export function CoverSelector({ value, onChange }: CoverSelectorProps) {
+  const { t } = useTranslation();
+  const { showToast } = useToast();
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [internalValue, setInternalValue] = useState(value || '');
   const [searchQuery, setSearchQuery] = useState('');
   const [customUrl, setCustomUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   useEffect(() => {
     setInternalValue(value || '');
   }, [value]);
-  
-  const filteredCountries = countries.filter(c =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+
+  const filteredCountries = countries.filter((c) => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   const handleCountrySelect = (country: Country) => {
     const url = `https://flagcdn.com/w1280/${country.code.toLowerCase()}.png`;
@@ -83,57 +89,18 @@ export function CoverSelector({ value, onChange }: CoverSelectorProps) {
     }
   };
 
-  const compressImage = async (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target?.result as string;
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const maxWidth = 1600;
-          const maxHeight = 900;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > maxWidth) {
-              height = (height * maxWidth) / width;
-              width = maxWidth;
-            }
-          } else {
-            if (height > maxHeight) {
-              width = (width * maxHeight) / height;
-              height = maxHeight;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0, width, height);
-          
-          const compressedDataUrl = canvas.toDataURL('image/png');
-          resolve(compressedDataUrl);
-        };
-        img.onerror = reject;
-      };
-      reader.onerror = reject;
-    });
-  };
-
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setLoading(true);
     try {
-      const compressedUrl = await compressImage(file);
+      const compressedUrl = await compressImage(file, 1600);
       onChange(compressedUrl);
       setCustomUrl('');
     } catch (err) {
       console.error('Error al comprimir imagen:', err);
+      showToast(t('cover.uploadError'), 'error');
     } finally {
       setLoading(false);
     }
@@ -153,33 +120,22 @@ export function CoverSelector({ value, onChange }: CoverSelectorProps) {
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700">
-        Imagen de portada
-      </label>
-      
+      <label className="block text-sm font-medium text-stone-700 dark:text-stone-300">{t('cover.title')}</label>
+
       {internalValue ? (
-        <div className="relative h-32 bg-gray-100 rounded-lg overflow-hidden">
-          <img
-            src={internalValue}
-            alt="Cover"
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = 'none';
-            }}
-          />
+        <div className="relative h-32 bg-stone-100 dark:bg-stone-700 rounded-lg overflow-hidden">
+          <ImageWithFallback src={internalValue} alt="Cover" className="w-full h-full object-cover" fallback={null} />
           <button
             type="button"
             onClick={handleRemoveImage}
-            className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+            className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all duration-150"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X className="w-4 h-4" />
           </button>
         </div>
       ) : (
-        <div className="h-32 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-300">
-          <span className="text-sm">Sin imagen</span>
+        <div className="h-32 bg-stone-100 dark:bg-stone-700 rounded-lg flex items-center justify-center text-stone-400 dark:text-stone-400 border-2 border-dashed border-stone-300 dark:border-stone-600">
+          <span className="text-sm">{t('cover.noImage')}</span>
         </div>
       )}
 
@@ -187,26 +143,20 @@ export function CoverSelector({ value, onChange }: CoverSelectorProps) {
         <button
           type="button"
           onClick={() => setShowCountryPicker(true)}
-          className="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50"
+          className="flex-1 px-3 py-2 text-sm rounded-lg border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all duration-150"
         >
-          🏳️ País
+          {t('cover.country')}
         </button>
-        <label className="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 text-center cursor-pointer">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-          {loading ? '...' : '📷 Subir'}
+        <label className="flex-1 px-3 py-2 text-sm rounded-lg border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all duration-150 text-center cursor-pointer">
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+          {loading ? '...' : t('cover.upload')}
         </label>
         <button
           type="button"
           onClick={() => document.getElementById('custom-url-input')?.focus()}
-          className="px-3 py-2 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50"
+          className="px-3 py-2 text-sm rounded-lg border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all duration-150"
         >
-          🔗
+          <Link className="w-4 h-4" />
         </button>
       </div>
 
@@ -216,57 +166,58 @@ export function CoverSelector({ value, onChange }: CoverSelectorProps) {
           type="url"
           value={customUrl}
           onChange={(e) => handleCustomUrlChange(e.target.value)}
-          placeholder="O pega una URL de imagen..."
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder={t('cover.urlPlaceholder')}
+          className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-stone-700 text-stone-900 dark:text-white placeholder-gray-400 dark:placeholder-stone-400 transition-all duration-150"
         />
       )}
 
       {showCountryPicker && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={(e) => e.target === e.currentTarget && setShowCountryPicker(false)}>
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-96 overflow-hidden flex flex-col">
-            <div className="p-4 border-b">
-              <h3 className="text-lg font-semibold mb-2">Seleccionar país</h3>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar país..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                autoFocus
-              />
-            </div>
-            <div className="flex-1 overflow-y-auto p-2">
-              <div className="grid grid-cols-2 gap-1">
-                {filteredCountries.map((country) => (
-                  <button
-                    key={country.code}
-                    onClick={() => handleCountrySelect(country)}
-                    className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-left"
-                  >
-                    <img
-                      src={`https://flagcdn.com/w40/${country.code.toLowerCase()}.png`}
-                      alt={country.name}
-                      className="w-6 h-4 rounded"
-                    />
-                    <span className="text-sm truncate">{country.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="p-4 border-t">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowCountryPicker(false);
-                  setSearchQuery('');
-                }}
-                className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
-              >
-                Cerrar
-              </button>
-            </div>
+        <Modal
+          title={t('cover.selectCountry')}
+          onClose={() => {
+            setShowCountryPicker(false);
+            setSearchQuery('');
+          }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-stone-800 dark:text-white">{t('cover.selectCountry')}</h3>
+            <button
+              type="button"
+              onClick={() => {
+                setShowCountryPicker(false);
+                setSearchQuery('');
+              }}
+              className="p-1 text-stone-400 hover:text-stone-600 transition-all duration-150"
+              aria-label={t('common.close')}
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-        </div>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t('cover.searchCountry')}
+            className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-stone-700 text-stone-900 dark:text-white placeholder-gray-400 dark:placeholder-stone-400 transition-all duration-150 mb-4"
+            autoFocus
+          />
+          <div className="grid grid-cols-2 gap-1 max-h-64 overflow-y-auto">
+            {filteredCountries.map((country) => (
+              <button
+                key={country.code}
+                onClick={() => handleCountrySelect(country)}
+                className="flex items-center gap-2 p-2 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 text-left text-stone-700 dark:text-stone-300 transition-all duration-150"
+              >
+                <img
+                  src={`https://flagcdn.com/w40/${country.code.toLowerCase()}.png`}
+                  alt={country.name}
+                  className="w-6 h-4 rounded"
+                />
+                <span className="text-sm truncate">{country.name}</span>
+              </button>
+            ))}
+          </div>
+        </Modal>
       )}
     </div>
   );

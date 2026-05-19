@@ -17,13 +17,7 @@ export interface Profile {
   updated_at: string;
 }
 
-export type EventType = 
-  | 'accommodation'
-  | 'transport'
-  | 'activity'
-  | 'restaurant'
-  | 'shopping'
-  | 'todo';
+export type EventType = 'accommodation' | 'transport' | 'activity' | 'restaurant' | 'shopping' | 'todo';
 
 export interface Trip {
   id: string;
@@ -89,7 +83,7 @@ export const EXPENSE_CATEGORIES: Record<ExpenseCategory, { label: string; icon: 
   accommodation: { label: 'Alojamiento', icon: '🏨', color: 'bg-purple-100 text-purple-600' },
   activities: { label: 'Actividades', icon: '🎭', color: 'bg-green-100 text-green-600' },
   shopping: { label: 'Compras', icon: '🛍️', color: 'bg-pink-100 text-pink-600' },
-  other: { label: 'Otros', icon: '📦', color: 'bg-gray-100 text-gray-600' },
+  other: { label: 'Otros', icon: '📦', color: 'bg-stone-100 text-stone-600' },
 };
 
 export interface Attachment {

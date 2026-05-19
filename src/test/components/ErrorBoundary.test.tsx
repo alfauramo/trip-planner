@@ -11,7 +11,7 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary>
         <div>Hello World</div>
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
     expect(screen.getByText('Hello World')).toBeInTheDocument();
   });
@@ -21,12 +21,12 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary>
         <ThrowError message="Test error" />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
-    expect(screen.getByText('Algo salió mal')).toBeInTheDocument();
+    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
     expect(screen.getByText('Test error')).toBeInTheDocument();
-    expect(screen.getByText('Reintentar')).toBeInTheDocument();
-    (console.error as any).mockRestore();
+    expect(screen.getByText('Retry')).toBeInTheDocument();
+    (console.error as unknown as jest.Mock).mockRestore();
   });
 
   it('renders custom fallback when provided', () => {
@@ -34,9 +34,9 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary fallback={<div>Custom Error</div>}>
         <ThrowError message="Test error" />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
     expect(screen.getByText('Custom Error')).toBeInTheDocument();
-    (console.error as any).mockRestore();
+    (console.error as unknown as jest.Mock).mockRestore();
   });
 });

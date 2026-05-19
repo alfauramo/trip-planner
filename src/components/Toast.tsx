@@ -18,7 +18,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const isMobile = useIsMobile();
 
   const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
-    const id = Math.random().toString(36).substring(2);
+    const id = crypto.randomUUID();
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -28,12 +28,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className={`fixed ${isMobile ? 'bottom-20 left-4 right-4' : 'top-4 left-1/2 -translate-x-1/2'} z-[200] flex flex-col gap-2`}>
+      <div
+        className={`fixed ${isMobile ? 'bottom-20 left-4 right-4' : 'top-4 left-1/2 -translate-x-1/2'} z-[200] flex flex-col gap-2`}
+      >
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`px-4 py-3 rounded-xl shadow-lg text-white flex items-center gap-2 animate-slide-in ${
-              toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            className={`px-4 py-3 rounded-xl shadow-lg shadow-elevated text-white flex items-center gap-2 animate-slide-in ${
+              toast.type === 'success' ? 'bg-emerald-500' : 'bg-red-500'
             } ${isMobile ? 'w-full' : ''}`}
           >
             {toast.type === 'success' ? (

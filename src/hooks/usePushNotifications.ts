@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 
 const PUBLIC_VAPID_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
@@ -13,6 +14,7 @@ function urlBase64ToUint8Array(base64String: string): BufferSource {
 export type PushStatus = 'unsupported' | 'denied' | 'granted' | 'prompt' | 'subscribing';
 
 export function usePushNotifications() {
+  const { user } = useAuth();
   const [status, setStatus] = useState<PushStatus>('prompt');
   const [subscription, setSubscription] = useState<PushSubscriptionJSON | null>(null);
 
@@ -42,13 +44,14 @@ export function usePushNotifications() {
         endpoint: subJson.endpoint,
         keys: subJson.keys,
         user_agent: navigator.userAgent,
+        user_id: user?.id,
       });
       setSubscription(subJson);
       setStatus('granted');
     } catch {
       setStatus('prompt');
     }
-  }, []);
+  }, [user]);
 
   const unsubscribe = useCallback(async () => {
     try {

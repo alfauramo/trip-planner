@@ -11,32 +11,43 @@ export function usePullToRefresh({ onRefresh, threshold = 60, disabled }: PullTo
   const [refreshing, setRefreshing] = useState(false);
   const startY = useRef(0);
   const pulling = useRef(false);
+  const currentPull = useRef(0);
+  const onRefreshRef = useRef(onRefresh);
+  const thresholdRef = useRef(threshold);
+  const disabledRef = useRef(disabled);
+  const refreshingRef = useRef(refreshing);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  onRefreshRef.current = onRefresh;
+  thresholdRef.current = threshold;
+  disabledRef.current = disabled;
+  refreshingRef.current = refreshing;
+
   const handleTouchStart = useCallback((e: TouchEvent) => {
-    if (disabled || refreshing) return;
+    if (disabledRef.current || refreshingRef.current) return;
     if (containerRef.current && containerRef.current.scrollTop > 0) return;
     startY.current = e.touches[0].clientY;
     pulling.current = true;
-  }, [disabled, refreshing]);
+  }, []);
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
-    if (!pulling.current || disabled || refreshing) return;
+    if (!pulling.current || disabledRef.current || refreshingRef.current) return;
     const diff = e.touches[0].clientY - startY.current;
     if (diff > 0) {
       const resistance = Math.min(diff * 0.4, 120);
+      currentPull.current = resistance;
       setPullDistance(resistance);
     }
-  }, [disabled, refreshing]);
+  }, []);
 
   const handleTouchEnd = useCallback(async () => {
-    if (!pulling.current || disabled) return;
+    if (!pulling.current || disabledRef.current) return;
     pulling.current = false;
-    if (pullDistance >= threshold) {
+    if (currentPull.current >= thresholdRef.current) {
       setRefreshing(true);
-      setPullDistance(threshold);
+      setPullDistance(thresholdRef.current);
       try {
-        await onRefresh();
+        await onRefreshRef.current();
       } finally {
         setRefreshing(false);
         setPullDistance(0);
@@ -44,7 +55,7 @@ export function usePullToRefresh({ onRefresh, threshold = 60, disabled }: PullTo
     } else {
       setPullDistance(0);
     }
-  }, [pullDistance, threshold, disabled, onRefresh]);
+  }, []);
 
   useEffect(() => {
     const el = containerRef.current;

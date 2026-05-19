@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useToast } from './Toast';
 
 export function AddDayForm({
   startDate,
@@ -18,37 +21,54 @@ export function AddDayForm({
     if (startDate) return startDate;
     return new Date().toISOString().split('T')[0];
   };
+  const { t } = useTranslation();
   const [date, setDate] = useState(getDefaultDate());
   const [notes, setNotes] = useState('');
+  const [saving, setSaving] = useState(false);
+  const { showToast } = useToast();
 
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha del día</label>
+        <label className="form-label">{t('day.date')}</label>
         <input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="input"
+          min={startDate || undefined}
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Descripción (opcional)
-        </label>
+        <label className="form-label">{t('day.description')}</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
-          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-          placeholder="Notas sobre este día..."
+          className="textarea"
+          placeholder={t('day.notes')}
         />
       </div>
       <button
-        onClick={() => onSave(date, notes || undefined)}
-        className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600 active:bg-blue-700"
+        onClick={async () => {
+          if (!date) {
+            showToast(t('errors.dateRequired'), 'error');
+            return;
+          }
+          setSaving(true);
+          try {
+            await onSave(date, notes || undefined);
+            showToast(t('common.saved'), 'success');
+          } catch {
+            showToast(t('errors.save'), 'error');
+          } finally {
+            setSaving(false);
+          }
+        }}
+        disabled={saving}
+        className="btn-primary w-full"
       >
-        Añadir Día
+        {saving ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : t('day.add')}
       </button>
     </div>
   );
@@ -61,37 +81,44 @@ export function EditDayForm({
   day: { id: string; date: string; notes?: string };
   onSave: (updates: { date: string; notes?: string }) => void;
 }) {
+  const { t } = useTranslation();
   const [date, setDate] = useState(day.date);
   const [notes, setNotes] = useState(day.notes || '');
+  const [saving, setSaving] = useState(false);
+  const { showToast } = useToast();
 
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha del día</label>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
+        <label className="form-label">{t('day.date')}</label>
+        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="input" />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Descripción (opcional)
-        </label>
+        <label className="form-label">{t('day.description')}</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
-          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-          placeholder="Notas sobre este día..."
+          className="textarea"
+          placeholder={t('day.notes')}
         />
       </div>
       <button
-        onClick={() => onSave({ date, notes: notes || undefined })}
-        className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium hover:bg-blue-600"
+        onClick={async () => {
+          setSaving(true);
+          try {
+            await onSave({ date, notes: notes || undefined });
+            showToast(t('common.saved'), 'success');
+          } catch {
+            showToast(t('errors.save'), 'error');
+          } finally {
+            setSaving(false);
+          }
+        }}
+        disabled={saving}
+        className="btn-primary w-full"
       >
-        Guardar
+        {saving ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : t('common.save')}
       </button>
     </div>
   );

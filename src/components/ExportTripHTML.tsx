@@ -1,23 +1,15 @@
+import { useTranslation } from 'react-i18next';
 import { FileText } from 'lucide-react';
 import { TripWithDetails } from '../types';
+import { formatDate, formatTime } from '../lib/date-utils';
 
-interface ExportPDFProps {
+interface ExportHTMLProps {
   trip: TripWithDetails;
 }
 
-export function ExportTripPDF({ trip }: ExportPDFProps) {
-  const generatePDF = () => {
-    const formatDate = (dateStr: string) => {
-      return new Date(dateStr).toLocaleDateString('es-ES', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      });
-    };
-
-    const formatTime = (time?: string) => time || '-';
-
+export function ExportTripHTML({ trip }: ExportHTMLProps) {
+  const { t } = useTranslation();
+  const generateHTML = () => {
     const html = `
 <!DOCTYPE html>
 <html lang="es">
@@ -104,7 +96,7 @@ export function ExportTripPDF({ trip }: ExportPDFProps) {
   }
 
   <div class="footer">
-    Generado por Trip Planner • ${new Date().toLocaleDateString('es-ES')}
+    ${t('export.generated')} • ${new Date().toLocaleDateString('es-ES')}
   </div>
 </body>
 </html>
@@ -123,11 +115,11 @@ export function ExportTripPDF({ trip }: ExportPDFProps) {
 
   return (
     <button
-      onClick={generatePDF}
+      onClick={generateHTML}
       className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
     >
       <FileText className="w-4 h-4" />
-      Exportar Itinerario
+      {t('trip.exportHTML')}
     </button>
   );
 }
