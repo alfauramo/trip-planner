@@ -89,12 +89,7 @@ export function ForgotPasswordPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label className="form-label">{t('auth.email')}</label>
-            <input
-              {...register('email')}
-              type="email"
-              className="w-full px-4 py-3 border border-stone-300 dark:border-stone-600 rounded-xl dark:bg-stone-700 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              placeholder={t('auth.email.placeholder')}
-            />
+            <input {...register('email')} type="email" className="input" placeholder={t('auth.email.placeholder')} />
             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
           </div>
           <button type="submit" disabled={isSubmitting} className="w-full btn-primary">
