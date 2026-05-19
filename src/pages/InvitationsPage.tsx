@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Mail, Calendar, Plane, Check, X, Loader2 } from 'lucide-react';
+import { Mail, Calendar, Plane, Check, X, Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
-import { useIsMobile } from '../hooks/useMediaQuery';
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '../lib/date-utils';
 import { ImageWithFallback } from '../components/ImageWithFallback';
@@ -30,7 +29,6 @@ export function InvitationsPage() {
   const { confirm } = useConfirm();
   const { showToast } = useToast();
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
   const { t } = useTranslation();
   const [invitations, setInvitations] = useState<PendingInvitation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -117,32 +115,27 @@ export function InvitationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-stone-50 dark:bg-stone-900 flex items-center justify-center">
+      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-900">
+    <div className="min-h-screen bg-stone-50 dark:bg-stone-950">
       <Helmet>
         <title>Invitaciones | Trip Planner</title>
       </Helmet>
       <header className="bg-white dark:bg-stone-800 border-b dark:border-stone-700 md:border-b-0 md:shadow-sm">
         <div className="px-4 py-3 md:page-container md:py-4 flex items-center gap-3">
-          {isMobile ? (
-            <button
-              aria-label={t('common.back')}
-              onClick={() => navigate(-1)}
-              className="p-1.5 -ml-1.5 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg"
-            >
-              <X className="w-5 h-5 text-stone-600 dark:text-stone-300" />
-            </button>
-          ) : (
-            <Link to="/" className="p-2 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg">
-              <X className="w-5 h-5 text-stone-600 dark:text-stone-300" />
-            </Link>
-          )}
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            aria-label={t('common.back')}
+            className="p-1.5 -ml-1.5 md:p-2 md:ml-0 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 text-stone-600 dark:text-stone-300" />
+          </button>
           <div className="flex items-center gap-2">
             <Mail className="w-5 h-5 md:w-6 md:h-6 text-emerald-600" />
             <h1 className="text-lg md:text-xl font-bold text-stone-800 dark:text-white">

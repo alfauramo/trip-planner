@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Camera, Save, User, MapPin, Globe, LogOut } from 'lucide-react';
+import { Camera, Save, User, MapPin, Globe, LogOut, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { useToast } from '../components/Toast';
@@ -86,14 +86,14 @@ export function ProfilePage() {
 
   if (loading && !profile) {
     return (
-      <div className="min-h-screen bg-stone-50 dark:bg-stone-900 flex items-center justify-center">
+      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-900 flex flex-col">
+    <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col">
       <Helmet>
         <title>Mi Perfil | Trip Planner</title>
       </Helmet>
@@ -105,14 +105,7 @@ export function ProfilePage() {
             aria-label={t('common.back')}
             className="p-1.5 -ml-1.5 sm:p-2 sm:ml-0 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg transition-colors"
           >
-            <svg
-              className="w-5 h-5 text-stone-600 dark:text-stone-300"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+            <ArrowLeft className="w-5 h-5 text-stone-600 dark:text-stone-300" />
           </button>
           <div>
             <h1 className="text-lg sm:text-xl font-semibold text-stone-900 dark:text-white">{t('profile.title')}</h1>
