@@ -1,6 +1,27 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 
+const rateLimit = new Map<string, { count: number; resetAt: number }>();
+const MAX_REQUESTS = 10;
+const WINDOW_MS = 60 * 60 * 1000;
+
 Deno.serve(async (req: Request) => {
+  const ip = req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || 'unknown';
+  const now = Date.now();
+  const entry = rateLimit.get(ip);
+
+  if (entry && now < entry.resetAt && entry.count >= MAX_REQUESTS) {
+    return new Response(JSON.stringify({ error: 'Demasiadas peticiones. Intenta de nuevo en una hora.' }), {
+      status: 429,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  if (!entry || now >= entry.resetAt) {
+    rateLimit.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+  } else {
+    entry.count++;
+  }
+
   const { destination, days, travelers, budget, interests } = await req.json();
 
   const prompt = `Crea un itinerario de viaje detallado para ${destination}.

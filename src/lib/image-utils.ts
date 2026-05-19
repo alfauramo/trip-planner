@@ -18,7 +18,7 @@ export function compressImage(file: File, maxWidth = 1200, quality = 0.8): Promi
           return;
         }
         ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', quality));
+        resolve(canvas.toDataURL('image/webp', Math.min(quality, 0.85)));
       };
       img.onerror = () => reject(new Error('Image load failed'));
       img.src = e.target?.result as string;

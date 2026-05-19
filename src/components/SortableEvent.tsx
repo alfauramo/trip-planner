@@ -47,7 +47,7 @@ export function SortableEvent({
           aria-label="Reordenar evento"
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing text-stone-300 dark:text-stone-600 hover:text-stone-400 transition-colors duration-150"
+          className="cursor-grab active:cursor-grabbing text-stone-300 dark:text-stone-600 hover:text-stone-400 transition-colors duration-150 p-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center"
         >
           <GripVertical className="w-4 h-4" />
         </button>
@@ -176,7 +176,7 @@ export function SortableEvent({
         <div className="sm:hidden flex items-center gap-1 mt-2 pt-2 border-t border-stone-50 dark:border-stone-700/50">
           <button
             onClick={onAddDetails}
-            className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-150"
+            className="flex items-center gap-1 px-2.5 py-2 text-xs font-medium text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-150 min-h-[44px]"
           >
             <FileText className="w-3 h-3" />
             {hasDetails ? t('event.details') : t('event.complete')}
@@ -184,7 +184,7 @@ export function SortableEvent({
           {event.google_maps_url && (
             <button
               onClick={onOpenMaps}
-              className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-150"
+              className="flex items-center gap-1 px-2.5 py-2 text-xs font-medium min-h-[44px] text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-150"
             >
               <ExternalLink className="w-3 h-3" />
               {t('event.maps')}
@@ -192,7 +192,7 @@ export function SortableEvent({
           )}
           <button
             onClick={onEdit}
-            className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-150"
+            className="flex items-center gap-1 px-2.5 py-2 text-xs font-medium min-h-[44px] text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-150"
           >
             <Edit2 className="w-3 h-3" />
             {t('common.edit')}
@@ -200,7 +200,7 @@ export function SortableEvent({
           <button
             onClick={onDelete}
             aria-label="Eliminar evento"
-            className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-150 ml-auto"
+            className="flex items-center gap-1 px-2.5 py-2 text-xs font-medium min-h-[44px] text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-150 ml-auto"
           >
             <Trash2 className="w-3 h-3" />
           </button>
