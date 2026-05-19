@@ -20,9 +20,10 @@ interface TripMembersManagerProps {
   tripTitle: string;
   members: TripMember[];
   onMembersChange: () => void;
+  isViewer?: boolean;
 }
 
-export function TripMembersManager({ tripId, tripTitle, members, onMembersChange }: TripMembersManagerProps) {
+export function TripMembersManager({ tripId, tripTitle, members, onMembersChange, isViewer }: TripMembersManagerProps) {
   const { user } = useAuth();
   const { confirm } = useConfirm();
   const { showToast } = useToast();
@@ -131,10 +132,12 @@ export function TripMembersManager({ tripId, tripTitle, members, onMembersChange
             <UserPlus className="w-5 h-5" />
             {t('member.title')}
           </h3>
-          <button onClick={() => setShowInvite(!showInvite)} className="btn-primary text-sm px-3 py-1.5 rounded-lg">
-            <Mail className="w-4 h-4" />
-            {t('member.invite')}
-          </button>
+          {!isViewer && (
+            <button onClick={() => setShowInvite(!showInvite)} className="btn-primary text-sm px-3 py-1.5 rounded-lg">
+              <Mail className="w-4 h-4" />
+              {t('member.invite')}
+            </button>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -167,7 +170,7 @@ export function TripMembersManager({ tripId, tripTitle, members, onMembersChange
                     </p>
                   </div>
                 </div>
-                {member.role !== 'owner' && (
+                {member.role !== 'owner' && !isViewer && (
                   <div className="flex items-center gap-2">
                     <select
                       value={member.role}

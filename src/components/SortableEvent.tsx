@@ -12,21 +12,28 @@ export function SortableEvent({
   onAddDetails,
   onDelete,
   onOpenMaps,
+  isViewer,
 }: {
   event: TripEvent;
   onEdit: () => void;
   onAddDetails: () => void;
   onDelete: () => void;
   onOpenMaps?: () => void;
+  isViewer?: boolean;
 }) {
   const { t } = useTranslation();
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: event.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: event.id,
+    disabled: isViewer,
+  });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
+  const style = isViewer
+    ? undefined
+    : {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+      };
 
   const typeConfig = eventTypes.find((t) => t.value === event.event_type) || eventTypes[0];
   const EventIcon = typeConfig.icon;
@@ -43,16 +50,18 @@ export function SortableEvent({
     <div ref={setNodeRef} style={style} className="flex items-start gap-3 sm:gap-4 pl-0 event-card group relative">
       <div className="timeline-line" />
       <div className="flex flex-col items-center pt-1.5 sm:pt-3">
-        <button
-          aria-label="Reordenar evento"
-          {...attributes}
-          {...listeners}
-          className="cursor-grab active:cursor-grabbing text-stone-300 dark:text-stone-600 hover:text-stone-400 transition-colors duration-150 p-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center"
-        >
-          <GripVertical className="w-4 h-4" />
-        </button>
+        {!isViewer && (
+          <button
+            aria-label="Reordenar evento"
+            {...attributes}
+            {...listeners}
+            className="cursor-grab active:cursor-grabbing text-stone-300 dark:text-stone-600 hover:text-stone-400 transition-colors duration-150 p-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center"
+          >
+            <GripVertical className="w-4 h-4" />
+          </button>
+        )}
         <div
-          className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-sm ${typeConfig.color} mt-1`}
+          className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-sm ${typeConfig.color} ${isViewer ? 'mt-0' : 'mt-1'}`}
         >
           <EventIcon className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
@@ -152,24 +161,28 @@ export function SortableEvent({
                 <FileText className="w-4 h-4" />
               </button>
             </Tooltip>
-            <Tooltip content={t('common.edit')}>
-              <button
-                onClick={onEdit}
-                aria-label="Editar evento"
-                className="p-2 text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all"
-              >
-                <Edit2 className="w-4 h-4" />
-              </button>
-            </Tooltip>
-            <Tooltip content={t('common.delete')}>
-              <button
-                onClick={onDelete}
-                aria-label="Eliminar evento"
-                className="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </Tooltip>
+            {!isViewer && (
+              <>
+                <Tooltip content={t('common.edit')}>
+                  <button
+                    onClick={onEdit}
+                    aria-label="Editar evento"
+                    className="p-2 text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                </Tooltip>
+                <Tooltip content={t('common.delete')}>
+                  <button
+                    onClick={onDelete}
+                    aria-label="Eliminar evento"
+                    className="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </Tooltip>
+              </>
+            )}
           </div>
         </div>
         {/* Mobile action bar */}
@@ -190,20 +203,24 @@ export function SortableEvent({
               {t('event.maps')}
             </button>
           )}
-          <button
-            onClick={onEdit}
-            className="flex items-center gap-1 px-2.5 py-2 text-xs font-medium min-h-[44px] text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-150"
-          >
-            <Edit2 className="w-3 h-3" />
-            {t('common.edit')}
-          </button>
-          <button
-            onClick={onDelete}
-            aria-label="Eliminar evento"
-            className="flex items-center gap-1 px-2.5 py-2 text-xs font-medium min-h-[44px] text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-150 ml-auto"
-          >
-            <Trash2 className="w-3 h-3" />
-          </button>
+          {!isViewer && (
+            <>
+              <button
+                onClick={onEdit}
+                className="flex items-center gap-1 px-2.5 py-2 text-xs font-medium min-h-[44px] text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-150"
+              >
+                <Edit2 className="w-3 h-3" />
+                {t('common.edit')}
+              </button>
+              <button
+                onClick={onDelete}
+                aria-label="Eliminar evento"
+                className="flex items-center gap-1 px-2.5 py-2 text-xs font-medium min-h-[44px] text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-150 ml-auto"
+              >
+                <Trash2 className="w-3 h-3" />
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

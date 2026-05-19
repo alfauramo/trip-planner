@@ -17,6 +17,7 @@ export function ExpensesSection({
   tripBudget,
   tripCurrency,
   isMobile,
+  isViewer,
 }: {
   days: (Day & { events: TripEvent[] })[];
   members: TripMember[];
@@ -25,6 +26,7 @@ export function ExpensesSection({
   tripBudget?: number;
   tripCurrency?: string;
   isMobile?: boolean;
+  isViewer?: boolean;
 }) {
   const { t } = useTranslation();
   const allEvents = useMemo(() => days.flatMap((d) => d.events), [days]);
@@ -101,7 +103,7 @@ export function ExpensesSection({
           <Receipt className="w-5 h-5" /> {t('expenses.title')}
         </h2>
         <div className="flex items-center gap-2">
-          {days.length === 0 ? (
+          {!isViewer && days.length === 0 ? (
             <button
               type="button"
               onClick={onAddDay}
@@ -109,7 +111,7 @@ export function ExpensesSection({
             >
               <Plus className="w-4 h-4" /> {t('day.add')}
             </button>
-          ) : (
+          ) : !isViewer ? (
             <>
               <button
                 type="button"
@@ -130,7 +132,7 @@ export function ExpensesSection({
                 </button>
               )}
             </>
-          )}
+          ) : null}
         </div>
       </div>
 

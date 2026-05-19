@@ -1,10 +1,18 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
-import { ErrorBoundary, ProtectedRoute, MobileNav, LoadingPage, ConfirmProvider, ToastProvider } from './components';
+import {
+  ErrorBoundary,
+  ProtectedRoute,
+  MobileNav,
+  LoadingPage,
+  ConfirmProvider,
+  ToastProvider,
+  CommandPalette,
+} from './components';
 import { useIsMobile, useRealtimeSync, useOnlineStatus } from './hooks';
 import { queryClient, persister } from './lib/queryClient';
 
@@ -27,6 +35,18 @@ function AppRoutes() {
   useRealtimeSync();
   const showMobileNav = isMobile && user;
   const { isOnline, justReconnected } = useOnlineStatus();
+  const [commandOpen, setCommandOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        setCommandOpen((v) => !v);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <div className={`animate-fade-in ${showMobileNav ? 'pb-16' : ''}`}>
@@ -99,6 +119,7 @@ function AppRoutes() {
         </Suspense>
       </main>
       {showMobileNav && <MobileNav />}
+      <CommandPalette open={commandOpen} onClose={() => setCommandOpen(false)} />
     </div>
   );
 }

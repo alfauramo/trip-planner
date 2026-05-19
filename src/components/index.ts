@@ -24,3 +24,4 @@ export { ExpenseCharts } from './ExpenseCharts';
 export { EventComments } from './EventComments';
 export { OptimizedImage } from './OptimizedImage';
 export { AIItineraryGenerator } from './AIItineraryGenerator';
+export { CommandPalette } from './CommandPalette';

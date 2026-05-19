@@ -27,9 +27,10 @@ const categoryColors: Record<string, string> = {
 
 interface PackingListProps {
   tripId: string;
+  isViewer?: boolean;
 }
 
-export function PackingList({ tripId }: PackingListProps) {
+export function PackingList({ tripId, isViewer }: PackingListProps) {
   const { t } = useTranslation();
   const { items, loading, addItem, togglePacked, deleteItem, addTemplateItems } = usePackingList(tripId);
   const { confirm } = useConfirm();
@@ -90,83 +91,87 @@ export function PackingList({ tripId }: PackingListProps) {
             </p>
           )}
         </div>
-        <div className="relative">
-          <button
-            onClick={() => setShowTemplates(!showTemplates)}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-all duration-150"
-          >
-            <Sparkles className="w-4 h-4" />
-            {t('packing.templates')}
-          </button>
-          {showTemplates && (
-            <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-stone-800 rounded-lg shadow-lg z-10">
-              <button
-                onClick={() => {
-                  addTemplateItems('beach');
-                  setShowTemplates(false);
-                }}
-                className="w-full text-left px-4 py-2 hover:bg-stone-100 dark:hover:bg-stone-700 text-sm transition-all duration-150"
-              >
-                {t('packing.template.beach')}
-              </button>
-              <button
-                onClick={() => {
-                  addTemplateItems('city');
-                  setShowTemplates(false);
-                }}
-                className="w-full text-left px-4 py-2 hover:bg-stone-100 dark:hover:bg-stone-700 text-sm transition-all duration-150"
-              >
-                {t('packing.template.city')}
-              </button>
-              <button
-                onClick={() => {
-                  addTemplateItems('mountain');
-                  setShowTemplates(false);
-                }}
-                className="w-full text-left px-4 py-2 hover:bg-stone-100 dark:hover:bg-stone-700 text-sm transition-all duration-150"
-              >
-                {t('packing.template.mountain')}
-              </button>
-              <button
-                onClick={() => {
-                  addTemplateItems('winter');
-                  setShowTemplates(false);
-                }}
-                className="w-full text-left px-4 py-2 hover:bg-stone-100 dark:hover:bg-stone-700 text-sm transition-all duration-150"
-              >
-                {t('packing.template.winter')}
-              </button>
-            </div>
-          )}
-        </div>
+        {!isViewer && (
+          <div className="relative">
+            <button
+              onClick={() => setShowTemplates(!showTemplates)}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-all duration-150"
+            >
+              <Sparkles className="w-4 h-4" />
+              {t('packing.templates')}
+            </button>
+            {showTemplates && (
+              <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-stone-800 rounded-lg shadow-lg z-10">
+                <button
+                  onClick={() => {
+                    addTemplateItems('beach');
+                    setShowTemplates(false);
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-stone-100 dark:hover:bg-stone-700 text-sm transition-all duration-150"
+                >
+                  {t('packing.template.beach')}
+                </button>
+                <button
+                  onClick={() => {
+                    addTemplateItems('city');
+                    setShowTemplates(false);
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-stone-100 dark:hover:bg-stone-700 text-sm transition-all duration-150"
+                >
+                  {t('packing.template.city')}
+                </button>
+                <button
+                  onClick={() => {
+                    addTemplateItems('mountain');
+                    setShowTemplates(false);
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-stone-100 dark:hover:bg-stone-700 text-sm transition-all duration-150"
+                >
+                  {t('packing.template.mountain')}
+                </button>
+                <button
+                  onClick={() => {
+                    addTemplateItems('winter');
+                    setShowTemplates(false);
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-stone-100 dark:hover:bg-stone-700 text-sm transition-all duration-150"
+                >
+                  {t('packing.template.winter')}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {totalCount > 0 && <ProgressBar value={progress} barClassName="bg-gradient-to-r from-emerald-500 to-teal-500" />}
 
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={newItem}
-          onChange={(e) => setNewItem(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder={t('packing.add')}
-          className="flex-1 px-4 py-2 border border-stone-300 dark:border-stone-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent dark:bg-stone-700 dark:text-white transition-all duration-150"
-        />
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white transition-all duration-150"
-        >
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
-        <button onClick={handleAdd} className="btn-primary px-4 py-2 rounded-lg" aria-label="Añadir artículo">
-          <Plus className="w-5 h-5" />
-        </button>
-      </div>
+      {!isViewer && (
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newItem}
+            onChange={(e) => setNewItem(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder={t('packing.add')}
+            className="flex-1 px-4 py-2 border border-stone-300 dark:border-stone-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent dark:bg-stone-700 dark:text-white transition-all duration-150"
+          />
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white transition-all duration-150"
+          >
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+          <button onClick={handleAdd} className="btn-primary px-4 py-2 rounded-lg" aria-label="Añadir artículo">
+            <Plus className="w-5 h-5" />
+          </button>
+        </div>
+      )}
 
       {totalCount === 0 ? (
         <div className="empty-state">
@@ -213,15 +218,17 @@ export function PackingList({ tripId }: PackingListProps) {
                         {item.name}
                         {item.quantity > 1 && <span className="ml-2 text-sm text-stone-500">x{item.quantity}</span>}
                       </span>
-                      <button
-                        onClick={async () => {
-                          if (await confirm(t('common.confirmDelete'))) deleteItem(item.id);
-                        }}
-                        className="p-1 text-stone-400 hover:text-red-500 transition-all duration-150"
-                        aria-label="Eliminar artículo"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {!isViewer && (
+                        <button
+                          onClick={async () => {
+                            if (await confirm(t('common.confirmDelete'))) deleteItem(item.id);
+                          }}
+                          className="p-1 text-stone-400 hover:text-red-500 transition-all duration-150"
+                          aria-label="Eliminar artículo"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>

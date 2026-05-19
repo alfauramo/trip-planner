@@ -27,6 +27,7 @@ export function TripItinerary({
   days,
   members,
   isMobile,
+  isViewer,
   onAddDayClick,
   onAddEventClick,
   onEditEventClick,
@@ -42,6 +43,7 @@ export function TripItinerary({
   days: (Day & { events: TripEvent[] })[];
   members: TripMember[];
   isMobile: boolean;
+  isViewer?: boolean;
   onAddDayClick: () => void;
   onAddEventClick: (dayId: string) => void;
   onEditEventClick: (event: TripEvent) => void;
@@ -112,6 +114,7 @@ export function TripItinerary({
   const renderDayCard = (day: Day & { events: TripEvent[] }) => (
     <div
       key={day.id}
+      id={`day-${day.id}`}
       className="bg-white dark:bg-stone-800 rounded-2xl shadow-sm overflow-hidden border border-stone-100 dark:border-stone-700/50"
     >
       <div className="relative px-4 py-3.5 flex items-center justify-between bg-gradient-to-r from-emerald-50 to-emerald-50/50 dark:from-stone-800 dark:to-stone-800 border-b border-stone-100 dark:border-stone-700/50">
@@ -130,45 +133,17 @@ export function TripItinerary({
             )}
           </div>
         </div>
-        <div className={`flex items-center ${isMobile ? 'gap-0.5 shrink-0' : 'gap-1'}`}>
-          {isMobile ? (
-            <>
-              <button
-                onClick={() => onEditDayClick(day)}
-                className="p-1.5 text-stone-400 hover:text-emerald-600 rounded-lg hover:bg-white/50 dark:hover:bg-stone-700 transition-colors"
-                aria-label={t('day.edit')}
-              >
-                <Pencil className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={async () => {
-                  if (await confirm(t('day.delete.confirm'))) {
-                    try {
-                      await onDeleteDay(day.id);
-                      showToast(t('day.deleted'));
-                    } catch (err: unknown) {
-                      showToast(err instanceof Error ? err.message : t('common.error'), 'error');
-                    }
-                  }
-                }}
-                className="p-1.5 text-stone-400 hover:text-red-500 rounded-lg hover:bg-white/50 dark:hover:bg-stone-700 transition-colors"
-                aria-label={t('day.delete')}
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </>
-          ) : (
-            <>
-              <Tooltip content={t('day.edit')}>
+        {!isViewer && (
+          <div className={`flex items-center ${isMobile ? 'gap-0.5 shrink-0' : 'gap-1'}`}>
+            {isMobile ? (
+              <>
                 <button
                   onClick={() => onEditDayClick(day)}
-                  aria-label="Editar día"
-                  className="p-2 text-stone-400 dark:text-stone-500 hover:text-emerald-600 hover:bg-white/50 dark:hover:bg-stone-700 rounded-lg transition-all"
+                  className="p-1.5 text-stone-400 hover:text-emerald-600 rounded-lg hover:bg-white/50 dark:hover:bg-stone-700 transition-colors"
+                  aria-label={t('day.edit')}
                 >
-                  <Pencil className="w-4 h-4" />
+                  <Pencil className="w-3.5 h-3.5" />
                 </button>
-              </Tooltip>
-              <Tooltip content={t('day.delete')}>
                 <button
                   onClick={async () => {
                     if (await confirm(t('day.delete.confirm'))) {
@@ -176,26 +151,56 @@ export function TripItinerary({
                         await onDeleteDay(day.id);
                         showToast(t('day.deleted'));
                       } catch (err: unknown) {
-                        showToast(err instanceof Error ? err.message : t('day.delete.error'), 'error');
+                        showToast(err instanceof Error ? err.message : t('common.error'), 'error');
                       }
                     }
                   }}
-                  aria-label="Eliminar día"
-                  className="p-2 text-stone-400 dark:text-stone-500 hover:text-red-500 hover:bg-white/50 dark:hover:bg-stone-700 rounded-lg transition-all"
+                  className="p-1.5 text-stone-400 hover:text-red-500 rounded-lg hover:bg-white/50 dark:hover:bg-stone-700 transition-colors"
+                  aria-label={t('day.delete')}
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-3.5 h-3.5" />
                 </button>
-              </Tooltip>
-            </>
-          )}
-        </div>
+              </>
+            ) : (
+              <>
+                <Tooltip content={t('day.edit')}>
+                  <button
+                    onClick={() => onEditDayClick(day)}
+                    aria-label="Editar día"
+                    className="p-2 text-stone-400 dark:text-stone-500 hover:text-emerald-600 hover:bg-white/50 dark:hover:bg-stone-700 rounded-lg transition-all"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                </Tooltip>
+                <Tooltip content={t('day.delete')}>
+                  <button
+                    onClick={async () => {
+                      if (await confirm(t('day.delete.confirm'))) {
+                        try {
+                          await onDeleteDay(day.id);
+                          showToast(t('day.deleted'));
+                        } catch (err: unknown) {
+                          showToast(err instanceof Error ? err.message : t('day.delete.error'), 'error');
+                        }
+                      }
+                    }}
+                    aria-label="Eliminar día"
+                    className="p-2 text-stone-400 dark:text-stone-500 hover:text-red-500 hover:bg-white/50 dark:hover:bg-stone-700 rounded-lg transition-all"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </Tooltip>
+              </>
+            )}
+          </div>
+        )}
       </div>
       <div className={`${isMobile ? 'p-4' : 'p-5'}`}>
         {day.events.length === 0 ? (
           <p className={`text-stone-400 dark:text-stone-500 text-center ${isMobile ? 'text-xs py-4' : 'text-sm py-6'}`}>
             {t('event.empty')}
           </p>
-        ) : (
+        ) : !isViewer ? (
           <DndContext collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, day.id)}>
             <SortableContext items={day.events.map((ev: TripEvent) => ev.id)} strategy={verticalListSortingStrategy}>
               <div className={`${isMobile ? 'space-y-3' : 'space-y-4'} overflow-hidden`}>
@@ -205,6 +210,7 @@ export function TripItinerary({
                       <SortableEvent
                         key={event.id}
                         event={event}
+                        isViewer={false}
                         onEdit={() => onEditEventClick(event)}
                         onAddDetails={() => onViewEventDetails(event)}
                         onDelete={async () => {
@@ -248,17 +254,53 @@ export function TripItinerary({
               </div>
             </SortableContext>
           </DndContext>
+        ) : (
+          <div className={`${isMobile ? 'space-y-3' : 'space-y-4'} overflow-hidden`}>
+            {day.events.map((event: TripEvent) => {
+              const eventContent = (
+                <>
+                  <SortableEvent
+                    key={event.id}
+                    event={event}
+                    isViewer
+                    onEdit={() => onEditEventClick(event)}
+                    onAddDetails={() => onViewEventDetails(event)}
+                    onDelete={async () => {
+                      if (await confirm(t('event.delete.confirm'))) {
+                        await onDeleteEvent(event.id, day.id);
+                        showToast(t('event.deleted'));
+                      }
+                    }}
+                    onOpenMaps={() => event.google_maps_url && window.open(event.google_maps_url, '_blank')}
+                  />
+                  <details className="ml-12">
+                    <summary className="text-xs text-stone-400 cursor-pointer hover:text-emerald-600 select-none py-1">
+                      {t('comments.title')}
+                    </summary>
+                    <EventComments eventId={event.id} />
+                  </details>
+                </>
+              );
+              return (
+                <div key={event.id} className="list-enter">
+                  {eventContent}
+                </div>
+              );
+            })}
+          </div>
         )}
-        <button
-          onClick={() => onAddEventClick(day.id)}
-          className={`w-full border-2 border-dashed border-stone-200 dark:border-stone-700 text-stone-400 hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 transition-all flex items-center justify-center gap-1.5 font-medium ${
-            isMobile ? 'mt-3 py-3 rounded-xl text-sm' : 'mt-4 py-2.5 rounded-xl'
-          }`}
-        >
-          <Plus className="w-4 h-4" />
-          {t('event.add')}
-        </button>
-        {day.events.length >= 2 && (
+        {!isViewer && (
+          <button
+            onClick={() => onAddEventClick(day.id)}
+            className={`w-full border-2 border-dashed border-stone-200 dark:border-stone-700 text-stone-400 hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 transition-all flex items-center justify-center gap-1.5 font-medium ${
+              isMobile ? 'mt-3 py-3 rounded-xl text-sm' : 'mt-4 py-2.5 rounded-xl'
+            }`}
+          >
+            <Plus className="w-4 h-4" />
+            {t('event.add')}
+          </button>
+        )}
+        {!isViewer && day.events.length >= 2 && (
           <div className={`flex gap-2 ${isMobile ? 'mt-3' : 'mt-3'}`}>
             <button
               onClick={() => optimizeDayOrder(day)}
@@ -300,9 +342,11 @@ export function TripItinerary({
       </div>
       <p className="empty-state-title">{isMobile ? t('itinerary.empty') : t('itinerary.empty.desc')}</p>
       <p className="empty-state-desc">{t('itinerary.empty.action')}</p>
-      <button onClick={onAddDayClick} className="text-emerald-600 font-medium text-sm hover:underline">
-        {t('itinerary.addFirstDay')}
-      </button>
+      {!isViewer && (
+        <button onClick={onAddDayClick} className="text-emerald-600 font-medium text-sm hover:underline">
+          {t('itinerary.addFirstDay')}
+        </button>
+      )}
     </div>
   );
 
@@ -321,13 +365,15 @@ export function TripItinerary({
           <Calendar className={isMobile ? 'w-4 h-4' : 'w-5 h-5'} />
           {t('itinerary.title')}
         </h2>
-        <button
-          onClick={onAddDayClick}
-          className={`flex items-center gap-1 text-emerald-600 font-medium ${isMobile ? 'text-sm' : 'hover:underline'}`}
-        >
-          <Plus className="w-4 h-4" />
-          {t('day.add')}
-        </button>
+        {!isViewer && (
+          <button
+            onClick={onAddDayClick}
+            className={`flex items-center gap-1 text-emerald-600 font-medium ${isMobile ? 'text-sm' : 'hover:underline'}`}
+          >
+            <Plus className="w-4 h-4" />
+            {t('day.add')}
+          </button>
+        )}
       </div>
 
       {days.length === 0 ? (
@@ -340,9 +386,11 @@ export function TripItinerary({
                   1
                 </div>
                 <span className="text-sm">{t('trip.step1')}</span>
-                <button onClick={onAddDayClick} className="ml-auto text-sm text-emerald-600 font-medium">
-                  {t('trip.addDays')}
-                </button>
+                {!isViewer && (
+                  <button onClick={onAddDayClick} className="ml-auto text-sm text-emerald-600 font-medium">
+                    {t('trip.addDays')}
+                  </button>
+                )}
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center text-sm font-bold">

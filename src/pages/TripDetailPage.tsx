@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Calendar, Plus, Receipt, Users, Package } from 'lucide-react';
+import { Calendar, Plus, Receipt, Users, Package, CalendarDays } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useTripDetail } from '../hooks/useTripDetail';
@@ -34,6 +34,7 @@ import {
 import type { PlaceForm } from '../components/EventForms';
 import { TripEvent, EventType } from '../types';
 import type { AIItineraryResult } from '../hooks/useAIItinerary';
+import { TripCalendar } from '../components/TripCalendar';
 
 function prepareEventUpdates(data: PlaceForm, payerId?: string, participants?: string[]) {
   const clean = (val: string | undefined) => (val === '' ? undefined : val);
@@ -93,7 +94,7 @@ export function TripDetailPage() {
   const [editingDay, setEditingDay] = useState<{ id: string; date: string; notes?: string } | null>(null);
   const [showEditTrip, setShowEditTrip] = useState(false);
   const [showCoverEditor, setShowCoverEditor] = useState(false);
-  const [activeTab, setActiveTab] = useState<'itinerary' | 'expenses' | 'members' | 'prep'>('itinerary');
+  const [activeTab, setActiveTab] = useState<'itinerary' | 'calendar' | 'expenses' | 'members' | 'prep'>('itinerary');
   const [eventDetails, setEventDetails] = useState<TripEvent | null>(null);
   const [showQuickAddExpense, setShowQuickAddExpense] = useState(false);
   const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
@@ -158,6 +159,9 @@ export function TripDetailPage() {
 
   const displayName = profile?.alias || profile?.full_name || user?.email?.split('@')[0] || t('profile.user');
 
+  const currentMemberRole = members.find((m) => m.user_id === user?.id)?.role || 'viewer';
+  const isViewer = currentMemberRole === 'viewer';
+
   const totalSpent = useMemo(
     () => days.flatMap((d) => d.events).reduce((sum, e) => sum + (e.cost_amount || 0), 0),
     [days],
@@ -191,6 +195,7 @@ export function TripDetailPage() {
 
   const tabs = [
     { key: 'itinerary' as const, label: t('nav.itinerary'), icon: Calendar },
+    { key: 'calendar' as const, label: t('nav.calendar'), icon: CalendarDays },
     { key: 'expenses' as const, label: t('nav.expenses'), icon: Receipt },
     { key: 'members' as const, label: t('nav.members'), icon: Users },
     { key: 'prep' as const, label: t('nav.prep'), icon: Package },
@@ -198,9 +203,24 @@ export function TripDetailPage() {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'calendar':
+        return (
+          <TripCalendar
+            days={days}
+            onDayClick={(day) => {
+              document.getElementById(`day-${day.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}
+          />
+        );
       case 'members':
         return (
-          <TripMembersManager tripId={trip.id} tripTitle={trip.title} members={members} onMembersChange={refresh} />
+          <TripMembersManager
+            tripId={trip.id}
+            tripTitle={trip.title}
+            members={members}
+            onMembersChange={refresh}
+            isViewer={isViewer}
+          />
         );
       case 'expenses':
         return (
@@ -215,14 +235,15 @@ export function TripDetailPage() {
             tripBudget={trip.total_budget}
             tripCurrency={trip.currency}
             isMobile={isMobile || undefined}
+            isViewer={isViewer}
           />
         );
       case 'prep':
         return (
           <div className="space-y-6">
-            <ChecklistSection tripId={trip.id} />
+            <ChecklistSection tripId={trip.id} isViewer={isViewer} />
             <div className={`card-widget ${isMobile ? 'p-4' : 'p-6'}`}>
-              <PackingList tripId={trip.id} />
+              <PackingList tripId={trip.id} isViewer={isViewer} />
             </div>
           </div>
         );
@@ -233,6 +254,7 @@ export function TripDetailPage() {
             days={days}
             members={members}
             isMobile={isMobile}
+            isViewer={isViewer}
             onAddDayClick={() => setShowAddDay(true)}
             onAddEventClick={(dayId) => setShowAddEvent(dayId)}
             onEditEventClick={(event) => setEditingEvent(event)}
@@ -421,7 +443,7 @@ export function TripDetailPage() {
           </div>
         </div>
         <main className="flex-1 px-4 pt-4 pb-24 space-y-6">{loading ? <DetailSkeleton /> : renderTabContent()}</main>
-        {activeTab === 'itinerary' && (
+        {activeTab === 'itinerary' && !isViewer && (
           <button
             type="button"
             onClick={() => setShowAddDay(true)}

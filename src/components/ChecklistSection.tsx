@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 import { useToast } from './Toast';
 import { ProgressBar } from './ProgressBar';
 
-export function ChecklistSection({ tripId }: { tripId: string }) {
+export function ChecklistSection({ tripId, isViewer }: { tripId: string; isViewer?: boolean }) {
   const { t } = useTranslation();
   const [items, setItems] = useState<
     {
@@ -120,27 +120,29 @@ export function ChecklistSection({ tripId }: { tripId: string }) {
           <ProgressBar value={progress} barClassName="bg-green-500" />
         </div>
       )}
-      <div className={cardCls}>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={newItem}
-            onChange={(e) => setNewItem(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && addItem()}
-            placeholder={t('checklist.addTask')}
-            className="input flex-1"
-          />
-          <button
-            type="button"
-            onClick={addItem}
-            disabled={!newItem.trim() || addingItem}
-            aria-label={t('checklist.addTask')}
-            className="btn-primary px-4"
-          >
-            {addingItem ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
-          </button>
+      {!isViewer && (
+        <div className={cardCls}>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newItem}
+              onChange={(e) => setNewItem(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && addItem()}
+              placeholder={t('checklist.addTask')}
+              className="input flex-1"
+            />
+            <button
+              type="button"
+              onClick={addItem}
+              disabled={!newItem.trim() || addingItem}
+              aria-label={t('checklist.addTask')}
+              className="btn-primary px-4"
+            >
+              {addingItem ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
       {loading ? (
         <div className="text-center py-6 text-sm text-stone-500">Cargando...</div>
       ) : items.length === 0 ? (
@@ -172,19 +174,21 @@ export function ChecklistSection({ tripId }: { tripId: string }) {
               >
                 {item.description}
               </span>
-              <button
-                type="button"
-                onClick={() => deleteItem(item.id)}
-                disabled={deletingIds.has(item.id)}
-                aria-label="Eliminar tarea"
-                className={`p-1 ${deletingIds.has(item.id) ? 'text-stone-300 cursor-not-allowed' : 'text-stone-400 hover:text-red-500'}`}
-              >
-                {deletingIds.has(item.id) ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Trash2 className="w-3.5 h-3.5" />
-                )}
-              </button>
+              {!isViewer && (
+                <button
+                  type="button"
+                  onClick={() => deleteItem(item.id)}
+                  disabled={deletingIds.has(item.id)}
+                  aria-label="Eliminar tarea"
+                  className={`p-1 ${deletingIds.has(item.id) ? 'text-stone-300 cursor-not-allowed' : 'text-stone-400 hover:text-red-500'}`}
+                >
+                  {deletingIds.has(item.id) ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              )}
             </div>
           ))}
         </div>

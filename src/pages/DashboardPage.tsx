@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
 import { NewTripForm } from '../components/NewTripForm';
-import { Plus, Calendar, Plane, Share2, RefreshCw, Trash2, Search, Clock } from 'lucide-react';
+import { Plus, Calendar, Plane, Share2, RefreshCw, Trash2, Search, Clock, Sparkles, ChevronRight } from 'lucide-react';
 import { type TripMember } from '../types';
 import { useTrips } from '../hooks/useTrips';
 import { useAuth } from '../context/AuthContext';
@@ -23,6 +23,7 @@ import { hapticLight, hapticMedium } from '../lib/haptic';
 import { useToast } from '../components/Toast';
 import { formatDate } from '../lib/date-utils';
 import { ImageWithFallback } from '../components/ImageWithFallback';
+import { TRIP_TEMPLATES } from '../lib/trip-templates';
 
 function getTripStatus(
   startDate?: string,
@@ -61,7 +62,7 @@ function getTripStatus(
 
 export function DashboardPage() {
   const { t } = useTranslation();
-  const { trips, loading, error, deleteTrip, fetchTrips: refreshTrips } = useTrips();
+  const { trips, loading, error, deleteTrip, fetchTrips: refreshTrips, createTrip } = useTrips();
   const { user, profile } = useAuth();
   const { confirm } = useConfirm();
   const navigate = useNavigate();
@@ -151,6 +152,44 @@ export function DashboardPage() {
     hapticMedium();
     if (await confirm(t('trip.delete.confirm'))) {
       deleteTrip(tripId);
+    }
+  };
+
+  const createDemoTrip = async () => {
+    hapticMedium();
+    try {
+      const trip = await createTrip({
+        title: 'Finde en Barcelona',
+        description:
+          t('onboarding.demoDesc') ||
+          'Un viaje de ejemplo de 3 días para que explores todas las funcionalidades. ¡Personalízalo a tu gusto!',
+        start_date: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
+        end_date: new Date(Date.now() + 9 * 86400000).toISOString().split('T')[0],
+      });
+      if (trip) {
+        navigate(`/trips/${trip.id}`);
+      }
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : t('errors.save'), 'error');
+    }
+  };
+
+  const createTripFromTemplate = async (templateIndex: number) => {
+    hapticMedium();
+    const tpl = TRIP_TEMPLATES[templateIndex];
+    if (!tpl) return;
+    try {
+      const trip = await createTrip({
+        title: tpl.title,
+        description: tpl.description,
+        start_date: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
+        end_date: new Date(Date.now() + (7 + tpl.duration - 1) * 86400000).toISOString().split('T')[0],
+      });
+      if (trip) {
+        navigate(`/trips/${trip.id}`);
+      }
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : t('errors.save'), 'error');
     }
   };
 
@@ -290,38 +329,80 @@ export function DashboardPage() {
                 </button>
               </div>
             ) : trips.length === 0 ? (
-              <div className="card p-6 text-center space-y-5">
-                <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto">
-                  <Plane className="w-8 h-8 text-emerald-600" />
+              <div className="space-y-6">
+                <div className="card p-6 text-center space-y-5">
+                  <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto">
+                    <Plane className="w-8 h-8 text-emerald-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
+                      {t('onboarding.title')}
+                    </h3>
+                    <p className="text-sm text-stone-500 dark:text-stone-300 mt-1">{t('onboarding.subtitle')}</p>
+                  </div>
+                  <div className="space-y-2 text-left max-w-xs mx-auto">
+                    <div className="flex items-center gap-3 text-sm">
+                      <span className="text-emerald-600 text-lg">1</span>
+                      <span className="text-stone-700 dark:text-stone-200">{t('onboarding.step1')}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <span className="text-emerald-600 text-lg">2</span>
+                      <span className="text-stone-700 dark:text-stone-200">{t('onboarding.step2')}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <span className="text-emerald-600 text-lg">3</span>
+                      <span className="text-stone-700 dark:text-stone-200">{t('onboarding.step3')}</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      hapticMedium();
+                      setShowNewTrip(true);
+                    }}
+                    className="btn-primary px-8 py-3.5"
+                  >
+                    <Plus className="w-5 h-5" />
+                    {t('onboarding.createFirst')}
+                  </button>
+
+                  <div className="mt-4 card p-4 bg-emerald-50/50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800">
+                    <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400 mb-2">
+                      {t('onboarding.demoTitle')}
+                    </p>
+                    <button onClick={createDemoTrip} className="btn-primary w-full text-sm">
+                      {t('onboarding.demoButton')}
+                    </button>
+                  </div>
                 </div>
+
                 <div>
-                  <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">{t('onboarding.title')}</h3>
-                  <p className="text-sm text-stone-500 dark:text-stone-300 mt-1">{t('onboarding.subtitle')}</p>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sparkles className="w-5 h-5 text-amber-500" />
+                    <h3 className="text-base font-semibold text-stone-900 dark:text-stone-100">
+                      {t('onboarding.templatesTitle')}
+                    </h3>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+                    {TRIP_TEMPLATES.map((tpl, i) => (
+                      <button
+                        key={tpl.title}
+                        onClick={() => createTripFromTemplate(i)}
+                        className="card card-interactive p-4 text-left flex items-center gap-3 group"
+                      >
+                        <span className="text-2xl shrink-0">{tpl.icon}</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">{tpl.title}</p>
+                          <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                            {tpl.duration}{' '}
+                            {tpl.duration === 1 ? t('onboarding.day') || 'día' : t('onboarding.days') || 'días'} ·{' '}
+                            {tpl.description}
+                          </p>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-stone-300 dark:text-stone-600 group-hover:text-emerald-500 transition-colors shrink-0" />
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="space-y-2 text-left max-w-xs mx-auto">
-                  <div className="flex items-center gap-3 text-sm">
-                    <span className="text-emerald-600 text-lg">1</span>
-                    <span className="text-stone-700 dark:text-stone-200">{t('onboarding.step1')}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <span className="text-emerald-600 text-lg">2</span>
-                    <span className="text-stone-700 dark:text-stone-200">{t('onboarding.step2')}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <span className="text-emerald-600 text-lg">3</span>
-                    <span className="text-stone-700 dark:text-stone-200">{t('onboarding.step3')}</span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => {
-                    hapticMedium();
-                    setShowNewTrip(true);
-                  }}
-                  className="btn-primary px-8 py-3.5"
-                >
-                  <Plus className="w-5 h-5" />
-                  {t('onboarding.createFirst')}
-                </button>
               </div>
             ) : (
               <>

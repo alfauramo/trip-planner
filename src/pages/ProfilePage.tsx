@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { useToast } from '../components/Toast';
 import { Footer } from '../components/Footer';
+import { AsyncButton } from '../components/AsyncButton';
 import { useTranslation } from 'react-i18next';
 import { ImageWithFallback } from '../components/ImageWithFallback';
 
@@ -14,7 +15,6 @@ export function ProfilePage() {
   const { user, profile, refreshProfile, signOut } = useAuth();
   const { showToast } = useToast();
   const { t } = useTranslation();
-  const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
@@ -64,7 +64,6 @@ export function ProfilePage() {
 
   const handleSave = async () => {
     if (!user) return;
-    setSaving(true);
     try {
       const updates: Record<string, string | null> = {
         full_name: fullName || null,
@@ -79,8 +78,7 @@ export function ProfilePage() {
       showToast(t('profile.updated'));
     } catch (err: unknown) {
       showToast(err instanceof Error ? err.message : t('profile.saveError'), 'error');
-    } finally {
-      setSaving(false);
+      throw err;
     }
   };
 
@@ -243,19 +241,10 @@ export function ProfilePage() {
               <LogOut className="w-4 h-4" />
               {t('auth.logout')}
             </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving}
-              className="btn-primary w-full sm:w-auto sm:px-6 sm:py-2.5"
-            >
-              {saving ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Save className="w-4 h-4" />
-              )}
+            <AsyncButton onClick={handleSave} className="btn-primary w-full sm:w-auto sm:px-6 sm:py-2.5">
+              <Save className="w-4 h-4" />
               {t('profile.save')}
-            </button>
+            </AsyncButton>
           </div>
         </div>
       </main>

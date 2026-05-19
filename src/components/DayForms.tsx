@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from './Toast';
+import { AsyncButton } from './AsyncButton';
 
 export function AddDayForm({
   startDate,
@@ -24,7 +24,6 @@ export function AddDayForm({
   const { t } = useTranslation();
   const [date, setDate] = useState(getDefaultDate());
   const [notes, setNotes] = useState('');
-  const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
 
   return (
@@ -49,27 +48,24 @@ export function AddDayForm({
           placeholder={t('day.notes')}
         />
       </div>
-      <button
+      <AsyncButton
         onClick={async () => {
           if (!date) {
             showToast(t('errors.dateRequired'), 'error');
-            return;
+            throw new Error('Date required');
           }
-          setSaving(true);
           try {
             await onSave(date, notes || undefined);
             showToast(t('common.saved'), 'success');
           } catch {
             showToast(t('errors.save'), 'error');
-          } finally {
-            setSaving(false);
+            throw new Error('Save failed');
           }
         }}
-        disabled={saving}
         className="btn-primary w-full"
       >
-        {saving ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : t('day.add')}
-      </button>
+        {t('day.add')}
+      </AsyncButton>
     </div>
   );
 }
@@ -84,7 +80,6 @@ export function EditDayForm({
   const { t } = useTranslation();
   const [date, setDate] = useState(day.date);
   const [notes, setNotes] = useState(day.notes || '');
-  const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
 
   return (
@@ -103,23 +98,20 @@ export function EditDayForm({
           placeholder={t('day.notes')}
         />
       </div>
-      <button
+      <AsyncButton
         onClick={async () => {
-          setSaving(true);
           try {
             await onSave({ date, notes: notes || undefined });
             showToast(t('common.saved'), 'success');
           } catch {
             showToast(t('errors.save'), 'error');
-          } finally {
-            setSaving(false);
+            throw new Error('Save failed');
           }
         }}
-        disabled={saving}
         className="btn-primary w-full"
       >
-        {saving ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : t('common.save')}
-      </button>
+        {t('common.save')}
+      </AsyncButton>
     </div>
   );
 }
