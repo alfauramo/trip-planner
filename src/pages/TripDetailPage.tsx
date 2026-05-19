@@ -443,7 +443,7 @@ export function TripDetailPage() {
           </div>
         </div>
         <main className="flex-1 px-4 pt-4 pb-24 space-y-6">{loading ? <DetailSkeleton /> : renderTabContent()}</main>
-        {activeTab === 'itinerary' && !isViewer && (
+        {!isViewer && (
           <button
             type="button"
             onClick={() => setShowAddDay(true)}

@@ -137,27 +137,7 @@ export function DashboardPage() {
     }
   };
 
-  const createDemoTrip = async () => {
-    hapticMedium();
-    try {
-      const trip = await createTrip({
-        title: 'Finde en Barcelona',
-        description:
-          t('onboarding.demoDesc') ||
-          'Un viaje de ejemplo de 3 días para que explores todas las funcionalidades. ¡Personalízalo a tu gusto!',
-        start_date: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
-        end_date: new Date(Date.now() + 9 * 86400000).toISOString().split('T')[0],
-      });
-      if (trip) {
-        navigate(`/trips/${trip.id}`);
-      }
-    } catch (err: unknown) {
-      showToast(err instanceof Error ? err.message : t('errors.save'), 'error');
-    }
-  };
-
   const createTripFromTemplate = async (templateIndex: number) => {
-    hapticMedium();
     const tpl = TRIP_TEMPLATES[templateIndex];
     if (!tpl) return;
     try {
@@ -346,18 +326,9 @@ export function DashboardPage() {
                     <Plus className="w-5 h-5" />
                     {t('onboarding.createFirst')}
                   </button>
-
-                  <div className="mt-4 card p-4 bg-emerald-50/50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800">
-                    <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400 mb-2">
-                      {t('onboarding.demoTitle')}
-                    </p>
-                    <button onClick={createDemoTrip} className="btn-primary w-full text-sm">
-                      {t('onboarding.demoButton')}
-                    </button>
-                  </div>
                 </div>
 
-                <div>
+                <div className="mt-8">
                   <div className="flex items-center gap-2 mb-3">
                     <Sparkles className="w-5 h-5 text-amber-500" />
                     <h3 className="text-base font-semibold text-stone-900 dark:text-stone-100">

@@ -124,20 +124,27 @@ export function AIItineraryGenerator({ onSelect }: Props) {
             />
           </label>
         </div>
-        <input
-          type="text"
-          placeholder={t('trip.ai.budget')}
-          value={budget}
-          onChange={(e) => setBudget(e.target.value)}
-          className="w-full rounded-lg border border-stone-300 p-2 dark:border-stone-600 dark:bg-stone-800"
-        />
-        <textarea
-          placeholder={t('trip.ai.interests')}
-          value={interests}
-          onChange={(e) => setInterests(e.target.value)}
-          rows={2}
-          className="w-full rounded-lg border border-stone-300 p-2 dark:border-stone-600 dark:bg-stone-800"
-        />
+        <details className="text-sm">
+          <summary className="cursor-pointer text-stone-500 hover:text-stone-700 py-1 select-none">
+            {t('trip.ai.moreOptions')}
+          </summary>
+          <div className="mt-2 space-y-2">
+            <input
+              type="text"
+              placeholder={t('trip.ai.budget')}
+              value={budget}
+              onChange={(e) => setBudget(e.target.value)}
+              className="w-full rounded-lg border border-stone-300 p-2 dark:border-stone-600 dark:bg-stone-800"
+            />
+            <textarea
+              placeholder={t('trip.ai.interests')}
+              value={interests}
+              onChange={(e) => setInterests(e.target.value)}
+              rows={2}
+              className="w-full rounded-lg border border-stone-300 p-2 dark:border-stone-600 dark:bg-stone-800"
+            />
+          </div>
+        </details>
         <button type="submit" disabled={loading} className="btn-primary w-full rounded-lg px-4 py-2">
           {loading ? <Spinner /> : t('trip.ai.generate')}
         </button>

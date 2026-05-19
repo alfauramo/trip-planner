@@ -387,7 +387,7 @@ export function TripItinerary({
                 </div>
                 <span className="text-sm">{t('trip.step1')}</span>
                 {!isViewer && (
-                  <button onClick={onAddDayClick} className="ml-auto text-sm text-emerald-600 font-medium">
+                  <button onClick={onAddDayClick} className="btn-primary text-sm px-4 py-2">
                     {t('trip.addDays')}
                   </button>
                 )}
