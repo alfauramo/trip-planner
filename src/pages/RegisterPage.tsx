@@ -67,7 +67,7 @@ export function RegisterPage() {
   };
 
   const containerCls = isMobile
-    ? 'min-h-dynamic bg-white dark:bg-stone-900 flex flex-col px-5 pt-12 keyboard-aware'
+    ? 'min-h-dynamic bg-white dark:bg-stone-950 flex flex-col px-5 pt-12 keyboard-aware'
     : 'auth-page';
 
   const cardCls = isMobile ? 'w-full' : 'auth-card sm:max-w-md';
@@ -149,33 +149,18 @@ export function RegisterPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label className="form-label">{t('auth.email')}</label>
-            <input
-              {...register('email')}
-              type="email"
-              className="w-full px-4 py-3 border border-stone-300 dark:border-stone-600 rounded-xl dark:bg-stone-700 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              placeholder={t('auth.email.placeholder')}
-            />
+            <input {...register('email')} type="email" className="input" placeholder={t('auth.email.placeholder')} />
             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
           </div>
           <div>
             <label className="form-label">{t('auth.password')}</label>
-            <input
-              {...register('password')}
-              type="password"
-              className="w-full px-4 py-3 border border-stone-300 dark:border-stone-600 rounded-xl dark:bg-stone-700 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              placeholder="••••••"
-            />
+            <input {...register('password')} type="password" className="input" placeholder="••••••" />
             {errors.password && <div className="text-red-500 text-sm mt-1">{errors.password.message}</div>}
             <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">{t('auth.password.requirements')}</p>
           </div>
           <div>
             <label className="form-label">{t('auth.password.confirm')}</label>
-            <input
-              {...register('confirmPassword')}
-              type="password"
-              className="w-full px-4 py-3 border border-stone-300 dark:border-stone-600 rounded-xl dark:bg-stone-700 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              placeholder="••••••"
-            />
+            <input {...register('confirmPassword')} type="password" className="input" placeholder="••••••" />
             {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>}
           </div>
           <button type="submit" disabled={isSubmitting} className="btn-primary w-full justify-center">

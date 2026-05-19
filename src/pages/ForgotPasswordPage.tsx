@@ -41,7 +41,7 @@ export function ForgotPasswordPage() {
   };
 
   const containerCls = isMobile
-    ? 'min-h-dynamic bg-white dark:bg-stone-900 flex flex-col px-5 pt-12 keyboard-aware'
+    ? 'min-h-dynamic bg-white dark:bg-stone-950 flex flex-col px-5 pt-12 keyboard-aware'
     : 'auth-page';
 
   const cardCls = isMobile ? 'w-full' : 'auth-card sm:max-w-md';
