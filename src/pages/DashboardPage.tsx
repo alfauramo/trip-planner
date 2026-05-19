@@ -20,6 +20,7 @@ import { useIsMobile } from '../hooks/useMediaQuery';
 import { usePullToRefresh } from '../hooks/usePullToRefresh';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { hapticLight, hapticMedium } from '../lib/haptic';
+import { shareTrip } from '../lib/share-utils';
 import { useToast } from '../components/Toast';
 import { formatDate } from '../lib/date-utils';
 import { ImageWithFallback } from '../components/ImageWithFallback';
@@ -126,26 +127,7 @@ export function DashboardPage() {
   const displayName = profile?.alias || profile?.full_name || user?.email?.split('@')[0] || t('profile.user');
 
   const handleShare = async (trip: { id: string; title: string; description?: string }) => {
-    const url = `${window.location.origin}/trip-planner/trips/${trip.id}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: trip.title,
-          text: trip.description || t('trip.share.via', { title: trip.title }),
-          url,
-        });
-        hapticLight();
-      } catch {
-        /* user cancelled */
-      }
-    } else {
-      try {
-        await navigator.clipboard.writeText(url);
-        showToast(t('trip.shared'));
-      } catch {
-        showToast(t('common.error'), 'error');
-      }
-    }
+    shareTrip(trip);
   };
 
   const handleDeleteTrip = async (tripId: string) => {

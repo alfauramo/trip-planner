@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { formatDateShort } from '../lib/date-utils';
 import { ImageWithFallback } from './ImageWithFallback';
 import { downloadICS } from '../lib/ics-utils';
+import { shareTrip } from '../lib/share-utils';
 import type { TripMember, TripEvent, Day } from '../types';
 
 export function TripDetailHeader({
@@ -41,14 +42,7 @@ export function TripDetailHeader({
   const { showToast } = useToast();
   const { t } = useTranslation();
 
-  const handleShare = () => {
-    const url = `${window.location.origin}/trip-planner/trips/${trip.id}`;
-    if (navigator.share) navigator.share({ title: trip.title, url }).catch(() => {});
-    else {
-      navigator.clipboard.writeText(url);
-      showToast(t('trip.shared'));
-    }
-  };
+  const handleShare = () => shareTrip(trip);
 
   const handleCalendarExport = () => {
     const icsEvents = (days as (Day & { events: TripEvent[] })[]).flatMap((day) =>

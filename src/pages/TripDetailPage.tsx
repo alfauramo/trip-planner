@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Calendar, Plus, Receipt, Users, Package, CalendarDays } from 'lucide-react';
+import { Calendar, Plus, Receipt, Users, Package } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useTripDetail } from '../hooks/useTripDetail';
@@ -34,7 +34,6 @@ import {
 import type { PlaceForm } from '../components/EventForms';
 import { TripEvent, EventType } from '../types';
 import type { AIItineraryResult } from '../hooks/useAIItinerary';
-import { TripCalendar } from '../components/TripCalendar';
 
 function prepareEventUpdates(data: PlaceForm, payerId?: string, participants?: string[]) {
   const clean = (val: string | undefined) => (val === '' ? undefined : val);
@@ -94,7 +93,7 @@ export function TripDetailPage() {
   const [editingDay, setEditingDay] = useState<{ id: string; date: string; notes?: string } | null>(null);
   const [showEditTrip, setShowEditTrip] = useState(false);
   const [showCoverEditor, setShowCoverEditor] = useState(false);
-  const [activeTab, setActiveTab] = useState<'itinerary' | 'calendar' | 'expenses' | 'members' | 'prep'>('itinerary');
+  const [activeTab, setActiveTab] = useState<'itinerary' | 'expenses' | 'members' | 'prep'>('itinerary');
   const [eventDetails, setEventDetails] = useState<TripEvent | null>(null);
   const [showQuickAddExpense, setShowQuickAddExpense] = useState(false);
   const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
@@ -201,7 +200,6 @@ export function TripDetailPage() {
 
   const tabs = [
     { key: 'itinerary' as const, label: t('nav.itinerary'), icon: Calendar, count: totalEvents },
-    { key: 'calendar' as const, label: t('nav.calendar'), icon: CalendarDays, count: null },
     { key: 'expenses' as const, label: t('nav.expenses'), icon: Receipt, count: totalExpensesCount },
     { key: 'members' as const, label: t('nav.members'), icon: Users, count: members.length },
     { key: 'prep' as const, label: t('nav.prep'), icon: Package, count: null },
@@ -209,15 +207,6 @@ export function TripDetailPage() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'calendar':
-        return (
-          <TripCalendar
-            days={days}
-            onDayClick={(day) => {
-              document.getElementById(`day-${day.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }}
-          />
-        );
       case 'members':
         return (
           <TripMembersManager
