@@ -8,6 +8,7 @@ import { Modal } from './Modal';
 import { useConfirm } from './ConfirmModal';
 import { useToast } from './Toast';
 import { sendInviteEmail } from '../lib/email';
+import { appUrl } from '../lib/urls';
 
 function getMemberDisplayName(member: TripMember): string {
   if (member.profile?.full_name) return member.profile.full_name;
@@ -53,7 +54,7 @@ export function TripMembersManager({ tripId, tripTitle, members, onMembersChange
       if (result.success) {
         if (result.needs_email) {
           try {
-            const acceptUrl = `${window.location.origin}/trip-planner/invite/${tripId}`;
+            const acceptUrl = appUrl(`/invite/${tripId}`);
             await sendInviteEmail(email.trim(), tripTitle, user.email || 'Alguien', acceptUrl);
             showToast(t('member.invite.sent'));
           } catch (emailError) {
@@ -102,7 +103,7 @@ export function TripMembersManager({ tripId, tripTitle, members, onMembersChange
   };
 
   const getShareLink = () => {
-    return `${window.location.origin}/trip-planner/invite/${tripId}`;
+    return appUrl(`/invite/${tripId}`);
   };
 
   const copyShareLink = () => {

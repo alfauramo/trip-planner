@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { Profile } from '../types';
+import { appUrl } from '../lib/urls';
 
 interface AuthContextType {
   user: User | null;
@@ -87,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/trip-planner/`,
+        redirectTo: appUrl('/'),
       },
     });
     if (error) throw error;
@@ -100,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resetPassword = async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/trip-planner/update-password`,
+      redirectTo: appUrl('/update-password'),
     });
     if (error) throw error;
   };
