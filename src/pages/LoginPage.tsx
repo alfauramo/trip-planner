@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../context/AuthContext';
 import { Plane } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -95,6 +96,9 @@ export function LoginPage() {
 
   return (
     <div className={containerCls}>
+      <Helmet>
+        <title>Iniciar sesión | Trip Planner</title>
+      </Helmet>
       <div className={cardCls}>
         <div className="flex items-center justify-center mb-8">
           <Plane className="w-10 h-10 text-emerald-600" />

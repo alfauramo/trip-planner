@@ -331,13 +331,41 @@ export function TripItinerary({
       </div>
 
       {days.length === 0 ? (
-        onBulkCreate ? (
-          <div className="card-widget p-4 sm:p-6">
-            <AIItineraryGenerator onSelect={onBulkCreate} />
+        <div className="space-y-6">
+          <div className="card p-5 space-y-3">
+            <h3 className="font-semibold">{t('trip.gettingStarted')}</h3>
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center text-sm font-bold">
+                  1
+                </div>
+                <span className="text-sm">{t('trip.step1')}</span>
+                <button onClick={onAddDayClick} className="ml-auto text-sm text-emerald-600 font-medium">
+                  {t('trip.addDays')}
+                </button>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center text-sm font-bold">
+                  2
+                </div>
+                <span className="text-sm">{t('trip.step2')}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center text-sm font-bold">
+                  3
+                </div>
+                <span className="text-sm">{t('trip.step3')}</span>
+              </div>
+            </div>
           </div>
-        ) : (
-          emptyState
-        )
+          {onBulkCreate ? (
+            <div className="card-widget p-4 sm:p-6">
+              <AIItineraryGenerator onSelect={onBulkCreate} />
+            </div>
+          ) : (
+            emptyState
+          )}
+        </div>
       ) : (
         <div className={isMobile ? 'space-y-3' : 'space-y-6 w-full'}>{days.map(renderDayCard)}</div>
       )}

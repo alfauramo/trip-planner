@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Calendar, Plus, Receipt, Users, Package } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useTripDetail } from '../hooks/useTripDetail';
 import { useTrips } from '../hooks/useTrips';
@@ -18,6 +19,8 @@ import { EditCoverForm } from '../components/EditCoverForm';
 import { ChecklistSection } from '../components/ChecklistSection';
 import { QuickAddExpenseForm } from '../components/QuickAddExpenseForm';
 import { ExpensesSection } from '../components/ExpensesSection';
+import { Modal } from '../components/Modal';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import {
   TripItinerary,
   AddDayForm,
@@ -91,6 +94,33 @@ export function TripDetailPage() {
   const [activeTab, setActiveTab] = useState<'itinerary' | 'expenses' | 'members' | 'prep'>('itinerary');
   const [eventDetails, setEventDetails] = useState<TripEvent | null>(null);
   const [showQuickAddExpense, setShowQuickAddExpense] = useState(false);
+  const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
+
+  const closeAllSheets = useCallback(() => {
+    setShowAddDay(false);
+    setShowAddEvent(null);
+    setEditingEvent(null);
+    setEditingDay(null);
+    setShowEditTrip(false);
+    setShowCoverEditor(false);
+    setEventDetails(null);
+    setShowQuickAddExpense(false);
+  }, []);
+
+  useKeyboardShortcuts(
+    useMemo(
+      () => [
+        { key: 'Escape', handler: closeAllSheets, description: t('shortcuts.closeSheets') || 'Cerrar panel' },
+        {
+          key: 'n',
+          ctrl: true,
+          handler: () => setShowAddDay(true),
+          description: t('shortcuts.addDay') || 'Añadir día',
+        },
+      ],
+      [closeAllSheets, t],
+    ),
+  );
 
   const handleQuickAddExpense = async (dayId: string, data: Record<string, unknown>) => {
     await addEvent(dayId, data);
@@ -133,6 +163,9 @@ export function TripDetailPage() {
   if (error || !trip) {
     return (
       <div className="error-page bg-stone-50 dark:bg-stone-950">
+        <Helmet>
+          <title>Viaje | Trip Planner</title>
+        </Helmet>
         <div className="error-content">
           <p className="error-message">{error || t('trip.notFound')}</p>
           <div className="error-actions">
@@ -330,6 +363,9 @@ export function TripDetailPage() {
   if (isMobile) {
     return (
       <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col">
+        <Helmet>
+          <title>{trip?.title || 'Viaje'} | Trip Planner</title>
+        </Helmet>
         <TripDetailHeader
           trip={trip}
           isMobile
@@ -371,12 +407,34 @@ export function TripDetailPage() {
           </button>
         )}
         {bottomSheets}
+        {showKeyboardHelp && (
+          <Modal title={t('shortcuts.title') || 'Atajos de teclado'} onClose={() => setShowKeyboardHelp(false)}>
+            <div className="space-y-3">
+              <p className="text-sm text-stone-500 dark:text-stone-400 mb-3">{t('shortcuts.available')}</p>
+              <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-800">
+                <span className="text-sm">{t('shortcuts.addDay') || 'Añadir día'}</span>
+                <kbd className="px-2 py-1 text-xs bg-stone-100 dark:bg-stone-800 rounded font-mono">Ctrl+N</kbd>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-800">
+                <span className="text-sm">{t('shortcuts.closeSheets') || 'Cerrar panel'}</span>
+                <kbd className="px-2 py-1 text-xs bg-stone-100 dark:bg-stone-800 rounded font-mono">Esc</kbd>
+              </div>
+              <div className="flex items-center justify-between py-2">
+                <span className="text-sm">{t('shortcuts.help') || 'Mostrar atajos'}</span>
+                <kbd className="px-2 py-1 text-xs bg-stone-100 dark:bg-stone-800 rounded font-mono">Ctrl+/</kbd>
+              </div>
+            </div>
+          </Modal>
+        )}
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col">
+      <Helmet>
+        <title>{trip?.title || 'Viaje'} | Trip Planner</title>
+      </Helmet>
       <TripDetailHeader
         trip={trip}
         isMobile={false}
@@ -410,6 +468,25 @@ export function TripDetailPage() {
         {loading ? <DetailSkeleton /> : renderTabContent()}
       </main>
       {bottomSheets}
+      {showKeyboardHelp && (
+        <Modal title={t('shortcuts.title') || 'Atajos de teclado'} onClose={() => setShowKeyboardHelp(false)}>
+          <div className="space-y-3">
+            <p className="text-sm text-stone-500 dark:text-stone-400 mb-3">{t('shortcuts.available')}</p>
+            <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-800">
+              <span className="text-sm">{t('shortcuts.addDay') || 'Añadir día'}</span>
+              <kbd className="px-2 py-1 text-xs bg-stone-100 dark:bg-stone-800 rounded font-mono">Ctrl+N</kbd>
+            </div>
+            <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-800">
+              <span className="text-sm">{t('shortcuts.closeSheets') || 'Cerrar panel'}</span>
+              <kbd className="px-2 py-1 text-xs bg-stone-100 dark:bg-stone-800 rounded font-mono">Esc</kbd>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-sm">{t('shortcuts.help') || 'Mostrar atajos'}</span>
+              <kbd className="px-2 py-1 text-xs bg-stone-100 dark:bg-stone-800 rounded font-mono">Ctrl+/</kbd>
+            </div>
+          </div>
+        </Modal>
+      )}
       <Footer />
     </div>
   );

@@ -1,14 +1,21 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { useIsMobile } from '../hooks/useMediaQuery';
 
+interface ToastOptions {
+  undoLabel?: string;
+  undoAction?: () => void;
+}
+
 interface Toast {
   id: string;
   message: string;
   type: 'success' | 'error';
+  undoLabel?: string;
+  undoAction?: () => void;
 }
 
 interface ToastContextType {
-  showToast: (message: string, type?: 'success' | 'error') => void;
+  showToast: (message: string, type?: 'success' | 'error', options?: ToastOptions) => void;
 }
 
 const ToastContext = createContext<ToastContextType | null>(null);
@@ -17,12 +24,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const isMobile = useIsMobile();
 
-  const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
+  const showToast = useCallback((message: string, type: 'success' | 'error' = 'success', options?: ToastOptions) => {
     const id = crypto.randomUUID();
-    setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
+    setToasts((prev) => [...prev, { id, message, type, ...options }]);
+    if (!options?.undoAction) {
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, 4000);
+    }
   }, []);
 
   return (
@@ -48,6 +57,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               </svg>
             )}
             <span className="text-sm font-medium">{toast.message}</span>
+            {toast.undoAction && (
+              <button
+                onClick={() => {
+                  toast.undoAction?.();
+                  setToasts((prev) => prev.filter((t) => t.id !== toast.id));
+                }}
+                className="ml-auto shrink-0 px-2 py-1 text-xs font-semibold bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+              >
+                {toast.undoLabel || 'Undo'}
+              </button>
+            )}
           </div>
         ))}
       </div>

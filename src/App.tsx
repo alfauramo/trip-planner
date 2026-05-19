@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -93,20 +94,22 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <BrowserRouter basename="/trip-planner">
-      <PersistQueryClientProvider client={queryClient} persistOptions={{ persister, maxAge: 1000 * 60 * 60 * 24 }}>
-        <ThemeProvider>
-          <AuthProvider>
-            <ErrorBoundary>
-              <ToastProvider>
-                <ConfirmProvider>
-                  <AppRoutes />
-                </ConfirmProvider>
-              </ToastProvider>
-            </ErrorBoundary>
-          </AuthProvider>
-        </ThemeProvider>
-      </PersistQueryClientProvider>
-    </BrowserRouter>
+    <HelmetProvider>
+      <BrowserRouter basename="/trip-planner">
+        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister, maxAge: 1000 * 60 * 60 * 24 }}>
+          <ThemeProvider>
+            <AuthProvider>
+              <ErrorBoundary>
+                <ToastProvider>
+                  <ConfirmProvider>
+                    <AppRoutes />
+                  </ConfirmProvider>
+                </ToastProvider>
+              </ErrorBoundary>
+            </AuthProvider>
+          </ThemeProvider>
+        </PersistQueryClientProvider>
+      </BrowserRouter>
+    </HelmetProvider>
   );
 }

@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useCallback, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAIItinerary, type AIItineraryResult } from '../hooks/useAIItinerary';
+import { useAIItinerary, type AIItineraryResult, type AIItineraryInput } from '../hooks/useAIItinerary';
 import { Spinner } from './Loading';
 
 interface Props {
@@ -17,16 +17,80 @@ export function AIItineraryGenerator({ onSelect }: Props) {
   const { generate, loading, error } = useAIItinerary();
   const [result, setResult] = useState<AIItineraryResult | null>(null);
 
+  const doGenerate = useCallback(
+    async (params: AIItineraryInput) => {
+      const data = await generate(params);
+      if (data) setResult(data);
+    },
+    [generate],
+  );
+
+  const presets = [
+    {
+      label: t('trip.ai.presets.weekend'),
+      destination: 'París',
+      days: 2,
+      travelers: 2,
+      interests: 'romántico, gastronomía, arte',
+    },
+    {
+      label: t('trip.ai.presets.tokyo'),
+      destination: 'Tokio',
+      days: 7,
+      travelers: 2,
+      interests: 'cultura, tecnología, comida callejera',
+    },
+    {
+      label: t('trip.ai.presets.beach'),
+      destination: 'Bali',
+      days: 5,
+      travelers: 2,
+      interests: 'playa, relax, naturaleza',
+    },
+  ];
+
+  function handlePreset(preset: (typeof presets)[0]) {
+    setDestination(preset.destination);
+    setDays(preset.days);
+    setTravelers(preset.travelers);
+    setBudget('');
+    setInterests(preset.interests);
+    doGenerate({
+      destination: preset.destination,
+      days: preset.days,
+      travelers: preset.travelers,
+      budget: '',
+      interests: preset.interests,
+    });
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    const data = await generate({ destination, days, travelers, budget, interests });
-    if (data) setResult(data);
+    await doGenerate({ destination, days, travelers, budget, interests });
   }
 
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">{t('trip.generateAI')}</h3>
       <form onSubmit={handleSubmit} className="space-y-3">
+        {!destination && (
+          <div className="space-y-1.5">
+            <p className="text-xs font-medium text-stone-500 dark:text-stone-400">Quick start</p>
+            <div className="flex flex-wrap gap-2">
+              {presets.map((p) => (
+                <button
+                  key={p.destination}
+                  type="button"
+                  onClick={() => handlePreset(p)}
+                  disabled={loading}
+                  className="px-3 py-1 text-xs rounded-full border border-stone-200 hover:border-emerald-400 hover:bg-emerald-50 dark:border-stone-600 dark:hover:border-emerald-500 dark:hover:bg-emerald-900/20 text-stone-600 dark:text-stone-300 transition-colors disabled:opacity-50"
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <input
           type="text"
           placeholder={t('trip.ai.destination')}

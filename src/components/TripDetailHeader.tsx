@@ -57,7 +57,7 @@ export function TripDetailHeader({
             <ImageWithFallback
               src={trip.cover_image}
               alt={trip.title}
-              loading="lazy"
+              loading="eager"
               className="w-full h-full object-cover"
               fallback={null}
             />
@@ -178,7 +178,7 @@ export function TripDetailHeader({
             <ImageWithFallback
               src={trip.cover_image}
               alt={trip.title}
-              loading="lazy"
+              loading="eager"
               className="w-full h-full object-cover"
               fallback={null}
             />
@@ -225,7 +225,7 @@ export function TripDetailHeader({
             type="button"
             onClick={onEditTrip}
             aria-label={t('trip.edit')}
-            className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400 hover:text-emerald-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
+            className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-300 hover:text-emerald-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
           >
             <Pencil className="w-4 h-4" />
             <span className="hidden sm:inline">{t('trip.edit')}</span>
@@ -234,7 +234,7 @@ export function TripDetailHeader({
             type="button"
             onClick={onEditCover}
             aria-label={t('trip.editCover')}
-            className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400 hover:text-emerald-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
+            className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-300 hover:text-emerald-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
           >
             <ImageIcon className="w-4 h-4" />
             <span className="hidden sm:inline">{t('trip.cover')}</span>
@@ -245,7 +245,7 @@ export function TripDetailHeader({
             type="button"
             onClick={handleShare}
             aria-label={t('common.share')}
-            className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400 hover:text-emerald-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
+            className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-300 hover:text-emerald-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
           >
             <Share2 className="w-4 h-4" />
             <span className="hidden sm:inline">{t('common.share')}</span>

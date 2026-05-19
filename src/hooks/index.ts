@@ -9,3 +9,6 @@ export { useIsMobile } from './useMediaQuery';
 export { useRealtimeSync } from './useRealtimeSync';
 export { usePushNotifications } from './usePushNotifications';
 export { useAIItinerary } from './useAIItinerary';
+export { useUndoableAction } from './useUndoableAction';
+export { useKeyboardShortcuts } from './useKeyboardShortcuts';
+export type { Shortcut } from './useKeyboardShortcuts';

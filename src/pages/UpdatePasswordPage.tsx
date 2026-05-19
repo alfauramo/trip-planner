@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../context/AuthContext';
 import { Plane } from 'lucide-react';
 import { useIsMobile } from '../hooks/useMediaQuery';
@@ -56,6 +57,9 @@ export function UpdatePasswordPage() {
   if (success) {
     return (
       <div className={containerCls}>
+        <Helmet>
+          <title>Actualizar Contraseña | Trip Planner</title>
+        </Helmet>
         <div className={`${cardCls} text-center`}>
           <div className="w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-green-500 text-2xl">✓</span>
@@ -69,6 +73,9 @@ export function UpdatePasswordPage() {
 
   return (
     <div className={containerCls}>
+      <Helmet>
+        <title>Actualizar Contraseña | Trip Planner</title>
+      </Helmet>
       <div className={cardCls}>
         <div className="flex items-center justify-center mb-8">
           <Plane className="w-10 h-10 text-emerald-600" />
