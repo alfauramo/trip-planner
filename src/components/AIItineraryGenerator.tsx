@@ -104,6 +104,7 @@ export function AIItineraryGenerator({ onSelect }: Props) {
             <span className="text-sm text-stone-500">{t('trip.ai.days')}</span>
             <input
               type="number"
+              inputMode="numeric"
               min={1}
               max={30}
               value={days}
@@ -115,6 +116,7 @@ export function AIItineraryGenerator({ onSelect }: Props) {
             <span className="text-sm text-stone-500">{t('trip.ai.travelers')}</span>
             <input
               type="number"
+              inputMode="numeric"
               min={1}
               value={travelers}
               onChange={(e) => setTravelers(Number(e.target.value))}

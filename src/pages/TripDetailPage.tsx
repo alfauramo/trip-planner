@@ -193,12 +193,18 @@ export function TripDetailPage() {
     );
   }
 
+  const totalEvents = useMemo(() => days.flatMap((d) => d.events).length, [days]);
+  const totalExpensesCount = useMemo(
+    () => days.flatMap((d) => d.events).filter((e) => (e.cost_amount || 0) > 0).length,
+    [days],
+  );
+
   const tabs = [
-    { key: 'itinerary' as const, label: t('nav.itinerary'), icon: Calendar },
-    { key: 'calendar' as const, label: t('nav.calendar'), icon: CalendarDays },
-    { key: 'expenses' as const, label: t('nav.expenses'), icon: Receipt },
-    { key: 'members' as const, label: t('nav.members'), icon: Users },
-    { key: 'prep' as const, label: t('nav.prep'), icon: Package },
+    { key: 'itinerary' as const, label: t('nav.itinerary'), icon: Calendar, count: totalEvents },
+    { key: 'calendar' as const, label: t('nav.calendar'), icon: CalendarDays, count: null },
+    { key: 'expenses' as const, label: t('nav.expenses'), icon: Receipt, count: totalExpensesCount },
+    { key: 'members' as const, label: t('nav.members'), icon: Users, count: members.length },
+    { key: 'prep' as const, label: t('nav.prep'), icon: Package, count: null },
   ];
 
   const renderTabContent = () => {
@@ -437,6 +443,11 @@ export function TripDetailPage() {
                 >
                   <Icon className="w-4 h-4" />
                   <span className="text-xs">{tab.label}</span>
+                  {tab.count != null && tab.count > 0 && (
+                    <span className="ml-1 text-[10px] bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 px-1.5 py-0.5 rounded-full font-medium leading-none">
+                      {tab.count}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -525,6 +536,11 @@ export function TripDetailPage() {
               >
                 <Icon className="w-4 h-4" />
                 <span>{tab.label}</span>
+                {tab.count != null && tab.count > 0 && (
+                  <span className="ml-1 text-[10px] bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 px-1.5 py-0.5 rounded-full font-medium leading-none">
+                    {tab.count}
+                  </span>
+                )}
               </button>
             );
           })}
