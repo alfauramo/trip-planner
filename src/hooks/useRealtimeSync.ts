@@ -11,7 +11,7 @@ export function useRealtimeSync() {
     if (!user) return;
 
     const channel = supabase
-      .channel('db-changes')
+      .channel(`db-changes-${Date.now()}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'trips' }, () => {
         queryClient.invalidateQueries({ queryKey: ['trips'] });
       })
@@ -34,6 +34,8 @@ export function useRealtimeSync() {
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user?.id]);
 }
