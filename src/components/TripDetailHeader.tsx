@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Share2, Plane, Pencil, ImageIcon, Calendar } from 'lucide-react';
+import { ArrowLeft, Share2, Plane, Pencil, ImageIcon, Calendar, CalendarPlus } from 'lucide-react';
 import { NotificationBell } from './NotificationBell';
 import { ThemeToggle } from './ThemeToggle';
 import { Tooltip } from './Tooltip';
@@ -8,6 +8,7 @@ import { useToast } from './Toast';
 import { useTranslation } from 'react-i18next';
 import { formatDateShort } from '../lib/date-utils';
 import { ImageWithFallback } from './ImageWithFallback';
+import { downloadICS } from '../lib/ics-utils';
 import type { TripMember, TripEvent, Day } from '../types';
 
 export function TripDetailHeader({
@@ -47,6 +48,38 @@ export function TripDetailHeader({
       navigator.clipboard.writeText(url);
       showToast(t('trip.shared'));
     }
+  };
+
+  const handleCalendarExport = () => {
+    const icsEvents = (days as (Day & { events: TripEvent[] })[]).flatMap((day) =>
+      day.events
+        .filter((e) => e.start_time && e.name)
+        .map((e) => {
+          const [sh, sm] = (e.start_time || '09:00').split(':').map(Number);
+          const start = new Date(day.date);
+          start.setHours(sh || 9, sm || 0);
+          const end = new Date(start);
+          if (e.end_time) {
+            const [eh, em] = e.end_time.split(':').map(Number);
+            end.setHours(eh || sh! + 1, em || 0);
+          } else {
+            end.setHours(end.getHours() + 1);
+          }
+          return {
+            title: e.name,
+            description: e.notes || e.address || undefined,
+            startDate: start,
+            endDate: end,
+            location: e.address || undefined,
+          };
+        }),
+    );
+    if (icsEvents.length === 0) {
+      showToast(t('trip.noEventsForCalendar'), 'error');
+      return;
+    }
+    downloadICS(icsEvents, trip.title, `${trip.title.replace(/\s+/g, '_')}.ics`);
+    showToast(t('trip.calendarDownloaded'));
   };
 
   if (isMobile) {
@@ -240,6 +273,15 @@ export function TripDetailHeader({
             <span className="hidden sm:inline">{t('trip.cover')}</span>
           </button>
           <ExportTripHTML trip={{ ...trip, days, members } as import('../types').TripWithDetails} />
+          <button
+            type="button"
+            onClick={handleCalendarExport}
+            aria-label={t('trip.exportCalendar')}
+            className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400 hover:text-emerald-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
+          >
+            <CalendarPlus className="w-4 h-4" />
+            <span className="hidden sm:inline">{t('trip.exportCalendar')}</span>
+          </button>
           <div className="flex-1" />
           <button
             type="button"
