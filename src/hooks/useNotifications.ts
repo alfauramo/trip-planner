@@ -35,32 +35,26 @@ export function useNotifications(userId: string | undefined) {
   useEffect(() => {
     if (!userId) return;
 
-    const subscription = supabase
-      .channel('notifications')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'notifications',
-        filter: `user_id=eq.${userId}`,
-      }, () => {
-        queryClient.invalidateQueries({ queryKey: ['notifications', userId] });
-      })
+    const channel = supabase
+      .channel(`notifications-${userId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
+        () => queryClient.invalidateQueries({ queryKey: ['notifications', userId] }),
+      )
       .subscribe();
 
     return () => {
-      subscription.unsubscribe();
+      supabase.removeChannel(channel);
     };
-  }, [userId, queryClient]);
+  }, [userId]);
 
   const notifications = query.data || [];
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const markAsReadMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('id', id);
+      const { error } = await supabase.from('notifications').update({ read: true }).eq('id', id);
 
       if (error) throw error;
     },
@@ -69,7 +63,7 @@ export function useNotifications(userId: string | undefined) {
       const previous = queryClient.getQueryData<Notification[]>(['notifications', userId]);
       if (previous) {
         queryClient.setQueryData<Notification[]>(['notifications', userId], (old) =>
-          old?.map(n => n.id === id ? { ...n, read: true } : n)
+          old?.map((n) => (n.id === id ? { ...n, read: true } : n)),
         );
       }
       return { previous };
@@ -97,7 +91,7 @@ export function useNotifications(userId: string | undefined) {
       const previous = queryClient.getQueryData<Notification[]>(['notifications', userId]);
       if (previous) {
         queryClient.setQueryData<Notification[]>(['notifications', userId], (old) =>
-          old?.map(n => ({ ...n, read: true }))
+          old?.map((n) => ({ ...n, read: true })),
         );
       }
       return { previous };
@@ -114,7 +108,11 @@ export function useNotifications(userId: string | undefined) {
     notifications,
     unreadCount,
     loading: query.isLoading,
-    markAsRead: async (id: string) => { await markAsReadMutation.mutateAsync(id); },
-    markAllAsRead: async () => { await markAllAsReadMutation.mutateAsync(); },
+    markAsRead: async (id: string) => {
+      await markAsReadMutation.mutateAsync(id);
+    },
+    markAllAsRead: async () => {
+      await markAllAsReadMutation.mutateAsync();
+    },
   };
 }
