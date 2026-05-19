@@ -5,7 +5,7 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ErrorBoundary, ProtectedRoute, MobileNav, LoadingPage, ConfirmProvider, ToastProvider } from './components';
-import { useIsMobile, useRealtimeSync } from './hooks';
+import { useIsMobile, useRealtimeSync, useOnlineStatus } from './hooks';
 import { queryClient, persister } from './lib/queryClient';
 
 const LoginPage = lazy(() => import('./pages/LoginPage').then((m) => ({ default: m.LoginPage })));
@@ -26,6 +26,7 @@ function AppRoutes() {
   const isMobile = useIsMobile();
   useRealtimeSync();
   const showMobileNav = isMobile && user;
+  const { isOnline, justReconnected } = useOnlineStatus();
 
   return (
     <div className={`animate-fade-in ${showMobileNav ? 'pb-16' : ''}`}>
@@ -36,6 +37,16 @@ function AppRoutes() {
         Saltar al contenido principal
       </a>
       <main id="main-content">
+        {!isOnline && (
+          <div className="sticky top-0 z-[80] bg-amber-500 text-white text-center py-2 px-4 text-sm font-medium shadow-lg">
+            Sin conexión — los cambios se sincronizarán al reconectar
+          </div>
+        )}
+        {justReconnected && (
+          <div className="sticky top-0 z-[80] bg-emerald-500 text-white text-center py-2 px-4 text-sm font-medium shadow-lg animate-fade-in">
+            Conexión restaurada — tus datos están actualizados
+          </div>
+        )}
         <Suspense fallback={<LoadingPage />}>
           <ErrorBoundary>
             <Routes>

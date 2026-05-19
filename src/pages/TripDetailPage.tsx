@@ -19,6 +19,8 @@ import { EditCoverForm } from '../components/EditCoverForm';
 import { ChecklistSection } from '../components/ChecklistSection';
 import { QuickAddExpenseForm } from '../components/QuickAddExpenseForm';
 import { ExpensesSection } from '../components/ExpensesSection';
+import { ProgressBar } from '../components/ProgressBar';
+import { formatCurrency } from '../lib/currencies';
 import { Modal } from '../components/Modal';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import {
@@ -155,6 +157,12 @@ export function TripDetailPage() {
   };
 
   const displayName = profile?.alias || profile?.full_name || user?.email?.split('@')[0] || t('profile.user');
+
+  const totalSpent = useMemo(
+    () => days.flatMap((d) => d.events).reduce((sum, e) => sum + (e.cost_amount || 0), 0),
+    [days],
+  );
+  const budgetProgress = trip?.total_budget && trip.total_budget > 0 ? (totalSpent / trip.total_budget) * 100 : 0;
 
   if (loading) {
     return isMobile ? <DetailSkeleton /> : <LoadingOverlay />;
@@ -376,6 +384,23 @@ export function TripDetailPage() {
           members={members}
           days={days}
         />
+        {trip?.total_budget && trip.total_budget > 0 && (
+          <div className="px-4 py-2 bg-white dark:bg-stone-950 border-b border-stone-100 dark:border-stone-800 flex items-center gap-3">
+            <span className="text-xs font-medium text-stone-500 shrink-0">
+              {formatCurrency(totalSpent, trip.currency)} / {formatCurrency(trip.total_budget, trip.currency)}
+            </span>
+            <ProgressBar
+              value={totalSpent}
+              max={trip.total_budget}
+              size="sm"
+              barClassName={
+                budgetProgress > 100 ? 'bg-red-500' : budgetProgress > 80 ? 'bg-amber-500' : 'bg-emerald-500'
+              }
+              className="flex-1"
+            />
+            <span className="text-[10px] text-stone-400 shrink-0">{Math.round(budgetProgress)}%</span>
+          </div>
+        )}
         <div className="sticky top-0 z-10 bg-white/95 dark:bg-stone-950/95 backdrop-blur-xl border-b border-stone-100 dark:border-stone-800 overflow-x-auto no-scrollbar">
           <div className="flex px-1 py-1.5 gap-0.5 min-w-max">
             {tabs.map((tab) => {
@@ -445,6 +470,25 @@ export function TripDetailPage() {
         members={members}
         days={days}
       />
+      {trip?.total_budget && trip.total_budget > 0 && (
+        <div className="py-2 bg-white dark:bg-stone-950 border-b border-stone-100 dark:border-stone-800">
+          <div className="page-container flex items-center gap-3">
+            <span className="text-xs font-medium text-stone-500 shrink-0">
+              {formatCurrency(totalSpent, trip.currency)} / {formatCurrency(trip.total_budget, trip.currency)}
+            </span>
+            <ProgressBar
+              value={totalSpent}
+              max={trip.total_budget}
+              size="sm"
+              barClassName={
+                budgetProgress > 100 ? 'bg-red-500' : budgetProgress > 80 ? 'bg-amber-500' : 'bg-emerald-500'
+              }
+              className="flex-1"
+            />
+            <span className="text-[10px] text-stone-400 shrink-0">{Math.round(budgetProgress)}%</span>
+          </div>
+        </div>
+      )}
       <div className="bg-white dark:bg-stone-950 border-b border-stone-100 dark:border-stone-800 sticky top-[57px] z-10">
         <div className="page-container flex overflow-x-auto no-scrollbar gap-1 py-2">
           {tabs.map((tab) => {

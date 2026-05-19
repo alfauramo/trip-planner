@@ -11,4 +11,5 @@ export { usePushNotifications } from './usePushNotifications';
 export { useAIItinerary } from './useAIItinerary';
 export { useUndoableAction } from './useUndoableAction';
 export { useKeyboardShortcuts } from './useKeyboardShortcuts';
+export { useOnlineStatus } from './useOnlineStatus';
 export type { Shortcut } from './useKeyboardShortcuts';

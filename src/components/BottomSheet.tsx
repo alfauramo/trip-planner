@@ -19,11 +19,23 @@ export function BottomSheet({ children, onClose, title }: BottomSheetProps) {
   const draggingRef = useRef(false);
   const startY = useRef(0);
   const { t } = useTranslation();
+  const previousFocus = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
+    previousFocus.current = document.activeElement as HTMLElement;
+    const timer = setTimeout(() => {
+      if (sheetRef.current) {
+        const firstInput = sheetRef.current.querySelector<HTMLElement>(
+          'input:not([type="hidden"]), textarea, select, button, [tabindex]:not([tabindex="-1"])',
+        );
+        firstInput?.focus();
+      }
+    }, 100);
     return () => {
       document.body.style.overflow = '';
+      clearTimeout(timer);
+      previousFocus.current?.focus();
     };
   }, []);
 
@@ -66,6 +78,9 @@ export function BottomSheet({ children, onClose, title }: BottomSheetProps) {
         <div
           ref={sheetRef}
           className="sheet-mobile"
+          role="dialog"
+          aria-modal="true"
+          aria-label={title}
           style={{
             transform: dragging ? `translateY(${offsetY}px)` : offsetY > 0 ? `translateY(${offsetY}px)` : '',
             transition: dragging ? 'none' : 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
@@ -101,7 +116,7 @@ export function BottomSheet({ children, onClose, title }: BottomSheetProps) {
       className="overlay-backdrop flex items-center justify-center p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="sheet-desktop">
+      <div className="sheet-desktop" role="dialog" aria-modal="true" aria-label={title}>
         {title && (
           <div className="flex items-center justify-between mb-4">
             <h2 className="overlay-title">{title}</h2>
