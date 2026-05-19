@@ -14,7 +14,7 @@ import { ActivityTimeline } from './ActivityTimeline';
 import { formatDate } from './EventHelpers';
 import { type TripEvent, type Day, type TripMember, type TripWithDetails } from '../types';
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { AIItineraryGenerator } from './AIItineraryGenerator';
 import type { AIItineraryResult } from '../hooks/useAIItinerary';
 
@@ -60,6 +60,11 @@ export function TripItinerary({
   const { t } = useTranslation();
   const [optimizingDay, setOptimizingDay] = useState<string | null>(null);
   const [routingDay, setRoutingDay] = useState<string | null>(null);
+  const routingTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => {
+    return () => clearTimeout(routingTimer.current);
+  }, []);
 
   const handleDragEnd = async (event: DragEndEvent, dayId: string) => {
     const { active, over } = event;
@@ -108,7 +113,8 @@ export function TripItinerary({
     }
     setRoutingDay(day.id);
     window.open(buildGoogleMapsRoute(eventsWithLocation), '_blank');
-    setTimeout(() => setRoutingDay(null), 500);
+    clearTimeout(routingTimer.current);
+    routingTimer.current = setTimeout(() => setRoutingDay(null), 500);
   };
 
   const renderDayCard = (day: Day & { events: TripEvent[] }) => (
