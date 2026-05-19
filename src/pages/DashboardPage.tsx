@@ -238,7 +238,7 @@ export function DashboardPage() {
             setShowNewTrip(true);
           }}
           aria-label={t('trip.new')}
-          className="btn-fab right-5 bottom-6"
+          className="btn-fab right-5 bottom-28"
           style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
         >
           <Plus className="w-6 h-6" />

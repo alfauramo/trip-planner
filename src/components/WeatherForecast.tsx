@@ -43,33 +43,6 @@ const weatherIcons: Record<number, typeof Sun> = {
   99: CloudRain,
 };
 
-const weatherDescriptions: Record<number, string> = {
-  0: 'weather.clear',
-  1: 'weather.mostlyClear',
-  2: 'weather.partlyCloudy',
-  3: 'weather.cloudy',
-  45: 'weather.foggy',
-  48: 'weather.foggy',
-  51: 'weather.drizzle',
-  53: 'weather.drizzle',
-  55: 'weather.drizzle',
-  61: 'weather.rain',
-  63: 'weather.rainModerate',
-  65: 'weather.rainHeavy',
-  71: 'weather.snow',
-  73: 'weather.snow',
-  75: 'weather.snow',
-  77: 'weather.hail',
-  80: 'weather.showers',
-  81: 'weather.showers',
-  82: 'weather.showers',
-  85: 'weather.showers',
-  86: 'weather.showers',
-  95: 'weather.thunderstorm',
-  96: 'weather.thunderstorm',
-  99: 'weather.thunderstorm',
-};
-
 export function WeatherForecast({ trip }: WeatherForecastProps) {
   const { t } = useTranslation();
   const [weather, setWeather] = useState<WeatherDay[]>([]);
@@ -170,24 +143,21 @@ export function WeatherForecast({ trip }: WeatherForecastProps) {
       </button>
 
       {showForecast && (
-        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        <div className="mt-3 grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 gap-2">
           {weather.map((day, i) => {
             const Icon = weatherIcons[day.weathercode] || Cloud;
             return (
-              <div key={i} className="bg-white/80 dark:bg-stone-700/80 rounded-lg p-3 text-center">
-                <div className="text-sm font-medium text-stone-600 dark:text-stone-300">{formatDate(day.date)}</div>
-                <Icon className="w-8 h-8 mx-auto my-2 text-emerald-600" />
-                <div className="text-xs text-stone-500 dark:text-stone-400 mb-1">
-                  {t(weatherDescriptions[day.weathercode])}
-                </div>
-                <div className="flex items-center justify-center gap-2 text-sm">
+              <div key={i} className="bg-white/80 dark:bg-stone-700/80 rounded-lg p-2 text-center">
+                <div className="text-xs font-medium text-stone-600 dark:text-stone-300">{formatDate(day.date)}</div>
+                <Icon className="w-5 h-5 sm:w-7 sm:h-7 mx-auto my-1.5 text-emerald-600" />
+                <div className="flex items-center justify-center gap-1.5 text-xs">
                   <span className="font-medium text-red-500">{day.tempMax}°</span>
-                  <span className="text-stone-400">/</span>
+                  <span className="text-stone-400 text-[10px]">/</span>
                   <span className="text-emerald-600">{day.tempMin}°</span>
                 </div>
                 {day.precipitation > 0 && (
-                  <div className="flex items-center justify-center gap-1 mt-1 text-xs text-stone-500">
-                    <Droplets className="w-3 h-3" />
+                  <div className="flex items-center justify-center gap-0.5 mt-0.5 text-[10px] text-stone-500">
+                    <Droplets className="w-2.5 h-2.5" />
                     {day.precipitation}mm
                   </div>
                 )}

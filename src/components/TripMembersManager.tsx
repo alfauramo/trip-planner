@@ -52,7 +52,7 @@ export function TripMembersManager({ tripId, tripTitle, members, onMembersChange
       if (result.success) {
         if (result.needs_email) {
           try {
-            const acceptUrl = `${window.location.origin}/invite/${tripId}`;
+            const acceptUrl = `${window.location.origin}/trip-planner/invite/${tripId}`;
             await sendInviteEmail(email.trim(), tripTitle, user.email || 'Alguien', acceptUrl);
             showToast(t('member.invite.sent'));
           } catch (emailError) {
@@ -101,7 +101,7 @@ export function TripMembersManager({ tripId, tripTitle, members, onMembersChange
   };
 
   const getShareLink = () => {
-    return `${window.location.origin}/invite/${tripId}`;
+    return `${window.location.origin}/trip-planner/invite/${tripId}`;
   };
 
   const copyShareLink = () => {
