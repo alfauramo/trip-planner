@@ -161,33 +161,21 @@ export function DashboardPage() {
         <title>Mis Viajes | Trip Planner</title>
       </Helmet>
       <header className="nav-header">
-        <div className="px-4 py-3 flex items-center justify-between sm:hidden">
+        <div className="px-4 py-3 sm:max-w-6xl sm:mx-auto sm:px-4 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="nav-logo">
               <Plane className="nav-logo-icon" />
             </div>
             <span className="nav-title">{t('app.name')}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <NotificationBell />
-            <ThemeToggle />
-          </div>
-        </div>
-        <div className="nav-header-inner hidden sm:flex">
-          <div className="nav-brand">
-            <div className="nav-logo">
-              <Plane className="nav-logo-icon" />
-            </div>
-            <span className="nav-title">{t('app.name')}</span>
-          </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <NotificationBell />
             <ThemeToggle />
             <Tooltip content={t('nav.profile')}>
               <button
                 type="button"
                 onClick={() => navigate('/profile')}
-                className="flex items-center gap-2 p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-colors"
+                className="hidden sm:flex items-center gap-2 p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-colors"
               >
                 {profile?.avatar_url ? (
                   <ImageWithFallback
