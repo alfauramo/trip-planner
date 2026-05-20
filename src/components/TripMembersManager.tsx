@@ -9,12 +9,7 @@ import { useConfirm } from './ConfirmModal';
 import { useToast } from './Toast';
 import { sendInviteEmail } from '../lib/email';
 import { appUrl } from '../lib/urls';
-
-function getMemberDisplayName(member: TripMember): string {
-  if (member.profile?.full_name) return member.profile.full_name;
-  if (member.profile?.alias) return member.profile.alias;
-  return member.email.split('@')[0];
-}
+import { getMemberDisplayName } from './EventHelpers';
 
 interface TripMembersManagerProps {
   tripId: string;

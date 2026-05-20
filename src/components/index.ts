@@ -25,3 +25,7 @@ export { EventComments } from './EventComments';
 export { OptimizedImage } from './OptimizedImage';
 export { AIItineraryGenerator } from './AIItineraryGenerator';
 export { CommandPalette } from './CommandPalette';
+export { AsyncButton } from './AsyncButton';
+export { Avatar, AvatarMini, AvatarMore } from './Avatar';
+export { ImageWithFallback } from './ImageWithFallback';
+export { ProgressBar } from './ProgressBar';

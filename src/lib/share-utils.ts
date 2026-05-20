@@ -1,10 +1,9 @@
 import { appUrl } from './urls';
 
-export function shareTrip(trip: { id: string; title: string; description?: string }): void {
+export function shareTrip(trip: { id: string; title: string; description?: string }): Promise<void> {
   const url = appUrl(`/trips/${trip.id}`);
   if (navigator.share) {
-    navigator.share({ title: trip.title, text: trip.description || trip.title, url }).catch(() => {});
-  } else {
-    navigator.clipboard.writeText(url).catch(() => {});
+    return navigator.share({ title: trip.title, text: trip.description || trip.title, url });
   }
+  return navigator.clipboard.writeText(url);
 }

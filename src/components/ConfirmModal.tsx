@@ -1,4 +1,4 @@
-import { useState, createContext, useContext, ReactNode } from 'react';
+import { useState, createContext, useContext, ReactNode, useRef } from 'react';
 import { useIsMobile } from '../hooks/useMediaQuery';
 import { useTranslation } from 'react-i18next';
 
@@ -66,24 +66,24 @@ function ConfirmDialog({
 export function ConfirmProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
-  const [resolve, setResolve] = useState<((value: boolean) => void) | null>(null);
+  const resolveRef = useRef<((value: boolean) => void) | null>(null);
 
   const confirm = (msg: string): Promise<boolean> => {
     return new Promise((res) => {
       setMessage(msg);
-      setResolve(() => res);
+      resolveRef.current = res;
       setIsOpen(true);
     });
   };
 
   const handleConfirm = () => {
     setIsOpen(false);
-    resolve?.(true);
+    resolveRef.current?.(true);
   };
 
   const handleCancel = () => {
     setIsOpen(false);
-    resolve?.(false);
+    resolveRef.current?.(false);
   };
 
   return (
