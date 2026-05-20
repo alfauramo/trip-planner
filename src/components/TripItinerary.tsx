@@ -60,6 +60,7 @@ export function TripItinerary({
   const { t } = useTranslation();
   const [optimizingDay, setOptimizingDay] = useState<string | null>(null);
   const [routingDay, setRoutingDay] = useState<string | null>(null);
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
   const routingTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
@@ -372,15 +373,39 @@ export function TripItinerary({
           {t('itinerary.title')}
         </h2>
         {!isViewer && (
-          <button
-            onClick={onAddDayClick}
-            className={`flex items-center gap-1 text-emerald-600 font-medium ${isMobile ? 'text-sm' : 'hover:underline'}`}
-          >
-            <Plus className="w-4 h-4" />
-            {t('day.add')}
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onAddDayClick}
+              className={`flex items-center gap-1 text-emerald-600 font-medium ${isMobile ? 'text-sm' : 'hover:underline'}`}
+            >
+              <Plus className="w-4 h-4" />
+              {t('day.add')}
+            </button>
+            {onBulkCreate && (
+              <button
+                onClick={() => setShowAIGenerator(!showAIGenerator)}
+                className={`flex items-center gap-1 text-purple-600 dark:text-purple-400 font-medium ${isMobile ? 'text-sm' : 'hover:underline'}`}
+              >
+                <Sparkles className="w-4 h-4" />
+                {isMobile ? 'IA' : t('trip.generateAI')}
+              </button>
+            )}
+          </div>
         )}
       </div>
+
+      {showAIGenerator && onBulkCreate && (
+        <div className="mb-6">
+          <div className="card-widget p-4 sm:p-6">
+            <AIItineraryGenerator
+              onSelect={(result) => {
+                onBulkCreate(result);
+                setShowAIGenerator(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {days.length === 0 ? (
         <div className="space-y-6">
