@@ -45,22 +45,38 @@ Responde SOLO con JSON válido sin markdown en este formato:
   "tips": ["tip 1", "tip 2"]
 }`;
 
-  const apiKey = Deno.env.get('OPENAI_API_KEY');
-  if (!apiKey) {
-    return new Response(JSON.stringify({ error: 'OPENAI_API_KEY no configurada' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+  const groqKey = Deno.env.get('GROQ_API_KEY');
+  const openaiKey = Deno.env.get('OPENAI_API_KEY');
+
+  let apiUrl: string;
+  let apiKey: string;
+  let model: string;
+
+  if (groqKey) {
+    apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
+    apiKey = groqKey;
+    model = 'llama3-70b-8192';
+  } else if (openaiKey) {
+    apiUrl = 'https://api.openai.com/v1/chat/completions';
+    apiKey = openaiKey;
+    model = 'gpt-4o-mini';
+  } else {
+    return new Response(
+      JSON.stringify({
+        error: 'Configura GROQ_API_KEY (gratis en console.groq.com) o OPENAI_API_KEY en los secretos de Edge Functions',
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } },
+    );
   }
 
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+  const res = await fetch(apiUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model,
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.7,
       max_tokens: 4000,
@@ -69,7 +85,7 @@ Responde SOLO con JSON válido sin markdown en este formato:
 
   if (!res.ok) {
     const err = await res.text();
-    return new Response(JSON.stringify({ error: `OpenAI error: ${err}` }), {
+    return new Response(JSON.stringify({ error: `Error: ${err}` }), {
       status: 502,
       headers: { 'Content-Type': 'application/json' },
     });
