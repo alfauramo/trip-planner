@@ -63,6 +63,12 @@ jobs:
       - name: Install
         run: npm ci
 
+      - name: Build for E2E
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || '' }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY || '' }}
+
       - name: Install Playwright
         run: npx playwright install --with-deps chromium
 
