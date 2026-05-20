@@ -421,11 +421,11 @@ export function DashboardPage() {
                 </div>
 
                 {/* Desktop trip cards */}
-                <div className="hidden sm:grid gap-6 md:grid-cols-2">
+                <div className="hidden sm:grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {filteredTrips.map((trip) => (
                     <div key={trip.id} className="card card-interactive overflow-hidden group list-enter">
                       <Link to={`/trips/${trip.id}`} className="block">
-                        <div className="trip-cover aspect-[16/9]">
+                        <div className="trip-cover">
                           {trip.cover_image ? (
                             <ImageWithFallback
                               src={trip.cover_image}
@@ -473,7 +473,7 @@ export function DashboardPage() {
                             </button>
                           </div>
                         </div>
-                        <div className="p-6">
+                        <div className="p-4">
                           <div className="flex items-center gap-2 mb-1">
                             <h3 className="section-title">{trip.title}</h3>
                             {getTripStatus(trip.start_date, trip.end_date, t) && (
