@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { TripEvent, TripMember } from '../types';
 
 interface ExpenseChartsProps {
@@ -71,20 +70,6 @@ export function ExpenseCharts({ events, members }: ExpenseChartsProps) {
     return events.reduce((sum, e) => sum + (e.cost_amount || 0), 0);
   }, [events]);
 
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: { name: string; value: number }[] }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg shadow-lg p-3 text-sm">
-          <p className="font-medium text-stone-800 dark:text-white">{payload[0].name}</p>
-          <p className="text-stone-600 dark:text-stone-300">
-            {new Intl.NumberFormat('es-ES', { style: 'currency', currency }).format(payload[0].value)}
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
-
   if (!hasCategoryData && !hasMemberData) {
     return (
       <div className="card p-6">
@@ -109,55 +94,73 @@ export function ExpenseCharts({ events, members }: ExpenseChartsProps) {
       {hasCategoryData && (
         <div className="card p-5">
           <h3 className="text-sm font-semibold text-stone-800 dark:text-white mb-4">{t('expenses.byCategory')}</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <PieChart>
-              <Pie
-                data={categoryData}
-                cx="50%"
-                cy="50%"
-                innerRadius={55}
-                outerRadius={90}
-                paddingAngle={2}
-                dataKey="value"
-              >
-                {categoryData.map((entry) => (
-                  <Cell key={entry.rawName} fill={CATEGORY_COLORS[entry.rawName] || '#6b7280'} />
-                ))}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend
-                formatter={(value: string) => (
-                  <span className="text-xs text-stone-700 dark:text-stone-300">{value}</span>
-                )}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+          <div className="relative w-40 h-40 mx-auto">
+            <svg viewBox="0 0 36 36" className="w-full h-full">
+              {categoryData.map((entry, i) => {
+                const total = categoryData.reduce((s, d) => s + d.value, 0);
+                const pct = (entry.value / total) * 100;
+                const circumference = 100;
+                const offset = categoryData.slice(0, i).reduce((s, d) => s + (d.value / total) * circumference, 0);
+                return (
+                  <circle
+                    key={entry.rawName}
+                    cx="18"
+                    cy="18"
+                    r="14"
+                    fill="none"
+                    stroke={CATEGORY_COLORS[entry.rawName] || '#6b7280'}
+                    strokeWidth="4"
+                    strokeDasharray={`${(pct * circumference) / 100} ${circumference - (pct * circumference) / 100}`}
+                    strokeDashoffset={-offset}
+                    className="transition-all duration-500"
+                  />
+                );
+              })}
+              <text x="18" y="17" textAnchor="middle" className="text-[6px] fill-stone-400">
+                Total
+              </text>
+              <text x="18" y="22" textAnchor="middle" className="text-[8px] font-bold fill-stone-800 dark:fill-white">
+                {new Intl.NumberFormat('es-ES', { style: 'currency', currency }).format(totalSpent)}
+              </text>
+            </svg>
+            <div className="mt-3 space-y-1">
+              {categoryData.map((entry) => (
+                <div key={entry.rawName} className="flex items-center gap-2 text-xs">
+                  <div className="w-3 h-3 rounded" style={{ background: CATEGORY_COLORS[entry.rawName] }} />
+                  <span className="text-stone-600 dark:text-stone-300">{entry.name}</span>
+                  <span className="ml-auto text-stone-400">
+                    {new Intl.NumberFormat('es-ES', { style: 'currency', currency }).format(entry.value)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
       {hasMemberData && (
         <div className="card p-5">
           <h3 className="text-sm font-semibold text-stone-800 dark:text-white mb-4">{t('expenses.byMember')}</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={memberData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-              <XAxis
-                dataKey="name"
-                tick={{ fontSize: 12, fill: '#6b7280' }}
-                axisLine={{ stroke: '#e5e7eb' }}
-                tickLine={false}
-                className="dark:fill-stone-400"
-              />
-              <YAxis
-                tick={{ fontSize: 12, fill: '#6b7280' }}
-                axisLine={{ stroke: '#e5e7eb' }}
-                tickLine={false}
-                className="dark:fill-stone-400"
-                tickFormatter={(v: number) => `${v}€`}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="space-y-2">
+            {memberData.map((entry) => {
+              const max = Math.max(...memberData.map((d) => d.value), 1);
+              const pct = (entry.value / max) * 100;
+              return (
+                <div key={entry.name} className="flex items-center gap-2">
+                  <span className="text-xs text-stone-600 dark:text-stone-300 w-24 truncate">{entry.name}</span>
+                  <div className="flex-1 h-5 bg-stone-100 dark:bg-stone-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-stone-500 w-16 text-right">
+                    {new Intl.NumberFormat('es-ES', { style: 'currency', currency }).format(entry.value)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>

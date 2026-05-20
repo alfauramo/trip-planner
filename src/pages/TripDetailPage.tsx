@@ -5,6 +5,7 @@ import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useTripDetail } from '../hooks/useTripDetail';
 import { useTrips } from '../hooks/useTrips';
+import { useTripPresence } from '../hooks/useTripPresence';
 import { TripMembersManager } from '../components/TripMembersManager';
 import { useToast } from '../components/Toast';
 import { LoadingOverlay, DetailSkeleton } from '../components/Loading';
@@ -83,6 +84,7 @@ export function TripDetailPage() {
     deleteEvent,
     deleteDay,
   } = useTripDetail(id!);
+  const { onlineUsers } = useTripPresence(id);
   const { showToast } = useToast();
   const { user, profile } = useAuth();
   const { t } = useTranslation();
@@ -204,6 +206,15 @@ export function TripDetailPage() {
     { key: 'members' as const, label: t('nav.members'), icon: Users, count: members.length },
     { key: 'prep' as const, label: t('nav.prep'), icon: Package, count: null },
   ];
+
+  const presenceIndicator = onlineUsers.length > 0 && (
+    <div className="px-4 py-1.5 bg-emerald-50/50 dark:bg-emerald-900/10 border-b border-emerald-100 dark:border-emerald-800 flex items-center gap-2">
+      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+      <span className="text-xs text-emerald-700 dark:text-emerald-300">
+        {onlineUsers.length} {onlineUsers.length === 1 ? t('trip.online.one') : t('trip.online.many')}
+      </span>
+    </div>
+  );
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -418,6 +429,7 @@ export function TripDetailPage() {
             <span className="text-[10px] text-stone-400 shrink-0">{Math.round(budgetProgress)}%</span>
           </div>
         )}
+        {presenceIndicator}
         <div className="sticky top-0 z-10 bg-white/95 dark:bg-stone-950/95 backdrop-blur-xl border-b border-stone-100 dark:border-stone-800 overflow-x-auto no-scrollbar">
           <div className="flex px-1 py-1.5 gap-0.5 min-w-max">
             {tabs.map((tab) => {
@@ -511,6 +523,7 @@ export function TripDetailPage() {
           </div>
         </div>
       )}
+      {presenceIndicator}
       <div className="bg-white dark:bg-stone-950 border-b border-stone-100 dark:border-stone-800 sticky top-[57px] z-10">
         <div className="page-container flex overflow-x-auto no-scrollbar gap-1 py-2">
           {tabs.map((tab) => {

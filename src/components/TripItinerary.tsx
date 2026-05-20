@@ -1,4 +1,4 @@
-import { Calendar, Plus, Compass, Pencil, Trash2, Sparkles, Route, Loader2 } from 'lucide-react';
+import { Calendar, Plus, Compass, Pencil, Trash2, Sparkles, Route, Loader2, CalendarDays } from 'lucide-react';
 import { optimizeRoute, buildGoogleMapsRoute } from '../lib/trip-optimizer';
 import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect } from 'react';
 import { AIItineraryGenerator } from './AIItineraryGenerator';
 import type { AIItineraryResult } from '../hooks/useAIItinerary';
+import { TripCalendar } from './TripCalendar';
 
 export { AddDayForm, EditDayForm } from './DayForms';
 export { AddEventForm, EditEventContent, EventDetailsContent } from './EventForms';
@@ -61,6 +62,7 @@ export function TripItinerary({
   const [optimizingDay, setOptimizingDay] = useState<string | null>(null);
   const [routingDay, setRoutingDay] = useState<string | null>(null);
   const [showAIGenerator, setShowAIGenerator] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   const routingTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
@@ -390,6 +392,13 @@ export function TripItinerary({
                 {isMobile ? 'IA' : t('trip.generateAI')}
               </button>
             )}
+            <button
+              onClick={() => setShowCalendar(!showCalendar)}
+              className={`flex items-center gap-1 font-medium ${isMobile ? 'text-sm' : 'hover:underline'} ${showCalendar ? 'text-emerald-600' : 'text-stone-500'}`}
+            >
+              <CalendarDays className="w-4 h-4" />
+              {isMobile ? t('nav.calendar') : t('nav.calendar')}
+            </button>
           </div>
         )}
       </div>
@@ -404,6 +413,19 @@ export function TripItinerary({
               }}
             />
           </div>
+        </div>
+      )}
+
+      {showCalendar && (
+        <div className="mb-6">
+          <TripCalendar
+            days={days}
+            onDayClick={(day) => {
+              setShowCalendar(false);
+              const el = document.getElementById(`day-${day.id}`);
+              el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}
+          />
         </div>
       )}
 

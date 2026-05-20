@@ -12,4 +12,5 @@ export { useAIItinerary } from './useAIItinerary';
 export { useUndoableAction } from './useUndoableAction';
 export { useKeyboardShortcuts } from './useKeyboardShortcuts';
 export { useOnlineStatus } from './useOnlineStatus';
+export { useTripPresence } from './useTripPresence';
 export type { Shortcut } from './useKeyboardShortcuts';
