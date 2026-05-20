@@ -378,7 +378,7 @@ export function DashboardPage() {
                                 </div>
                               )}
                             </div>
-                            <div className="p-4">
+                            <div className="p-3">
                               <div className="flex items-center gap-2">
                                 <h3 className="card-title">{trip.title}</h3>
                                 {getTripStatus(trip.start_date, trip.end_date, t) && (

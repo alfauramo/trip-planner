@@ -743,7 +743,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
    DESIGN SYSTEM — Trip card cover
    ============================================================ */
 .trip-cover {
-  @apply relative aspect-[16/9] sm:aspect-[2/1] bg-gradient-to-br from-emerald-600 to-teal-800;
+  @apply relative h-36 sm:h-40 lg:h-44 bg-gradient-to-br from-emerald-600 to-teal-800;
 }
 .trip-cover-img {
   @apply w-full h-full object-cover;
