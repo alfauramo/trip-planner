@@ -18,7 +18,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: process.env.CI ? 'npm run build && npm run preview' : 'npm run dev',
+    command: process.env.CI ? 'npx vite preview --port 4173' : 'npm run dev',
     url: process.env.CI ? 'http://localhost:4173/trip-planner/' : 'http://localhost:5173/trip-planner/',
     reuseExistingServer: !process.env.CI,
     timeout: 60000,
