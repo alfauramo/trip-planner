@@ -119,6 +119,7 @@ export function NotificationBell() {
               <button
                 onClick={() => {
                   setShowDropdown(false);
+                  navigate('/invitations');
                 }}
                 className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
               >
