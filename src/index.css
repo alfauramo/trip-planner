@@ -388,7 +388,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
 }
 
 .btn-primary {
-  @apply btn-base px-5 py-2.5 text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.97] focus-visible:ring-emerald-500 focus-visible:ring-offset-white dark:focus-visible:ring-offset-stone-950;
+  @apply btn-base px-5 py-2.5 text-white bg-brand-600 hover:bg-brand-700 active:bg-brand-800 shadow-sm hover:shadow-md active:shadow-sm active:scale-[0.97] focus-visible:ring-brand-500 focus-visible:ring-offset-white dark:focus-visible:ring-offset-stone-950;
 }
 
 .btn-secondary {
@@ -409,7 +409,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
 }
 
 .btn-fab {
-  @apply fixed z-30 w-14 h-14 rounded-full shadow-lg shadow-emerald-500/30 p-0 flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white active:scale-90;
+  @apply fixed z-30 w-14 h-14 rounded-full shadow-lg shadow-brand-500/40 p-0 flex items-center justify-center bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white active:scale-90;
   transition: all 0.15s var(--ease-spring);
 }
 
@@ -418,7 +418,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
   transition: all 0.15s var(--ease-spring);
 }
 .btn-nav-active {
-  @apply btn-nav bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300;
+  @apply btn-nav bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-brand-300;
 }
 .btn-nav-inactive {
   @apply btn-nav text-stone-500 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800;
@@ -498,7 +498,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
    DESIGN SYSTEM — Input hierarchy
    ============================================================ */
 .input {
-  @apply w-full px-4 py-2.5 rounded-xl text-sm bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 focus-visible:ring-emerald-500/60 transition-all duration-150 ease-out;
+  @apply w-full px-4 py-2.5 rounded-xl text-sm bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 focus-visible:ring-brand-500/60 transition-all duration-150 ease-out;
 }
 .input-error {
   @apply border-red-300 dark:border-red-700 focus:ring-red-500/30 focus:border-red-500;
@@ -608,7 +608,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
   @apply text-center py-16;
 }
 .empty-state-icon-bg {
-  @apply bg-emerald-50 dark:bg-emerald-950/50 rounded-full flex items-center justify-center mx-auto mb-4 w-14 h-14;
+  @apply bg-brand-50 dark:bg-brand-950/50 rounded-full flex items-center justify-center mx-auto mb-4 w-14 h-14;
 }
 .empty-state-icon {
   @apply w-12 h-12 mx-auto mb-4 text-stone-300 dark:text-stone-500;
@@ -663,7 +663,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
   @apply flex items-center gap-2.5;
 }
 .nav-logo {
-  @apply w-8 h-8 md:w-9 md:h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-sm shadow-emerald-200 dark:shadow-emerald-900/30;
+  @apply w-8 h-8 md:w-9 md:h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-sm shadow-brand-200 dark:shadow-brand-900/30;
 }
 .nav-logo-icon {
   @apply w-4 h-4 md:w-5 md:h-5 text-white;
@@ -721,7 +721,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
    DESIGN SYSTEM — Trip card cover
    ============================================================ */
 .trip-cover {
-  @apply relative h-36 sm:h-40 lg:h-44 bg-gradient-to-br from-emerald-600 to-teal-800;
+  @apply relative h-36 sm:h-40 lg:h-44 bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900;
 }
 .trip-cover-img {
   @apply w-full h-full object-cover;
@@ -740,7 +740,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
    DESIGN SYSTEM — Profile banner (gradient)
    ============================================================ */
 .profile-banner {
-  @apply bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-4 md:p-5 flex items-center justify-between text-white shadow-sm;
+  @apply bg-gradient-to-r from-brand-500 to-brand-700 rounded-2xl p-4 md:p-5 flex items-center justify-between text-white shadow-sm;
 }
 .profile-banner-text {
   @apply font-medium text-sm;
