@@ -23,6 +23,7 @@ import { Tooltip } from './Tooltip';
 import { SwipeableRow } from './SwipeableRow';
 import { WeatherForecast } from './WeatherForecast';
 import { EventComments } from './EventComments';
+import { BottomSheet } from './BottomSheet';
 import { SortableEvent } from './SortableEvent';
 import { ActivityTimeline } from './ActivityTimeline';
 import { formatDate } from './EventHelpers';
@@ -75,6 +76,7 @@ export function TripItinerary({
   const [showActivity, setShowActivity] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [selectedCommentEvent, setSelectedCommentEvent] = useState<string | null>(null);
   const routingTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
@@ -241,13 +243,8 @@ export function TripItinerary({
                           }
                         }}
                         onOpenMaps={() => event.google_maps_url && window.open(event.google_maps_url, '_blank')}
+                        onViewComments={() => setSelectedCommentEvent(event.id)}
                       />
-                      <details className="ml-12">
-                        <summary className="text-xs text-stone-400 cursor-pointer hover:text-emerald-600 select-none py-1">
-                          {t('comments.title')}
-                        </summary>
-                        <EventComments eventId={event.id} />
-                      </details>
                     </>
                   );
                   if (isMobile) {
@@ -293,13 +290,8 @@ export function TripItinerary({
                       }
                     }}
                     onOpenMaps={() => event.google_maps_url && window.open(event.google_maps_url, '_blank')}
+                    onViewComments={() => setSelectedCommentEvent(event.id)}
                   />
-                  <details className="ml-12">
-                    <summary className="text-xs text-stone-400 cursor-pointer hover:text-emerald-600 select-none py-1">
-                      {t('comments.title')}
-                    </summary>
-                    <EventComments eventId={event.id} />
-                  </details>
                 </>
               );
               return (
@@ -499,6 +491,11 @@ export function TripItinerary({
         </div>
       ) : (
         <div className={isMobile ? 'space-y-3' : 'space-y-6 w-full'}>{days.map(renderDayCard)}</div>
+      )}
+      {selectedCommentEvent && (
+        <BottomSheet title={t('comments.title')} onClose={() => setSelectedCommentEvent(null)}>
+          <EventComments eventId={selectedCommentEvent} />
+        </BottomSheet>
       )}
     </>
   );

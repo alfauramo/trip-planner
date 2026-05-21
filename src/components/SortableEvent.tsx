@@ -1,6 +1,6 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, FileText, ExternalLink, Edit2, Trash2, Clock, MapIcon, Euro } from 'lucide-react';
+import { GripVertical, FileText, ExternalLink, Edit2, Trash2, Clock, MapIcon, Euro, MessageSquare } from 'lucide-react';
 import { Tooltip } from './Tooltip';
 import { eventTypes } from './EventHelpers';
 import { type TripEvent } from '../types';
@@ -12,6 +12,7 @@ export function SortableEvent({
   onAddDetails,
   onDelete,
   onOpenMaps,
+  onViewComments,
   isViewer,
 }: {
   event: TripEvent;
@@ -19,6 +20,7 @@ export function SortableEvent({
   onAddDetails: () => void;
   onDelete: () => void;
   onOpenMaps?: () => void;
+  onViewComments?: () => void;
   isViewer?: boolean;
 }) {
   const { t } = useTranslation();
@@ -89,6 +91,17 @@ export function SortableEvent({
             )}
           </div>
           <div className="hidden sm:flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+            {onViewComments && (
+              <Tooltip content={t('comments.title')}>
+                <button
+                  onClick={onViewComments}
+                  aria-label={t('comments.title')}
+                  className="p-2 text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                </button>
+              </Tooltip>
+            )}
             {event.google_maps_url && (
               <Tooltip content={t('event.googleMaps')}>
                 <button
@@ -177,6 +190,15 @@ export function SortableEvent({
 
         {/* Mobile actions */}
         <div className="sm:hidden flex items-center gap-1 mt-2 pt-2 border-t border-stone-100 dark:border-stone-800">
+          {onViewComments && (
+            <button
+              onClick={onViewComments}
+              className="flex items-center gap-1 px-2.5 py-2 text-xs font-medium min-h-[44px] text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-150"
+            >
+              <MessageSquare className="w-3 h-3" />
+              {t('comments.title')}
+            </button>
+          )}
           <button
             onClick={onAddDetails}
             className="flex items-center gap-1 px-2.5 py-2 text-xs font-medium text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-150 min-h-[44px]"
