@@ -7,6 +7,7 @@ import {
   Sparkles,
   Route,
   Loader2,
+  MoreHorizontal,
   CalendarDays,
   CloudSun,
   Clock,
@@ -17,6 +18,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { supabase } from '../lib/supabase';
 import { useToast } from './Toast';
 import { useConfirm } from './ConfirmModal';
+import { Modal } from './Modal';
 import { Tooltip } from './Tooltip';
 import { SwipeableRow } from './SwipeableRow';
 import { WeatherForecast } from './WeatherForecast';
@@ -72,6 +74,7 @@ export function TripItinerary({
   const [showWeather, setShowWeather] = useState(false);
   const [showActivity, setShowActivity] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const routingTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
@@ -381,8 +384,8 @@ export function TripItinerary({
           <Calendar className={isMobile ? 'w-4 h-4' : 'w-5 h-5'} />
           {t('itinerary.title')}
         </h2>
-        {!isViewer && (
-          <div className="flex items-center gap-1 sm:gap-3">
+        <div className="flex items-center gap-1">
+          {!isViewer && (
             <button
               onClick={onAddDayClick}
               className={`flex items-center gap-1 text-emerald-600 font-medium ${isMobile ? 'text-sm' : 'hover:underline'}`}
@@ -390,35 +393,55 @@ export function TripItinerary({
               <Plus className="w-4 h-4" />
               {t('day.add')}
             </button>
+          )}
+          <div className="relative">
+            <button
+              onClick={() => setShowMoreMenu(!showMoreMenu)}
+              className={`flex items-center gap-1 font-medium ${isMobile ? 'text-sm' : 'hover:underline'} ${showMoreMenu ? 'text-emerald-600' : 'text-stone-400 dark:text-stone-500'}`}
+            >
+              <MoreHorizontal className="w-4 h-4" />
+              {!isMobile && <span className="text-xs">{t('common.more')}</span>}
+            </button>
+            {showMoreMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
+                <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-stone-800 rounded-xl shadow-xl border border-stone-200 dark:border-stone-700 z-50 py-1 overflow-hidden">
+                  <button
+                    onClick={() => {
+                      setShowCalendar(!showCalendar);
+                      setShowMoreMenu(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
+                  >
+                    <CalendarDays className="w-4 h-4" /> {t('nav.calendar')}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowWeather(!showWeather);
+                      setShowMoreMenu(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
+                  >
+                    <CloudSun className="w-4 h-4" /> {t('weather.title')}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowActivity(!showActivity);
+                      setShowMoreMenu(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
+                  >
+                    <Clock className="w-4 h-4" /> {t('activity.title')}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
-        )}
-        <div className="flex items-center gap-1 sm:gap-3">
-          <button
-            onClick={() => setShowCalendar(!showCalendar)}
-            className={`flex items-center gap-1 font-medium ${isMobile ? 'text-xs' : 'text-sm hover:underline'} ${showCalendar ? 'text-emerald-600' : 'text-stone-400 dark:text-stone-500'}`}
-          >
-            <CalendarDays className="w-4 h-4" />
-            {isMobile ? '' : t('nav.calendar')}
-          </button>
-          <button
-            onClick={() => setShowWeather(!showWeather)}
-            className={`flex items-center gap-1 font-medium ${isMobile ? 'text-xs' : 'text-sm hover:underline'} ${showWeather ? 'text-emerald-600' : 'text-stone-400 dark:text-stone-500'}`}
-          >
-            <CloudSun className="w-4 h-4" />
-            {isMobile ? '' : t('weather.title')}
-          </button>
-          <button
-            onClick={() => setShowActivity(!showActivity)}
-            className={`flex items-center gap-1 font-medium ${isMobile ? 'text-xs' : 'text-sm hover:underline'} ${showActivity ? 'text-emerald-600' : 'text-stone-400 dark:text-stone-500'}`}
-          >
-            <Clock className="w-4 h-4" />
-            {isMobile ? '' : t('activity.title')}
-          </button>
         </div>
       </div>
 
       {showCalendar && (
-        <div className="mb-6">
+        <Modal title={t('nav.calendar')} onClose={() => setShowCalendar(false)}>
           <TripCalendar
             days={days}
             onDayClick={(day) => {
@@ -427,7 +450,17 @@ export function TripItinerary({
               el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }}
           />
-        </div>
+        </Modal>
+      )}
+      {showWeather && (
+        <Modal title={t('weather.title')} onClose={() => setShowWeather(false)}>
+          <WeatherForecast trip={{ ...trip, days, members } as TripWithDetails} />
+        </Modal>
+      )}
+      {showActivity && (
+        <Modal title={t('activity.title')} onClose={() => setShowActivity(false)}>
+          <ActivityTimeline tripId={trip.id} />
+        </Modal>
       )}
 
       {days.length === 0 ? (
@@ -464,36 +497,6 @@ export function TripItinerary({
         </div>
       ) : (
         <div className={isMobile ? 'space-y-3' : 'space-y-6 w-full'}>{days.map(renderDayCard)}</div>
-      )}
-      {days.length > 0 && (showWeather || showActivity) && (
-        <div className="mt-8 border-t border-stone-100 dark:border-stone-800 pt-6 space-y-4">
-          {showWeather && (
-            <div className="card p-4">
-              <button onClick={() => setShowWeather(false)} className="w-full flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CloudSun className="w-5 h-5 text-amber-500" />
-                  <span className="font-medium text-stone-800 dark:text-white text-sm">{t('weather.title')}</span>
-                </div>
-                <span className="text-xs text-stone-400">{t('common.hide')}</span>
-              </button>
-              <div className="mt-3">
-                <WeatherForecast trip={{ ...trip, days, members } as TripWithDetails} />
-              </div>
-            </div>
-          )}
-          {showActivity && (
-            <div className="card p-4">
-              <button onClick={() => setShowActivity(false)} className="w-full flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-blue-500" />
-                  <span className="font-medium text-stone-800 dark:text-white text-sm">{t('activity.title')}</span>
-                </div>
-                <span className="text-xs text-stone-400">{t('common.hide')}</span>
-              </button>
-              <ActivityTimeline tripId={trip.id} />
-            </div>
-          )}
-        </div>
       )}
     </>
   );
