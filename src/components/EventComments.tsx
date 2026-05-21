@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 import { MessageSquare, Send, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -18,6 +19,7 @@ interface EventCommentsProps {
 
 export function EventComments({ eventId }: EventCommentsProps) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
@@ -77,7 +79,7 @@ export function EventComments({ eventId }: EventCommentsProps) {
     const optimistic: Comment = {
       id: crypto.randomUUID(),
       event_id: eventIdRef.current,
-      user_id: 'local',
+      user_id: user?.id || 'local',
       content: text,
       created_at: new Date().toISOString(),
       user_name: t('comments.you'),
@@ -88,7 +90,7 @@ export function EventComments({ eventId }: EventCommentsProps) {
     try {
       const { error } = await supabase
         .from('event_comments')
-        .insert({ event_id: eventIdRef.current, content: optimistic.content });
+        .insert({ event_id: eventIdRef.current, content: optimistic.content, user_id: user?.id });
 
       if (error) throw error;
       setNewComment('');
