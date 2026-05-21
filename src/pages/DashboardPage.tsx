@@ -126,7 +126,11 @@ export function DashboardPage() {
   const handleDeleteTrip = async (tripId: string) => {
     hapticMedium();
     if (await confirm(t('trip.delete.confirm'))) {
-      deleteTrip(tripId);
+      try {
+        await deleteTrip(tripId);
+      } catch {
+        showToast(t('common.error'), 'error');
+      }
     }
   };
 
