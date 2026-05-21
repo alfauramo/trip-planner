@@ -229,7 +229,7 @@ export function DashboardPage() {
             </div>
           )}
 
-          <main className="px-4 pt-6 pb-24 sm:page-container sm:py-10 sm:w-full">
+          <main className="px-4 pt-6 pb-24 sm:max-w-5xl sm:mx-auto sm:py-10 sm:w-full">
             <div className="flex items-center justify-between mb-6 sm:mb-10">
               <div>
                 <h1 className="page-title">{t('trip.myTrips')}</h1>
@@ -421,7 +421,7 @@ export function DashboardPage() {
                 </div>
 
                 {/* Desktop trip cards */}
-                <div className="hidden sm:grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="hidden sm:grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
                   {filteredTrips.map((trip) => (
                     <div key={trip.id} className="card card-interactive overflow-hidden group list-enter">
                       <Link to={`/trips/${trip.id}`} className="block">
