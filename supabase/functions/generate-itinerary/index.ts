@@ -55,7 +55,7 @@ Responde SOLO con JSON válido sin markdown en este formato:
   if (groqKey) {
     apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
     apiKey = groqKey;
-    model = 'llama3-70b-8192';
+    model = 'llama-3.3-70b-versatile';
   } else if (openaiKey) {
     apiUrl = 'https://api.openai.com/v1/chat/completions';
     apiKey = openaiKey;
