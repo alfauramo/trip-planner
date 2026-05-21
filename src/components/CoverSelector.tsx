@@ -167,7 +167,7 @@ export function CoverSelector({ value, onChange }: CoverSelectorProps) {
           value={customUrl}
           onChange={(e) => handleCustomUrlChange(e.target.value)}
           placeholder={t('cover.urlPlaceholder')}
-          className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-stone-700 text-stone-900 dark:text-white placeholder-gray-400 dark:placeholder-stone-400 transition-all duration-150"
+          className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-white dark:bg-stone-700 text-stone-900 dark:text-white placeholder-gray-400 dark:placeholder-stone-400 transition-all duration-150"
         />
       )}
 
@@ -198,7 +198,7 @@ export function CoverSelector({ value, onChange }: CoverSelectorProps) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('cover.searchCountry')}
-            className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-stone-700 text-stone-900 dark:text-white placeholder-gray-400 dark:placeholder-stone-400 transition-all duration-150 mb-4"
+            className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-white dark:bg-stone-700 text-stone-900 dark:text-white placeholder-gray-400 dark:placeholder-stone-400 transition-all duration-150 mb-4"
             autoFocus
           />
           <div className="grid grid-cols-2 gap-1 max-h-64 overflow-y-auto">

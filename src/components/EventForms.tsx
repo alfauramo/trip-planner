@@ -301,7 +301,7 @@ export function EditEventContent({
       <button
         type="button"
         onClick={() => setShowAdvanced(!showAdvanced)}
-        className="text-sm text-emerald-600 hover:text-emerald-700"
+        className="text-sm text-brand-600 hover:text-brand-700"
       >
         {showAdvanced ? t('common.hide') : t('common.more')}
       </button>
@@ -326,7 +326,7 @@ export function EditEventContent({
             </div>
             <div className="flex items-center pt-6">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" {...register('cost_paid')} className="w-4 h-4 text-emerald-600 rounded" />
+                <input type="checkbox" {...register('cost_paid')} className="w-4 h-4 text-brand-600 rounded" />
                 <span className="text-sm text-stone-600 dark:text-stone-300">{t('event.paid')}</span>
               </label>
             </div>
@@ -385,7 +385,7 @@ export function EditEventContent({
                       if (e.target.checked) setSelectedParticipants([...selectedParticipants, uid]);
                       else setSelectedParticipants(selectedParticipants.filter((id) => id !== uid));
                     }}
-                    className="w-4 h-4 text-emerald-600 rounded"
+                    className="w-4 h-4 text-brand-600 rounded"
                   />
                   <span className="text-sm text-stone-600 dark:text-stone-300">{getMemberDisplayName(m)}</span>
                 </label>
@@ -476,7 +476,7 @@ export function EventDetailsContent({
               type="checkbox"
               checked={costPaid}
               onChange={(e) => setCostPaid(e.target.checked)}
-              className="w-4 h-4 text-emerald-600 rounded"
+              className="w-4 h-4 text-brand-600 rounded"
             />
             <span className="text-sm text-stone-600 dark:text-stone-300">{t('event.paid')}</span>
           </label>
@@ -518,7 +518,7 @@ export function EventDetailsContent({
                     onClick={() =>
                       setSelectedParticipants((prev) => (selected ? prev.filter((p) => p !== id) : [...prev, id]))
                     }
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${selected ? 'bg-emerald-500 text-white' : 'bg-white dark:bg-stone-700 border border-stone-200 dark:border-stone-600 text-stone-600 dark:text-stone-300'}`}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${selected ? 'bg-brand-500 text-white' : 'bg-white dark:bg-stone-700 border border-stone-200 dark:border-stone-600 text-stone-600 dark:text-stone-300'}`}
                   >
                     {getMemberDisplayName(m)}
                   </button>

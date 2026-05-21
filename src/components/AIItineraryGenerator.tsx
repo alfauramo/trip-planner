@@ -83,7 +83,7 @@ export function AIItineraryGenerator({ onSelect }: Props) {
                   type="button"
                   onClick={() => handlePreset(p)}
                   disabled={loading}
-                  className="px-3 py-1 text-xs rounded-full border border-stone-200 hover:border-emerald-400 hover:bg-emerald-50 dark:border-stone-600 dark:hover:border-emerald-500 dark:hover:bg-emerald-900/20 text-stone-600 dark:text-stone-300 transition-colors disabled:opacity-50"
+                  className="px-3 py-1 text-xs rounded-full border border-stone-200 hover:border-brand-400 hover:bg-brand-50 dark:border-stone-600 dark:hover:border-brand-500 dark:hover:bg-brand-900/20 text-stone-600 dark:text-stone-300 transition-colors disabled:opacity-50"
                 >
                   {p.label}
                 </button>

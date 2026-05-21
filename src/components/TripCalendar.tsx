@@ -63,9 +63,9 @@ export function TripCalendar({
 
   return (
     <div className="bg-white dark:bg-stone-800 rounded-2xl shadow-sm overflow-hidden border border-stone-100 dark:border-stone-700/50">
-      <div className="px-4 py-3.5 flex items-center justify-between bg-gradient-to-r from-emerald-50 to-emerald-50/50 dark:from-stone-800 dark:to-stone-800 border-b border-stone-100 dark:border-stone-700/50">
+      <div className="px-4 py-3.5 flex items-center justify-between bg-gradient-to-r from-brand-50 to-brand-50/50 dark:from-stone-800 dark:to-stone-800 border-b border-stone-100 dark:border-stone-700/50">
         <h3 className="font-semibold text-stone-800 dark:text-white flex items-center gap-2 text-sm">
-          <CalendarDays className="w-4 h-4 text-emerald-600" />
+          <CalendarDays className="w-4 h-4 text-brand-600" />
           {monthNames[monthStart.getMonth()]} {monthStart.getFullYear()}
         </h3>
         <span className="text-xs text-stone-400">
@@ -96,13 +96,13 @@ export function TripCalendar({
                 disabled={!tripDay}
                 className={`aspect-square rounded-lg flex flex-col items-center justify-center text-sm transition-all ${
                   isTripDay
-                    ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 font-semibold hover:bg-emerald-200 dark:hover:bg-emerald-900/50 cursor-pointer'
+                    ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-800 dark:text-brand-300 font-semibold hover:bg-brand-200 dark:hover:bg-brand-900/50 cursor-pointer'
                     : 'text-stone-300 dark:text-stone-600 cursor-default'
                 }`}
               >
                 <span>{day}</span>
                 {eventCount > 0 && (
-                  <span className="text-[10px] leading-none text-emerald-600/70 dark:text-emerald-400/70">
+                  <span className="text-[10px] leading-none text-brand-600/70 dark:text-brand-400/70">
                     {eventCount}
                   </span>
                 )}

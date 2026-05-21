@@ -108,7 +108,7 @@ export function TripMembersManager({ tripId, tripTitle, members, onMembersChange
 
   const roleIcons = {
     owner: <Crown className="w-4 h-4 text-yellow-500" />,
-    editor: <Edit className="w-4 h-4 text-emerald-600" />,
+    editor: <Edit className="w-4 h-4 text-brand-600" />,
     viewer: <Eye className="w-4 h-4 text-stone-500 dark:text-stone-400" />,
   };
 
@@ -260,7 +260,7 @@ export function TripMembersManager({ tripId, tripTitle, members, onMembersChange
                     value="viewer"
                     checked={role === 'viewer'}
                     onChange={() => setRole('viewer')}
-                    className="text-emerald-600"
+                    className="text-brand-600"
                   />
                   <Eye className="w-4 h-4 text-stone-500 dark:text-stone-400" />
                   <span className="text-sm text-stone-700 dark:text-stone-300">{t('member.role.viewer')}</span>
@@ -272,7 +272,7 @@ export function TripMembersManager({ tripId, tripTitle, members, onMembersChange
                     value="editor"
                     checked={role === 'editor'}
                     onChange={() => setRole('editor')}
-                    className="text-emerald-600"
+                    className="text-brand-600"
                   />
                   <Edit className="w-4 h-4 text-stone-500 dark:text-stone-400" />
                   <span className="text-sm text-stone-700 dark:text-stone-300">{t('member.role.editor')}</span>

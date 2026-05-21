@@ -144,7 +144,7 @@ export function PackingList({ tripId, isViewer }: PackingListProps) {
         )}
       </div>
 
-      {totalCount > 0 && <ProgressBar value={progress} barClassName="bg-gradient-to-r from-emerald-500 to-teal-500" />}
+      {totalCount > 0 && <ProgressBar value={progress} barClassName="bg-gradient-to-r from-brand-500 to-brand-500" />}
 
       {!isViewer && (
         <div className="flex gap-2">
@@ -154,7 +154,7 @@ export function PackingList({ tripId, isViewer }: PackingListProps) {
             onChange={(e) => setNewItem(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={t('packing.add')}
-            className="flex-1 px-4 py-2 border border-stone-300 dark:border-stone-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent dark:bg-stone-700 dark:text-white transition-all duration-150"
+            className="flex-1 px-4 py-2 border border-stone-300 dark:border-stone-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-stone-700 dark:text-white transition-all duration-150"
           />
           <select
             value={selectedCategory}

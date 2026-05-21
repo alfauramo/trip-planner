@@ -44,7 +44,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={toast.id}
             className={`px-4 py-3 rounded-xl shadow-lg shadow-elevated text-white flex items-center gap-2 animate-slide-in ${
-              toast.type === 'success' ? 'bg-emerald-500' : 'bg-red-500'
+              toast.type === 'success' ? 'bg-brand-500' : 'bg-red-500'
             } ${isMobile ? 'w-full' : ''}`}
           >
             {toast.type === 'success' ? (

@@ -78,7 +78,7 @@ export function UpdatePasswordPage() {
       </Helmet>
       <div className={cardCls}>
         <div className="flex items-center justify-center mb-8">
-          <Plane className="w-10 h-10 text-emerald-600" />
+          <Plane className="w-10 h-10 text-brand-600" />
           <h1 className={`font-bold text-stone-800 dark:text-white ml-3 ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
             {t('app.name')}
           </h1>

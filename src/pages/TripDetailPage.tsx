@@ -154,7 +154,7 @@ export function TripDetailPage() {
         <div className="error-content">
           <p className="error-message">{error || t('trip.notFound')}</p>
           <div className="error-actions">
-            <Link to="/" className="text-emerald-600 hover:underline">
+            <Link to="/" className="text-brand-600 hover:underline">
               {t('common.back')}
             </Link>
             <button type="button" onClick={refresh} className="btn-primary">
@@ -180,9 +180,9 @@ export function TripDetailPage() {
   ];
 
   const presenceIndicator = onlineUsers.length > 0 && (
-    <div className="px-4 py-1.5 bg-emerald-50/50 dark:bg-emerald-900/10 border-b border-emerald-100 dark:border-emerald-800 flex items-center gap-2">
-      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-      <span className="text-xs text-emerald-700 dark:text-emerald-300">
+    <div className="px-4 py-1.5 bg-brand-50/50 dark:bg-brand-900/10 border-b border-brand-100 dark:border-brand-800 flex items-center gap-2">
+      <div className="w-2 h-2 bg-brand-500 rounded-full animate-pulse" />
+      <span className="text-xs text-brand-700 dark:text-brand-300">
         {onlineUsers.length} {onlineUsers.length === 1 ? t('trip.online.one') : t('trip.online.many')}
       </span>
     </div>
@@ -392,9 +392,7 @@ export function TripDetailPage() {
               value={totalSpent}
               max={trip.total_budget}
               size="sm"
-              barClassName={
-                budgetProgress > 100 ? 'bg-red-500' : budgetProgress > 80 ? 'bg-amber-500' : 'bg-emerald-500'
-              }
+              barClassName={budgetProgress > 100 ? 'bg-red-500' : budgetProgress > 80 ? 'bg-amber-500' : 'bg-brand-500'}
               className="flex-1"
             />
             <span className="text-[10px] text-stone-400 shrink-0">{Math.round(budgetProgress)}%</span>
@@ -485,9 +483,7 @@ export function TripDetailPage() {
               value={totalSpent}
               max={trip.total_budget}
               size="sm"
-              barClassName={
-                budgetProgress > 100 ? 'bg-red-500' : budgetProgress > 80 ? 'bg-amber-500' : 'bg-emerald-500'
-              }
+              barClassName={budgetProgress > 100 ? 'bg-red-500' : budgetProgress > 80 ? 'bg-amber-500' : 'bg-brand-500'}
               className="flex-1"
             />
             <span className="text-[10px] text-stone-400 shrink-0">{Math.round(budgetProgress)}%</span>

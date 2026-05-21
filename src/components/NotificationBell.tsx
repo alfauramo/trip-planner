@@ -40,7 +40,7 @@ export function NotificationBell() {
       <button
         type="button"
         onClick={() => setShowDropdown(!showDropdown)}
-        className="relative p-2 text-stone-600 hover:text-emerald-600 transition-colors"
+        className="relative p-2 text-stone-600 hover:text-brand-600 transition-colors"
         aria-label={t('notifications.title')}
       >
         <Bell className="w-5 h-5" />
@@ -61,7 +61,7 @@ export function NotificationBell() {
                 <button
                   type="button"
                   onClick={markAllAsRead}
-                  className="text-xs text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+                  className="text-xs text-brand-600 hover:text-brand-700 flex items-center gap-1"
                 >
                   <Check className="w-3 h-3" />
                   {t('notifications.markAllRead')}
@@ -83,7 +83,7 @@ export function NotificationBell() {
                       type="button"
                       onClick={() => handleNotificationClick(notification)}
                       className={`w-full px-4 py-3 text-left hover:bg-stone-50 transition-colors ${
-                        !notification.read ? 'bg-emerald-50/50' : ''
+                        !notification.read ? 'bg-brand-50/50' : ''
                       }`}
                     >
                       <div className="flex items-start gap-3">
@@ -107,7 +107,7 @@ export function NotificationBell() {
                           )}
                           <p className="text-xs text-stone-400 mt-1">{formatDate(notification.created_at)}</p>
                         </div>
-                        {!notification.read && <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2" />}
+                        {!notification.read && <div className="w-2 h-2 bg-brand-500 rounded-full mt-2" />}
                       </div>
                     </button>
                   ))}
@@ -121,7 +121,7 @@ export function NotificationBell() {
                   setShowDropdown(false);
                   navigate('/invitations');
                 }}
-                className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                className="text-sm text-brand-600 hover:text-brand-700 font-medium"
               >
                 {t('notifications.viewAll')}
               </button>

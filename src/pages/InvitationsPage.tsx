@@ -117,7 +117,7 @@ export function InvitationsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+        <Loader2 className="w-8 h-8 text-brand-600 animate-spin" />
       </div>
     );
   }
@@ -138,7 +138,7 @@ export function InvitationsPage() {
             <ArrowLeft className="w-5 h-5 text-stone-600 dark:text-stone-300" />
           </button>
           <div className="flex items-center gap-2">
-            <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
+            <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-brand-600" />
             <h1 className="text-lg sm:text-xl font-bold text-stone-800 dark:text-white">
               {t('member.invitation.title')}
             </h1>
@@ -148,8 +148,8 @@ export function InvitationsPage() {
 
       <main className="flex-1 px-4 py-4 pb-20 sm:page-container sm:py-8 sm:pb-0">
         {tripId && tripTitle && !tripTitleLoading && (
-          <div className="bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 p-4 rounded-xl mb-4">
-            <p className="text-emerald-800 dark:text-emerald-200 text-sm">
+          <div className="bg-brand-50 dark:bg-brand-900/30 border border-brand-200 dark:border-brand-700 p-4 rounded-xl mb-4">
+            <p className="text-brand-800 dark:text-brand-200 text-sm">
               Te han invitado a unirte a <strong>{tripTitle}</strong>
             </p>
           </div>
@@ -162,10 +162,7 @@ export function InvitationsPage() {
             </div>
             <p className="empty-state-title">{t('member.invitation.empty')}</p>
             <p className="empty-state-desc">{t('member.invitation.empty.desc')}</p>
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 text-emerald-600 text-sm font-medium hover:underline"
-            >
+            <Link to="/" className="inline-flex items-center gap-2 text-brand-600 text-sm font-medium hover:underline">
               <Plane className="w-4 h-4" /> {t('member.invitation.goToTrips')}
             </Link>
           </div>

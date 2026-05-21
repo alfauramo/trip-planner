@@ -106,7 +106,7 @@ export function QuickAddExpenseForm({
                 key={cat}
                 type="button"
                 onClick={() => setCategory(cat)}
-                className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-all flex items-center gap-1 ${category === cat ? `${catInfo.color} ring-2 ring-emerald-500` : 'bg-stone-50 dark:bg-stone-700 text-stone-600 dark:text-stone-300'}`}
+                className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-all flex items-center gap-1 ${category === cat ? `${catInfo.color} ring-2 ring-brand-500` : 'bg-stone-50 dark:bg-stone-700 text-stone-600 dark:text-stone-300'}`}
               >
                 <span>{catInfo.icon}</span>
                 <span>{catInfo.label}</span>
@@ -126,7 +126,7 @@ export function QuickAddExpenseForm({
                 key={m.id}
                 type="button"
                 onClick={() => toggleParticipant(id)}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${isSelected ? 'bg-emerald-500 text-white' : 'bg-white text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700'}`}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${isSelected ? 'bg-brand-500 text-white' : 'bg-white text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700'}`}
               >
                 {getMemberDisplayName(m)}
               </button>

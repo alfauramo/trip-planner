@@ -85,7 +85,7 @@ export function ActivityTimeline({ tripId }: ActivityTimelineProps) {
       </div>
 
       {activities.length > 10 && (
-        <button onClick={() => setShowAll(!showAll)} className="text-sm text-emerald-600 hover:text-emerald-700 mt-2">
+        <button onClick={() => setShowAll(!showAll)} className="text-sm text-brand-600 hover:text-brand-700 mt-2">
           {showAll ? t('activity.showLess') : t('activity.showMore', { count: activities.length - 10 })}
         </button>
       )}

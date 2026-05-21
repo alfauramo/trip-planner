@@ -298,7 +298,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
 
 /* Skip-to-content (invisible until focused) */
 .skip-link {
-  @apply sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[999] focus:px-4 focus:py-2 focus:bg-emerald-600 focus:text-white focus:rounded-xl focus:text-sm focus:font-medium focus:shadow-lg;
+  @apply sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[999] focus:px-4 focus:py-2 focus:bg-brand-600 focus:text-white focus:rounded-xl focus:text-sm focus:font-medium focus:shadow-lg;
 }
 
 /* ============================================================
@@ -535,7 +535,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
   @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
 }
 .badge-primary {
-  @apply badge bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300;
+  @apply badge bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300;
 }
 .badge-secondary {
   @apply badge bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400;
@@ -749,7 +749,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
   @apply text-xs text-white/70 mt-0.5;
 }
 .profile-banner-btn {
-  @apply shrink-0 px-3 py-1.5 bg-white text-emerald-600 rounded-xl text-xs font-medium hover:bg-emerald-50 transition-colors;
+  @apply shrink-0 px-3 py-1.5 bg-white text-brand-600 rounded-xl text-xs font-medium hover:bg-brand-50 transition-colors;
 }
 
 /* ============================================================

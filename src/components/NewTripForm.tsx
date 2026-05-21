@@ -116,7 +116,7 @@ export function NewTripForm() {
           </label>
           <input
             {...register('title')}
-            className="w-full px-4 py-3 border border-stone-300 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+            className="w-full px-4 py-3 border border-stone-300 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             placeholder="Ej: Viaje a China"
           />
           {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>}
@@ -126,7 +126,7 @@ export function NewTripForm() {
           <textarea
             {...register('description')}
             rows={3}
-            className="w-full px-4 py-3 border border-stone-300 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+            className="w-full px-4 py-3 border border-stone-300 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
             placeholder="Cuéntanos sobre tu viaje..."
           />
         </div>
@@ -136,7 +136,7 @@ export function NewTripForm() {
             <input
               {...register('start_date')}
               type="date"
-              className="w-full px-4 py-3 border border-stone-300 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-stone-300 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             />
           </div>
           <div>
@@ -145,7 +145,7 @@ export function NewTripForm() {
               {...register('end_date')}
               type="date"
               min={startDate || ''}
-              className="w-full px-4 py-3 border border-stone-300 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-stone-300 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             />
             {errors.end_date && <p className="text-red-500 text-xs mt-1">{errors.end_date.message}</p>}
           </div>

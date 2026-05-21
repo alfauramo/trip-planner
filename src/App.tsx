@@ -52,7 +52,7 @@ function AppRoutes() {
     <div className={`animate-fade-in ${showMobileNav ? 'pb-16' : ''}`}>
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[999] focus:px-4 focus:py-2 focus:bg-emerald-600 focus:text-white focus:rounded-xl focus:text-sm focus:font-medium focus:shadow-lg"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[999] focus:px-4 focus:py-2 focus:bg-brand-600 focus:text-white focus:rounded-xl focus:text-sm focus:font-medium focus:shadow-lg"
       >
         Saltar al contenido principal
       </a>
@@ -63,7 +63,7 @@ function AppRoutes() {
           </div>
         )}
         {justReconnected && (
-          <div className="sticky top-0 z-[80] bg-emerald-500 text-white text-center py-2 px-4 text-sm font-medium shadow-lg animate-fade-in">
+          <div className="sticky top-0 z-[80] bg-brand-500 text-white text-center py-2 px-4 text-sm font-medium shadow-lg animate-fade-in">
             Conexión restaurada — tus datos están actualizados
           </div>
         )}

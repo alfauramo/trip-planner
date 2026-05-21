@@ -118,7 +118,7 @@ export function EventComments({ eventId }: EventCommentsProps) {
   return (
     <div className="card p-5">
       <div className="flex items-center gap-2 mb-4">
-        <MessageSquare className="w-4 h-4 text-emerald-600" />
+        <MessageSquare className="w-4 h-4 text-brand-600" />
         <h3 className="text-sm font-semibold text-stone-800 dark:text-white">{t('comments.title')}</h3>
       </div>
 
@@ -156,7 +156,7 @@ export function EventComments({ eventId }: EventCommentsProps) {
           onChange={(e) => setNewComment(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
           placeholder={t('comments.placeholder')}
-          className="flex-1 px-3 py-2 text-sm border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-700 text-stone-800 dark:text-white placeholder-gray-400 dark:placeholder-stone-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-150"
+          className="flex-1 px-3 py-2 text-sm border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-700 text-stone-800 dark:text-white placeholder-gray-400 dark:placeholder-stone-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-150"
           disabled={sending}
         />
         <button

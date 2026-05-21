@@ -77,7 +77,7 @@ export function FileUploader({ eventId, attachments, onAttachmentsChange }: File
       case 'pdf':
         return <FileText className="w-5 h-5 text-red-500" />;
       case 'image':
-        return <Image className="w-5 h-5 text-emerald-500" />;
+        return <Image className="w-5 h-5 text-brand-500" />;
       default:
         return <File className="w-5 h-5 text-stone-500 dark:text-stone-400" />;
     }
@@ -102,11 +102,11 @@ export function FileUploader({ eventId, attachments, onAttachmentsChange }: File
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="text-sm text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+          className="text-sm text-brand-600 hover:text-brand-700 flex items-center gap-1"
         >
           {uploading ? (
             <>
-              <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
               {t('common.uploading')}
             </>
           ) : (
@@ -133,7 +133,7 @@ export function FileUploader({ eventId, attachments, onAttachmentsChange }: File
                   href={attachment.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-stone-700 dark:text-stone-200 hover:text-emerald-600 truncate block"
+                  className="text-sm text-stone-700 dark:text-stone-200 hover:text-brand-600 truncate block"
                 >
                   {attachment.name}
                 </a>
@@ -141,7 +141,7 @@ export function FileUploader({ eventId, attachments, onAttachmentsChange }: File
               <a
                 href={attachment.url}
                 download={attachment.name}
-                className="p-1 text-stone-400 hover:text-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="p-1 text-stone-400 hover:text-brand-600 opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <Download className="w-4 h-4" />
               </a>

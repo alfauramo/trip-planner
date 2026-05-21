@@ -107,7 +107,7 @@ export function ExpensesSection({
             <button
               type="button"
               onClick={onAddDay}
-              className="flex items-center gap-1 text-emerald-600 text-sm font-medium"
+              className="flex items-center gap-1 text-brand-600 text-sm font-medium"
             >
               <Plus className="w-4 h-4" /> {t('day.add')}
             </button>
@@ -136,7 +136,7 @@ export function ExpensesSection({
         </div>
       </div>
 
-      <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-xl p-5 text-white">
+      <div className="bg-gradient-to-r from-brand-600 to-brand-700 rounded-xl p-5 text-white">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-1.5">
             <TrendingUp className="w-4 h-4" />

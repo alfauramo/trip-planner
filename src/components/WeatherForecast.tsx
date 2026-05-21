@@ -133,7 +133,7 @@ export function WeatherForecast({ trip }: WeatherForecastProps) {
   }
 
   return (
-    <div className="mt-4 bg-gradient-to-r from-emerald-50 to-emerald-50/50 dark:from-stone-800 dark:to-stone-700 rounded-xl p-4">
+    <div className="mt-4 bg-gradient-to-r from-brand-50 to-brand-50/50 dark:from-stone-800 dark:to-stone-700 rounded-xl p-4">
       <button onClick={() => setShowForecast(!showForecast)} className="w-full flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sun className="w-5 h-5 text-yellow-500" />
@@ -149,11 +149,11 @@ export function WeatherForecast({ trip }: WeatherForecastProps) {
             return (
               <div key={i} className="bg-white/80 dark:bg-stone-700/80 rounded-lg p-2 text-center">
                 <div className="text-xs font-medium text-stone-600 dark:text-stone-300">{formatDate(day.date)}</div>
-                <Icon className="w-5 h-5 sm:w-7 sm:h-7 mx-auto my-1.5 text-emerald-600" />
+                <Icon className="w-5 h-5 sm:w-7 sm:h-7 mx-auto my-1.5 text-brand-600" />
                 <div className="flex items-center justify-center gap-1.5 text-xs">
                   <span className="font-medium text-red-500">{day.tempMax}°</span>
                   <span className="text-stone-400 text-[10px]">/</span>
-                  <span className="text-emerald-600">{day.tempMin}°</span>
+                  <span className="text-brand-600">{day.tempMin}°</span>
                 </div>
                 {day.precipitation > 0 && (
                   <div className="flex items-center justify-center gap-0.5 mt-0.5 text-[10px] text-stone-500">

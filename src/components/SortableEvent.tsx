@@ -52,7 +52,7 @@ export function SortableEvent({
     <div ref={setNodeRef} style={style} className="flex items-start gap-2 sm:gap-3 group">
       {/* Timeline dot + line */}
       <div className="flex flex-col items-center pt-2 sm:pt-3 shrink-0">
-        <div className="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-100 dark:ring-emerald-900/50" />
+        <div className="w-2 h-2 rounded-full bg-brand-500 ring-2 ring-brand-100 dark:ring-brand-900/50" />
         <div className="w-px flex-1 bg-stone-200 dark:bg-stone-700 mt-1" />
       </div>
 
@@ -96,7 +96,7 @@ export function SortableEvent({
                 <button
                   onClick={onViewComments}
                   aria-label={t('comments.title')}
-                  className="p-2 text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all"
+                  className="p-2 text-stone-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-all"
                 >
                   <MessageSquare className="w-4 h-4" />
                 </button>
@@ -107,7 +107,7 @@ export function SortableEvent({
                 <button
                   onClick={onOpenMaps}
                   aria-label="Abrir en mapa"
-                  className="p-2 text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all"
+                  className="p-2 text-stone-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-all"
                 >
                   <ExternalLink className="w-4 h-4" />
                 </button>
@@ -120,7 +120,7 @@ export function SortableEvent({
                 className={`p-2 rounded-lg transition-all ${
                   hasDetails
                     ? 'text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20'
-                    : 'text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
+                    : 'text-stone-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20'
                 }`}
               >
                 <FileText className="w-4 h-4" />
@@ -132,7 +132,7 @@ export function SortableEvent({
                   <button
                     onClick={onEdit}
                     aria-label="Editar evento"
-                    className="p-2 text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all"
+                    className="p-2 text-stone-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-all"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
@@ -193,7 +193,7 @@ export function SortableEvent({
           {onViewComments && (
             <button
               onClick={onViewComments}
-              className="flex items-center gap-1 px-2.5 py-2 text-xs font-medium min-h-[44px] text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-150"
+              className="flex items-center gap-1 px-2.5 py-2 text-xs font-medium min-h-[44px] text-stone-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-all duration-150"
             >
               <MessageSquare className="w-3 h-3" />
               {t('comments.title')}
@@ -201,7 +201,7 @@ export function SortableEvent({
           )}
           <button
             onClick={onAddDetails}
-            className="flex items-center gap-1 px-2.5 py-2 text-xs font-medium text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-150 min-h-[44px]"
+            className="flex items-center gap-1 px-2.5 py-2 text-xs font-medium text-stone-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-all duration-150 min-h-[44px]"
           >
             <FileText className="w-3 h-3" />
             {hasDetails ? t('event.details') : t('event.complete')}
@@ -209,7 +209,7 @@ export function SortableEvent({
           {event.google_maps_url && (
             <button
               onClick={onOpenMaps}
-              className="flex items-center gap-1 px-2.5 py-2 text-xs font-medium min-h-[44px] text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-150"
+              className="flex items-center gap-1 px-2.5 py-2 text-xs font-medium min-h-[44px] text-stone-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-all duration-150"
             >
               <ExternalLink className="w-3 h-3" />
               {t('event.maps')}
@@ -219,7 +219,7 @@ export function SortableEvent({
             <>
               <button
                 onClick={onEdit}
-                className="flex items-center gap-1 px-2.5 py-2 text-xs font-medium min-h-[44px] text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-150"
+                className="flex items-center gap-1 px-2.5 py-2 text-xs font-medium min-h-[44px] text-stone-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-all duration-150"
               >
                 <Edit2 className="w-3 h-3" />
                 {t('common.edit')}

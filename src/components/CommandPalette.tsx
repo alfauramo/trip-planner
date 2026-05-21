@@ -210,11 +210,11 @@ export function CommandPalette({ open, onClose }: Props) {
                     onClick={cmd.action}
                     className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
                       selected
-                        ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
+                        ? 'bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300'
                         : 'text-stone-700 dark:text-stone-300'
                     }`}
                   >
-                    <span className={selected ? 'text-emerald-600' : 'text-stone-400'}>{cmd.icon}</span>
+                    <span className={selected ? 'text-brand-600' : 'text-stone-400'}>{cmd.icon}</span>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium truncate">{cmd.label}</div>
                       {cmd.description && <div className="text-xs text-stone-400 truncate">{cmd.description}</div>}

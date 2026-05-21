@@ -60,7 +60,7 @@ export function ForgotPasswordPage() {
             {t('auth.resetPassword.emailSent')}
           </h2>
           <p className="text-stone-600 dark:text-stone-400 mb-6">{t('auth.resetPassword.emailSent.desc')}</p>
-          <Link to="/login" className="text-emerald-600 hover:underline font-medium">
+          <Link to="/login" className="text-brand-600 hover:underline font-medium">
             {t('auth.backToLogin')}
           </Link>
         </div>
@@ -75,7 +75,7 @@ export function ForgotPasswordPage() {
       </Helmet>
       <div className={cardCls}>
         <div className="flex items-center justify-center mb-8">
-          <Plane className="w-10 h-10 text-emerald-600" />
+          <Plane className="w-10 h-10 text-brand-600" />
           <h1 className={`font-bold text-stone-800 dark:text-white ml-3 ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
             {t('app.name')}
           </h1>
@@ -98,7 +98,7 @@ export function ForgotPasswordPage() {
         </form>
 
         <div className="mt-6 text-center text-sm">
-          <Link to="/login" className="text-emerald-600 hover:underline font-medium">
+          <Link to="/login" className="text-brand-600 hover:underline font-medium">
             {t('auth.backToLogin')}
           </Link>
         </div>

@@ -127,7 +127,7 @@ export function ExportTripHTML({ trip }: ExportHTMLProps) {
       <button
         type="button"
         onClick={printPDF}
-        className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-300 hover:text-emerald-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
+        className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-300 hover:text-brand-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
       >
         <Printer className="w-4 h-4" />
         <span className="hidden sm:inline">{t('trip.exportPDF')}</span>
@@ -135,7 +135,7 @@ export function ExportTripHTML({ trip }: ExportHTMLProps) {
       <button
         type="button"
         onClick={downloadHTML}
-        className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-300 hover:text-emerald-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
+        className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-300 hover:text-brand-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
       >
         <FileText className="w-4 h-4" />
         <span className="hidden sm:inline">{t('trip.exportHTML')}</span>

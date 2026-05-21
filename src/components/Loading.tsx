@@ -5,7 +5,7 @@ export function Spinner({ size = 'md', className = '' }: { size?: 'sm' | 'md' | 
 
   return (
     <div className={`flex items-center justify-center ${className}`}>
-      <div className={`${sizeClasses[size]} border-emerald-500 border-t-transparent rounded-full animate-spin`} />
+      <div className={`${sizeClasses[size]} border-brand-500 border-t-transparent rounded-full animate-spin`} />
     </div>
   );
 }

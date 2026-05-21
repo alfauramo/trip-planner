@@ -31,7 +31,7 @@ export function MobileNav() {
               onClick={() => navigate(item.path)}
               className={`flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 min-w-0 rounded-xl transition-all duration-200 ${
                 active
-                  ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 dark:text-emerald-400'
+                  ? 'text-brand-600 bg-brand-50 dark:bg-brand-950/60 dark:text-brand-400'
                   : 'text-stone-400 dark:text-stone-500'
               }`}
             >

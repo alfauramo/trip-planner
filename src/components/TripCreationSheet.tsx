@@ -101,8 +101,8 @@ export function TripCreationSheet({ onClose }: { onClose: () => void }) {
         onClick={() => setMode('manual')}
         className="w-full flex items-center gap-3 p-4 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors text-left"
       >
-        <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
-          <Pencil className="w-5 h-5 text-emerald-600" />
+        <div className="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center shrink-0">
+          <Pencil className="w-5 h-5 text-brand-600" />
         </div>
         <div>
           <div className="font-medium text-stone-800 dark:text-white">{t('trip.creation.manual')}</div>

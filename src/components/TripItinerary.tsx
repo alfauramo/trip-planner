@@ -140,9 +140,9 @@ export function TripItinerary({
       id={`day-${day.id}`}
       className="bg-white dark:bg-stone-800 rounded-2xl shadow-sm overflow-hidden border border-stone-100 dark:border-stone-700/50"
     >
-      <div className="relative px-4 py-3.5 flex items-center justify-between bg-gradient-to-r from-emerald-50 to-emerald-50/50 dark:from-stone-800 dark:to-stone-800 border-b border-stone-100 dark:border-stone-700/50">
+      <div className="relative px-4 py-3.5 flex items-center justify-between bg-gradient-to-r from-brand-50 to-brand-50/50 dark:from-stone-800 dark:to-stone-800 border-b border-stone-100 dark:border-stone-700/50">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
             {day.day_number}
           </div>
           <div>
@@ -162,7 +162,7 @@ export function TripItinerary({
               <>
                 <button
                   onClick={() => onEditDayClick(day)}
-                  className="p-1.5 text-stone-400 hover:text-emerald-600 rounded-lg hover:bg-white/50 dark:hover:bg-stone-700 transition-colors"
+                  className="p-1.5 text-stone-400 hover:text-brand-600 rounded-lg hover:bg-white/50 dark:hover:bg-stone-700 transition-colors"
                   aria-label={t('day.edit')}
                 >
                   <Pencil className="w-3.5 h-3.5" />
@@ -190,7 +190,7 @@ export function TripItinerary({
                   <button
                     onClick={() => onEditDayClick(day)}
                     aria-label="Editar día"
-                    className="p-2 text-stone-400 dark:text-stone-500 hover:text-emerald-600 hover:bg-white/50 dark:hover:bg-stone-700 rounded-lg transition-all"
+                    className="p-2 text-stone-400 dark:text-stone-500 hover:text-brand-600 hover:bg-white/50 dark:hover:bg-stone-700 rounded-lg transition-all"
                   >
                     <Pencil className="w-4 h-4" />
                   </button>
@@ -305,7 +305,7 @@ export function TripItinerary({
         {!isViewer && (
           <button
             onClick={() => onAddEventClick(day.id)}
-            className={`w-full border-2 border-dashed border-stone-200 dark:border-stone-700 text-stone-400 hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 transition-all flex items-center justify-center gap-1.5 font-medium ${
+            className={`w-full border-2 border-dashed border-stone-200 dark:border-stone-700 text-stone-400 hover:border-brand-400 hover:text-brand-600 hover:bg-brand-50/50 dark:hover:bg-brand-900/10 transition-all flex items-center justify-center gap-1.5 font-medium ${
               isMobile ? 'mt-3 py-3 rounded-xl text-sm' : 'mt-4 py-2.5 rounded-xl'
             }`}
           >
@@ -331,7 +331,7 @@ export function TripItinerary({
             </button>
             <button
               onClick={() => openDayInMaps(day)}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-gradient-to-r from-emerald-50 to-emerald-50/50 text-emerald-700 hover:from-emerald-100 hover:to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-900/20 dark:text-emerald-400 transition-all font-medium ${
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-gradient-to-r from-brand-50 to-brand-50/50 text-brand-700 hover:from-brand-100 hover:to-brand-100 dark:from-brand-900/20 dark:to-brand-900/20 dark:text-brand-400 transition-all font-medium ${
                 isMobile ? 'rounded-xl text-xs' : 'rounded-xl text-sm'
               }`}
             >
@@ -351,12 +351,12 @@ export function TripItinerary({
   const emptyState = (
     <div className="empty-state">
       <div className="empty-state-icon-bg">
-        <Compass className="empty-state-icon text-emerald-400" />
+        <Compass className="empty-state-icon text-brand-400" />
       </div>
       <p className="empty-state-title">{isMobile ? t('itinerary.empty') : t('itinerary.empty.desc')}</p>
       <p className="empty-state-desc">{t('itinerary.empty.action')}</p>
       {!isViewer && (
-        <button onClick={onAddDayClick} className="text-emerald-600 font-medium text-sm hover:underline">
+        <button onClick={onAddDayClick} className="text-brand-600 font-medium text-sm hover:underline">
           {t('itinerary.addFirstDay')}
         </button>
       )}
@@ -380,7 +380,7 @@ export function TripItinerary({
           {!isViewer && (
             <button
               onClick={onAddDayClick}
-              className={`flex items-center gap-1 text-emerald-600 font-medium ${isMobile ? 'text-sm' : 'hover:underline'}`}
+              className={`flex items-center gap-1 text-brand-600 font-medium ${isMobile ? 'text-sm' : 'hover:underline'}`}
             >
               <Plus className="w-4 h-4" />
               {t('day.add')}
@@ -389,7 +389,7 @@ export function TripItinerary({
           <div className="relative">
             <button
               onClick={() => setShowMoreMenu(!showMoreMenu)}
-              className={`flex items-center gap-1 font-medium ${isMobile ? 'text-sm' : 'hover:underline'} ${showMoreMenu ? 'text-emerald-600' : 'text-stone-400 dark:text-stone-500'}`}
+              className={`flex items-center gap-1 font-medium ${isMobile ? 'text-sm' : 'hover:underline'} ${showMoreMenu ? 'text-brand-600' : 'text-stone-400 dark:text-stone-500'}`}
             >
               <MoreHorizontal className="w-4 h-4" />
               {!isMobile && <span className="text-xs">{t('common.more')}</span>}
@@ -461,7 +461,7 @@ export function TripItinerary({
             <h3 className="font-semibold">{t('trip.gettingStarted')}</h3>
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">
+                <div className="w-7 h-7 rounded-full bg-brand-100 dark:bg-brand-900/30 text-brand-600 flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">
                   1
                 </div>
                 <div className="flex-1">
@@ -474,13 +474,13 @@ export function TripItinerary({
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">
+                <div className="w-7 h-7 rounded-full bg-brand-100 dark:bg-brand-900/30 text-brand-600 flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">
                   2
                 </div>
                 <p className="text-sm flex-1">{t('trip.step2')}</p>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">
+                <div className="w-7 h-7 rounded-full bg-brand-100 dark:bg-brand-900/30 text-brand-600 flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">
                   3
                 </div>
                 <p className="text-sm flex-1">{t('trip.step3')}</p>

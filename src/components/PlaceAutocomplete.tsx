@@ -131,7 +131,7 @@ export function PlaceAutocomplete({ value = '', onSelect, placeholder, className
           onChange={handleInputChange}
           onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
           placeholder={resolvedPlaceholder}
-          className="w-full pl-10 pr-10 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-700 text-stone-800 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+          className="w-full pl-10 pr-10 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-700 text-stone-800 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
           autoComplete="off"
         />
         {loading && (

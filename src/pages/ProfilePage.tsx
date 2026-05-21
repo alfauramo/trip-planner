@@ -114,7 +114,7 @@ export function ProfilePage() {
   if (loading && !profile) {
     return (
       <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -155,11 +155,11 @@ export function ProfilePage() {
                     fallback={null}
                   />
                 ) : (
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-2xl sm:text-3xl font-semibold border-4 border-stone-100 dark:border-stone-700">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white text-2xl sm:text-3xl font-semibold border-4 border-stone-100 dark:border-stone-700">
                     {displayName.charAt(0).toUpperCase()}
                   </div>
                 )}
-                <label className="absolute bottom-0 right-0 p-1.5 sm:p-2 bg-emerald-600 hover:bg-emerald-700 rounded-full cursor-pointer transition-colors shadow-lg">
+                <label className="absolute bottom-0 right-0 p-1.5 sm:p-2 bg-brand-600 hover:bg-brand-700 rounded-full cursor-pointer transition-colors shadow-lg">
                   {uploadingAvatar ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
@@ -192,7 +192,7 @@ export function ProfilePage() {
                       type="text"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 sm:py-2.5 border border-stone-200 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      className="w-full pl-10 pr-4 py-3 sm:py-2.5 border border-stone-200 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                       placeholder={t('profile.fullName.placeholder')}
                     />
                   </div>
@@ -207,7 +207,7 @@ export function ProfilePage() {
                       type="text"
                       value={alias}
                       onChange={(e) => setAlias(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                      className="w-full pl-8 pr-4 py-3 sm:py-2.5 border border-stone-200 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      className="w-full pl-8 pr-4 py-3 sm:py-2.5 border border-stone-200 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                       placeholder={t('profile.alias.placeholder')}
                     />
                   </div>
@@ -220,7 +220,7 @@ export function ProfilePage() {
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-3 sm:py-2.5 border border-stone-200 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
+                  className="w-full px-4 py-3 sm:py-2.5 border border-stone-200 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 resize-none"
                   placeholder={t('profile.bio.placeholder')}
                 />
               </div>
@@ -234,7 +234,7 @@ export function ProfilePage() {
                       type="text"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 sm:py-2.5 border border-stone-200 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      className="w-full pl-10 pr-4 py-3 sm:py-2.5 border border-stone-200 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                       placeholder={t('profile.location.placeholder')}
                     />
                   </div>
@@ -247,7 +247,7 @@ export function ProfilePage() {
                       type="url"
                       value={website}
                       onChange={(e) => setWebsite(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 sm:py-2.5 border border-stone-200 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      className="w-full pl-10 pr-4 py-3 sm:py-2.5 border border-stone-200 dark:border-stone-600 rounded-xl bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                       placeholder={t('profile.website.placeholder')}
                     />
                   </div>
@@ -261,7 +261,7 @@ export function ProfilePage() {
               <button
                 type="button"
                 onClick={() => setShowPasswordChange(true)}
-                className="flex items-center gap-2 text-sm text-stone-500 hover:text-emerald-600 transition-colors"
+                className="flex items-center gap-2 text-sm text-stone-500 hover:text-brand-600 transition-colors"
               >
                 <Key className="w-4 h-4" />
                 {t('auth.password.change')}

@@ -12,7 +12,7 @@ export function ProgressBar({ value, max = 100, className = '', barClassName = '
   return (
     <div className={`w-full bg-stone-200 dark:bg-stone-700 rounded-full ${height} ${className}`}>
       <div
-        className={`h-full rounded-full transition-all duration-300 ${barClassName || 'bg-emerald-500'}`}
+        className={`h-full rounded-full transition-all duration-300 ${barClassName || 'bg-brand-500'}`}
         style={{ width: `${pct}%` }}
       />
     </div>

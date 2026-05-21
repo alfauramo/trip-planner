@@ -99,7 +99,7 @@ export function LoginPage() {
       </Helmet>
       <div className={cardCls}>
         <div className="flex items-center justify-center mb-8">
-          <Plane className="w-10 h-10 text-emerald-600" />
+          <Plane className="w-10 h-10 text-brand-600" />
           <h1 className={`font-bold text-stone-800 dark:text-white ml-3 ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
             {t('app.name')}
           </h1>
@@ -157,7 +157,7 @@ export function LoginPage() {
                 type="button"
                 onClick={() => handleResendVerification(watch('email'))}
                 disabled={resending}
-                className="text-xs text-emerald-600 hover:underline disabled:opacity-50"
+                className="text-xs text-brand-600 hover:underline disabled:opacity-50"
               >
                 {resending ? t('auth.resending') : t('auth.resend')}
               </button>
@@ -182,13 +182,13 @@ export function LoginPage() {
         </form>
 
         <div className="mt-6 text-center text-sm">
-          <Link to="/forgot-password" className="text-emerald-600 hover:underline">
+          <Link to="/forgot-password" className="text-brand-600 hover:underline">
             {t('auth.password.forgot')}
           </Link>
         </div>
         <div className="mt-4 text-center text-sm text-stone-600 dark:text-stone-400">
           {t('auth.noAccount')}{' '}
-          <Link to="/register" className="text-emerald-600 hover:underline font-medium">
+          <Link to="/register" className="text-brand-600 hover:underline font-medium">
             {t('auth.signupLink')}
           </Link>
         </div>

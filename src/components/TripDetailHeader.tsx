@@ -91,7 +91,7 @@ export function TripDetailHeader({
             <div className="absolute inset-0 hero-gradient" />
           </>
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 to-teal-800 flex items-center justify-center">
+          <div className="absolute inset-0 bg-gradient-to-br from-brand-600 to-brand-800 flex items-center justify-center">
             <Plane className="w-20 h-20 text-white/15" />
           </div>
         )}
@@ -186,7 +186,7 @@ export function TripDetailHeader({
                     fallback={null}
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-sm font-medium ring-2 ring-stone-100 dark:ring-stone-700">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white text-sm font-medium ring-2 ring-stone-100 dark:ring-stone-700">
                     {displayName.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -212,7 +212,7 @@ export function TripDetailHeader({
             <div className="absolute inset-0 hero-gradient" />
           </>
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 to-teal-800 flex items-center justify-center">
+          <div className="absolute inset-0 bg-gradient-to-br from-brand-600 to-brand-800 flex items-center justify-center">
             <Plane className="w-28 h-28 text-white/15" />
           </div>
         )}
@@ -252,7 +252,7 @@ export function TripDetailHeader({
             type="button"
             onClick={onEditTrip}
             aria-label={t('trip.edit')}
-            className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-300 hover:text-emerald-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
+            className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-300 hover:text-brand-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
           >
             <Pencil className="w-4 h-4" />
             <span className="hidden sm:inline">{t('trip.edit')}</span>
@@ -261,7 +261,7 @@ export function TripDetailHeader({
             type="button"
             onClick={onEditCover}
             aria-label={t('trip.editCover')}
-            className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-300 hover:text-emerald-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
+            className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-300 hover:text-brand-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
           >
             <ImageIcon className="w-4 h-4" />
             <span className="hidden sm:inline">{t('trip.cover')}</span>
@@ -270,7 +270,7 @@ export function TripDetailHeader({
             type="button"
             onClick={handleCalendarExport}
             aria-label={t('trip.exportCalendar')}
-            className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-300 hover:text-emerald-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
+            className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-300 hover:text-brand-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
           >
             <CalendarPlus className="w-4 h-4" />
             <span className="hidden sm:inline">{t('trip.exportCalendar')}</span>
@@ -281,7 +281,7 @@ export function TripDetailHeader({
             type="button"
             onClick={handleShare}
             aria-label={t('common.share')}
-            className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-300 hover:text-emerald-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
+            className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-300 hover:text-brand-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
           >
             <Share2 className="w-4 h-4" />
             <span className="hidden sm:inline">{t('common.share')}</span>

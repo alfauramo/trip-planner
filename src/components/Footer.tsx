@@ -9,14 +9,11 @@ export function Footer() {
       <div className="max-w-6xl mx-auto px-6 py-5">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-stone-500 dark:text-stone-400">
           <div className="flex items-center gap-2">
-            <Plane className="w-4 h-4 text-emerald-500" />
+            <Plane className="w-4 h-4 text-brand-500" />
             <span className="font-medium">{t('app.name')}</span>
           </div>
           <span>{t('footer.madeBy')}</span>
-          <Link
-            to="/profile"
-            className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-medium"
-          >
+          <Link to="/profile" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors font-medium">
             {t('nav.profile')}
           </Link>
         </div>
