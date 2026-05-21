@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Camera, Save, User, MapPin, Globe, LogOut, ArrowLeft } from 'lucide-react';
+import { Camera, Save, User, MapPin, Globe, LogOut, ArrowLeft, Key } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { useToast } from '../components/Toast';
@@ -12,7 +12,7 @@ import { ImageWithFallback } from '../components/ImageWithFallback';
 
 export function ProfilePage() {
   const navigate = useNavigate();
-  const { user, profile, refreshProfile, signOut } = useAuth();
+  const { user, profile, refreshProfile, signOut, updatePassword } = useAuth();
   const { showToast } = useToast();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
@@ -23,6 +23,10 @@ export function ProfilePage() {
   const [bio, setBio] = useState('');
   const [location, setLocation] = useState('');
   const [website, setWebsite] = useState('');
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -79,6 +83,29 @@ export function ProfilePage() {
     } catch (err: unknown) {
       showToast(err instanceof Error ? err.message : t('profile.saveError'), 'error');
       throw err;
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      showToast(t('auth.password.mismatch'), 'error');
+      return;
+    }
+    if (newPassword.length < 8) {
+      showToast(t('auth.password.requirements'), 'error');
+      return;
+    }
+    setChangingPassword(true);
+    try {
+      await updatePassword(newPassword);
+      showToast(t('auth.password.updated'));
+      setNewPassword('');
+      setConfirmPassword('');
+      setShowPasswordChange(false);
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : t('common.error'), 'error');
+    } finally {
+      setChangingPassword(false);
     }
   };
 
@@ -228,6 +255,56 @@ export function ProfilePage() {
               </div>
             </div>
           </div>
+
+          {!showPasswordChange ? (
+            <div className="px-5 sm:px-8 py-3 border-t dark:border-stone-700">
+              <button
+                type="button"
+                onClick={() => setShowPasswordChange(true)}
+                className="flex items-center gap-2 text-sm text-stone-500 hover:text-emerald-600 transition-colors"
+              >
+                <Key className="w-4 h-4" />
+                {t('auth.password.change')}
+              </button>
+            </div>
+          ) : (
+            <div className="px-5 sm:px-8 py-4 border-t dark:border-stone-700 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-stone-700 dark:text-stone-300">
+                  {t('auth.password.change')}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordChange(false)}
+                  className="text-xs text-stone-400 hover:text-stone-600"
+                >
+                  {t('common.cancel')}
+                </button>
+              </div>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder={t('auth.password.new')}
+                className="input"
+              />
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder={t('auth.password.confirm')}
+                className="input"
+              />
+              <button
+                type="button"
+                onClick={handleChangePassword}
+                disabled={changingPassword || !newPassword || !confirmPassword}
+                className="btn-primary w-full text-sm py-2"
+              >
+                {changingPassword ? t('common.loading') : t('auth.password.update')}
+              </button>
+            </div>
+          )}
 
           <div className="px-5 sm:px-8 py-4 bg-stone-50 dark:bg-stone-700/50 border-t dark:border-stone-700 flex flex-col sm:flex-row gap-3 justify-center sm:justify-end">
             <button type="button" onClick={handleLogout} className="btn-secondary w-full sm:w-auto">
