@@ -396,7 +396,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
 }
 
 .btn-ghost {
-  @apply btn-base px-4 py-2 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 active:bg-stone-200 dark:active:bg-stone-700 focus-visible:ring-stone-400 focus-visible:ring-offset-white dark:focus-visible:ring-offset-stone-950;
+  @apply btn-base px-4 py-2 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 active:bg-stone-200 dark:active:bg-stone-700 focus-visible:ring-stone-400 focus-visible:ring-offset-white dark:focus-visible:ring-offset-stone-950;
 }
 
 .btn-danger {
@@ -404,7 +404,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
 }
 
 .btn-icon {
-  @apply inline-flex items-center justify-center w-9 h-9 rounded-xl text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 active:bg-stone-200 dark:active:bg-stone-700 active:scale-[0.92] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400;
+  @apply inline-flex items-center justify-center w-9 h-9 rounded-xl text-stone-500 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 active:bg-stone-200 dark:active:bg-stone-700 active:scale-[0.92] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400;
   transition: all 0.15s var(--ease-spring);
 }
 
@@ -480,6 +480,11 @@ input[type='date']::-webkit-calendar-picker-indicator {
     0 1px 6px rgba(0, 0, 0, 0.02);
 }
 .dark .card-widget {
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.dark .card-widget {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 .card-widget-mobile {
@@ -493,7 +498,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
    DESIGN SYSTEM — Input hierarchy
    ============================================================ */
 .input {
-  @apply w-full px-4 py-2.5 rounded-xl text-sm bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 focus-visible:ring-emerald-500/60 transition-all duration-150 ease-out;
+  @apply w-full px-4 py-2.5 rounded-xl text-sm bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 focus-visible:ring-emerald-500/60 transition-all duration-150 ease-out;
 }
 .input-error {
   @apply border-red-300 dark:border-red-700 focus:ring-red-500/30 focus:border-red-500;
@@ -606,7 +611,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
   @apply bg-emerald-50 dark:bg-emerald-950/50 rounded-full flex items-center justify-center mx-auto mb-4 w-14 h-14;
 }
 .empty-state-icon {
-  @apply w-12 h-12 mx-auto mb-4 text-stone-300 dark:text-stone-600;
+  @apply w-12 h-12 mx-auto mb-4 text-stone-300 dark:text-stone-500;
 }
 
 /* ============================================================
@@ -622,7 +627,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
   @apply space-y-6;
 }
 .page-header {
-  @apply sticky top-0 z-20 bg-white/80 dark:bg-stone-950/80 backdrop-blur-xl border-b border-stone-100 dark:border-stone-800;
+  @apply sticky top-0 z-20 bg-white/90 dark:bg-stone-900/90 backdrop-blur-xl border-b border-stone-100 dark:border-stone-800;
 }
 
 /* ============================================================
@@ -639,7 +644,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
   animation: scale-in-spring 0.35s var(--ease-spring);
 }
 .sheet-handle {
-  @apply w-10 h-1 bg-stone-300 dark:bg-stone-600 rounded-full mx-auto cursor-grab active:cursor-grabbing;
+  @apply w-10 h-1 bg-stone-300 dark:bg-stone-500 rounded-full mx-auto cursor-grab active:cursor-grabbing;
 }
 .sheet-close-btn {
   @apply btn-icon -mr-1.5;
