@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { MessageSquare, Send, Loader2 } from 'lucide-react';
+import { Send, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface Comment {
@@ -102,28 +102,19 @@ export function EventComments({ eventId }: EventCommentsProps) {
   }, [newComment, t]);
 
   if (loading) {
-    return null;
+    return <p className="text-sm text-stone-400 text-center py-4">{t('common.loading')}</p>;
   }
 
   if (!tableExists) {
     return (
-      <div className="card p-5 opacity-60">
-        <div className="flex items-center gap-2 mb-3">
-          <MessageSquare className="w-4 h-4 text-stone-400" />
-          <h3 className="text-sm font-semibold text-stone-500 dark:text-stone-400">{t('comments.title')}</h3>
-        </div>
-        <p className="text-xs text-stone-400 dark:text-stone-500">{t('comments.notAvailable')}</p>
+      <div className="text-center py-4">
+        <p className="text-sm text-stone-400 dark:text-stone-500">{t('comments.notAvailable')}</p>
       </div>
     );
   }
 
   return (
-    <div className="card p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <MessageSquare className="w-4 h-4 text-brand-600" />
-        <h3 className="text-sm font-semibold text-stone-800 dark:text-white">{t('comments.title')}</h3>
-      </div>
-
+    <div>
       <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
         {comments.length === 0 && (
           <p className="text-xs text-stone-400 dark:text-stone-500 text-center py-4">{t('comments.empty')}</p>
