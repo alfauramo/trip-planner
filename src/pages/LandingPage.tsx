@@ -1,20 +1,33 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plane, Calendar, Receipt, Users, Sparkles, Check, ArrowRight, Star } from 'lucide-react';
+import { Plane, Calendar, Receipt, Users, Sparkles, Check, ArrowRight, Star, ChevronDown } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { ThemeToggle } from '../components/ThemeToggle';
+
+function FAQItem({ question, answer }: { question: string; answer: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border-b border-stone-200 dark:border-stone-800 last:border-b-0">
+      <button onClick={() => setOpen(!open)} className="w-full py-4 flex items-center justify-between text-left">
+        <span className="font-medium text-stone-900 dark:text-white pr-4">{question}</span>
+        <ChevronDown className={`w-4 h-4 text-stone-400 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && <p className="pb-4 text-sm text-stone-500 dark:text-stone-400 leading-relaxed">{answer}</p>}
+    </div>
+  );
+}
 
 export function LandingPage() {
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-stone-950">
       <Helmet>
-        <title>Trip Planner — Planifica viajes en grupo sin el caos</title>
+        <title>Trip Planner — Hecho para viajeros, por viajeros</title>
         <meta
           name="description"
-          content="Crea itinerarios, divide gastos y mantén a tu grupo sincronizado. La forma más sencilla de planificar viajes entre amigos."
+          content="Crea itinerarios, divide gastos y mantén a tu grupo sincronizado. La herramienta de viajes construida desde la experiencia real."
         />
       </Helmet>
 
-      {/* Nav */}
       <nav className="sticky top-0 z-50 bg-white/90 dark:bg-stone-900/90 backdrop-blur-xl border-b border-stone-100 dark:border-stone-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -42,14 +55,17 @@ export function LandingPage() {
       <section className="relative">
         <div className="absolute inset-0 bg-gradient-to-b from-brand-50/80 via-transparent to-transparent dark:from-brand-950/30 pointer-events-none" />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-24 pb-8 sm:pt-36 sm:pb-12 text-center relative">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-50 dark:bg-brand-950/50 text-brand-700 dark:text-brand-300 text-sm font-medium mb-6">
+            Hecho para viajeros, por viajeros
+          </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-stone-900 dark:text-white tracking-tight leading-[1.05]">
-            Planifica viajes en grupo
+            El planificador de viajes
             <br />
-            <span className="text-brand-600 dark:text-brand-400">sin perder la cabeza</span>
+            <span className="text-brand-600 dark:text-brand-400">que ojalá hubiéramos tenido antes</span>
           </h1>
           <p className="mt-6 text-lg sm:text-xl text-stone-500 dark:text-stone-400 max-w-xl mx-auto leading-relaxed">
-            Itinerarios claros, gastos divididos automáticamente, y todo el grupo sincronizado. Deja los 47 mensajes de
-            WhatsApp y las hojas de cálculo.
+            Construido por gente que se ha peleado con hojas de cálculo, grupos de WhatsApp y notas perdidas. Para que
+            tu próximo viaje en grupo sea solo la parte divertida.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
@@ -63,7 +79,6 @@ export function LandingPage() {
           <p className="mt-4 text-xs text-stone-400">Sin tarjeta. Empieza en 30 segundos.</p>
         </div>
 
-        {/* Demo cards preview */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-20 sm:pb-28">
           <div className="grid sm:grid-cols-3 gap-4">
             {[
@@ -87,9 +102,8 @@ export function LandingPage() {
       <section className="py-20 sm:py-28 bg-stone-100/50 dark:bg-stone-900/50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-16">
-            <p className="text-sm font-medium text-brand-600 dark:text-brand-400 mb-3">EL PROBLEMA</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-stone-900 dark:text-white">
-              Planificar un viaje en grupo es un desastre
+              Lo hemos vivido. Por eso lo hemos arreglado.
             </h2>
           </div>
           <div className="grid sm:grid-cols-2 gap-6 sm:gap-8">
@@ -98,14 +112,13 @@ export function LandingPage() {
                 <span className="text-xl">✕</span> Sin Trip Planner
               </h3>
               {[
-                'Mensajes perdidos en grupos de WhatsApp',
-                'Gastos apuntados en notas y hojas de cálculo',
-                'Nadie sabe quién debe qué a quién',
-                'Cada persona tiene una versión del plan',
+                '47 mensajes de WhatsApp para decidir un restaurante',
+                '"¿Quién pagó el hotel?" — nadie lo sabe',
+                'Gastos en notas del móvil que desaparecen',
+                'Cada persona tiene una versión distinta del plan',
               ].map((item) => (
                 <p key={item} className="flex items-start gap-2 text-sm text-stone-600 dark:text-stone-400">
-                  <span className="text-red-400 shrink-0 mt-0.5">—</span>
-                  {item}
+                  <span className="text-red-400 shrink-0 mt-0.5">—</span> {item}
                 </p>
               ))}
             </div>
@@ -114,14 +127,13 @@ export function LandingPage() {
                 <Check className="w-5 h-5" /> Con Trip Planner
               </h3>
               {[
-                'Un único sitio con todo el itinerario',
-                'Gastos divididos automáticamente entre el grupo',
-                'Cada persona ve lo que debe y lo que ha pagado',
-                'Todo el mundo sincronizado en tiempo real',
+                'Un solo sitio con todo el plan del viaje',
+                'Cada gasto se divide solo. Sin calculadora',
+                '"Tú debes 23€, yo debo 15€" — claro para todos',
+                'El grupo entero ve los cambios al momento',
               ].map((item) => (
                 <p key={item} className="flex items-start gap-2 text-sm text-stone-600 dark:text-stone-400">
-                  <Check className="w-4 h-4 text-brand-500 shrink-0 mt-0.5" />
-                  {item}
+                  <Check className="w-4 h-4 text-brand-500 shrink-0 mt-0.5" /> {item}
                 </p>
               ))}
             </div>
@@ -129,46 +141,45 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Features as benefits */}
+      {/* Features */}
       <section className="py-20 sm:py-28">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-16">
-            <p className="text-sm font-medium text-brand-600 dark:text-brand-400 mb-3">QUÉ PUEDES HACER</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-stone-900 dark:text-white">
-              Todo lo que necesitas en un solo sitio
+              Lo que hemos construido para ti
             </h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
                 icon: Calendar,
-                title: 'Itinerario visual',
-                desc: 'Días, actividades, horarios y ubicaciones. Arrastra para reordenar. Todo claro para todo el grupo.',
+                title: 'Itinerario claro',
+                desc: 'Días, horarios y ubicaciones. Arrastra para reordenar. Sin capturas de pantalla ni PDFs reenviados.',
               },
               {
                 icon: Receipt,
-                title: 'Gastos sin dramas',
-                desc: 'Cada gasto se divide automáticamente. El grupo ve al instante quién debe qué. Sin calculadora.',
+                title: 'Gastos que se entienden',
+                desc: 'Registras un gasto y la app lo divide entre quien corresponda. Todo el grupo ve al instante quién debe qué.',
               },
               {
                 icon: Sparkles,
-                title: 'IA que planifica por ti',
-                desc: 'Di "Tokio 7 días" y la IA te crea el itinerario completo. Días, actividades, horarios. En segundos.',
+                title: 'La IA te ayuda',
+                desc: 'Dile "Finde en París" y te genera el itinerario completo. Perfecto para cuando no sabes por dónde empezar.',
               },
               {
                 icon: Users,
-                title: 'Colaboración real',
-                desc: 'Invita a quien quieras. Todo el grupo ve los cambios al momento. Sin reenviar PDFs.',
+                title: 'Todo el grupo dentro',
+                desc: 'Invita a quien quieras. Cada persona ve el plan, añade actividades y registra lo que paga.',
               },
               {
                 icon: Check,
-                title: 'Checklist de viaje',
-                desc: 'Qué llevar, qué reservar, qué no olvidar. Plantillas por tipo de viaje. Progreso visible.',
+                title: 'No te dejas nada',
+                desc: 'Checklist de equipaje, tareas antes del viaje, plantillas según el tipo de destino. Todo controlado.',
               },
               {
                 icon: Plane,
-                title: 'Templates listos',
-                desc: 'Barcelona 3 días, Tokio 7 días, Camino de Santiago... Empieza con un viaje ya diseñado.',
+                title: 'Empieza rápido',
+                desc: 'Templates listos: Barcelona, Tokio, Roma, Camino de Santiago... Elige uno y personalízalo.',
               },
             ].map((f) => (
               <div key={f.title} className="card p-6">
@@ -183,31 +194,28 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* How it works — ultra simple */}
+      {/* How it works */}
       <section className="py-20 sm:py-28 bg-white dark:bg-stone-900">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-16">
-            <p className="text-sm font-medium text-brand-600 dark:text-brand-400 mb-3">EN 3 PASOS</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-stone-900 dark:text-white">
-              Del "¿por dónde empiezo?" al viaje listo
-            </h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-stone-900 dark:text-white">Así de simple es</h2>
           </div>
           <div className="space-y-8">
             {[
               {
                 step: '1',
                 title: 'Crea el viaje',
-                desc: 'Nombre, fechas, destino. O dile a la IA "Finde en París" y te lo crea entero.',
+                desc: 'Ponle nombre, elige fechas. O dile a la IA "Finde en París" y te lo crea entero en segundos.',
               },
               {
                 step: '2',
                 title: 'Añade el plan',
-                desc: 'Días, actividades con horarios, gastos. Todo organizado y visible para el grupo.',
+                desc: 'Días con actividades, horarios y gastos. Todo organizado. Todo el grupo lo ve.',
               },
               {
                 step: '3',
-                title: 'Invita y disfruta',
-                desc: 'Comparte el enlace. El grupo ve el itinerario, añade gastos y colabora al instante.',
+                title: 'Comparte y disfruta',
+                desc: 'Invita a quien viaja contigo. Ellos también pueden añadir cosas. Adiós al caos.',
               },
             ].map((s) => (
               <div key={s.step} className="flex gap-5 sm:gap-8">
@@ -224,7 +232,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Social proof placeholder */}
+      {/* Social proof */}
       <section className="py-16 bg-brand-600 text-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
           <div className="flex items-center justify-center gap-1 mb-4">
@@ -233,45 +241,63 @@ export function LandingPage() {
             ))}
           </div>
           <p className="text-lg sm:text-xl font-medium">
-            "Por fin dejamos de usar WhatsApp para planificar los viajes. Ahora todo el grupo sabe qué toca cada día y
-            quién ha pagado qué."
+            "Por fin dejamos de usar WhatsApp para planificar. Ahora el grupo entero sabe qué toca cada día y quién ha
+            pagado qué."
           </p>
-          <p className="mt-4 text-sm text-white/60">— Usuario de Trip Planner</p>
+          <p className="mt-4 text-sm text-white/60">— Grupo de 6 viajando por Japón</p>
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* FAQ — conversion focused */}
       <section className="py-20 sm:py-28">
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
-          <h2 className="text-3xl font-bold text-center text-stone-900 dark:text-white mb-12">Preguntas frecuentes</h2>
-          <div className="space-y-6">
-            {[
-              {
-                q: '¿Es gratis?',
-                a: 'Sí. Trip Planner es completamente gratuito. Crea todos los viajes que quieras, invita a quien necesites y usa todas las funcionalidades sin límite.',
-              },
-              {
-                q: '¿Cuántas personas pueden colaborar en un viaje?',
-                a: 'Sin límite. Invita a todos los que quieras. Cada persona puede ver el itinerario, añadir eventos y registrar gastos.',
-              },
-              {
-                q: '¿Cómo funciona la división de gastos?',
-                a: 'Cada gasto se registra indicando quién pagó y entre quiénes se divide. La app calcula automáticamente quién debe qué a quién. Adiós a la calculadora.',
-              },
-              {
-                q: '¿La IA genera itinerarios reales?',
-                a: 'Sí. Le dices el destino, los días y tus intereses, y la IA te crea un itinerario día a día con actividades, horarios y consejos. Puedes editarlo todo después.',
-              },
-              {
-                q: '¿Puedo exportar el viaje?',
-                a: 'Sí. Puedes imprimirlo como PDF, exportarlo a HTML o descargarlo como calendario (.ics) para llevarlo en Google Calendar o Apple Calendar.',
-              },
-            ].map((faq) => (
-              <div key={faq.q}>
-                <h3 className="font-semibold text-stone-900 dark:text-white mb-1">{faq.q}</h3>
-                <p className="text-sm text-stone-500 dark:text-stone-400 leading-relaxed">{faq.a}</p>
-              </div>
-            ))}
+          <h2 className="text-3xl font-bold text-center text-stone-900 dark:text-white mb-4">¿Alguna duda?</h2>
+          <p className="text-center text-stone-500 dark:text-stone-400 text-sm mb-12">
+            Si no encuentras tu respuesta,{' '}
+            <Link to="/register" className="text-brand-600 hover:underline">
+              pruébalo gratis
+            </Link>{' '}
+            y lo ves en 30 segundos.
+          </p>
+          <div className="card p-4 sm:p-6 divide-y divide-stone-100 dark:divide-stone-800">
+            <FAQItem
+              question="¿Qué es exactamente Trip Planner?"
+              answer="Una herramienta para planificar viajes en grupo. Itinerarios día a día, gastos compartidos que se dividen solos, checklists, y todo sincronizado para que el grupo entero lo vea. Sin WhatsApp, sin hojas de cálculo."
+            />
+            <FAQItem
+              question="¿Es gratis?"
+              answer="Sí, completamente. Todos los viajes que quieras, todas las personas que necesites, todas las funcionalidades. No hay trampa."
+            />
+            <FAQItem
+              question="¿Cuánto se tarda en crear un viaje?"
+              answer={
+                '30 segundos si tienes claro el destino. Si usas la IA, escribes "Finde en París" y en segundos tienes el itinerario completo listo para editar.'
+              }
+            />
+            <FAQItem
+              question="¿Puedo usarlo con más gente?"
+              answer="Claro. Invita a quien quieras. Cada persona ve el itinerario, puede añadir actividades y registrar lo que paga. Todo en tiempo real."
+            />
+            <FAQItem
+              question="¿Cómo van los gastos?"
+              answer="Registras un gasto, eliges quién pagó y entre quiénes se divide. La app calcula automáticamente quién debe qué a quién. Sin discusiones."
+            />
+            <FAQItem
+              question="¿Funciona bien en el móvil?"
+              answer="Está diseñado para usarse sobre todo en el móvil. Es donde más lo necesitas: en el aeropuerto, en el restaurante, en el hotel."
+            />
+            <FAQItem
+              question="¿Qué lo diferencia de otras herramientas?"
+              answer="Está construido por gente que ha viajado mucho y sabe lo que falla. No es un gestor de tareas genérico disfrazado de planificador de viajes. Está pensado específicamente para viajes en grupo."
+            />
+            <FAQItem
+              question="¿Mis datos están seguros?"
+              answer="Sí. Usamos Supabase como backend, con cifrado en tránsito y en reposo. Tus viajes solo los ves tú y la gente que invites."
+            />
+            <FAQItem
+              question="¿Y si cambio de planes?"
+              answer="Editar un viaje es instantáneo. Cambia fechas, añade días, mueve actividades. Todo adaptable. Los viajes cambian, la herramienta también."
+            />
           </div>
         </div>
       </section>
@@ -279,8 +305,8 @@ export function LandingPage() {
       {/* Final CTA */}
       <section className="py-20 sm:py-28 bg-gradient-to-br from-brand-600 to-brand-900 text-white">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold">Tu próximo viaje empieza aquí</h2>
-          <p className="mt-4 text-lg text-white/70">Gratis. Sin anuncios. Sin límites.</p>
+          <h2 className="text-3xl sm:text-4xl font-bold">Tu próximo viaje merece estar bien organizado</h2>
+          <p className="mt-4 text-lg text-white/70">Gratis. Hecho con la experiencia de muchos viajes.</p>
           <div className="mt-10">
             <Link
               to="/register"
@@ -293,7 +319,6 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-stone-900 dark:bg-black text-stone-500 py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -310,7 +335,9 @@ export function LandingPage() {
               </Link>
             </div>
           </div>
-          <div className="mt-8 pt-8 border-t border-stone-800 text-center text-sm">Planifica. Viaja. Repite.</div>
+          <div className="mt-8 pt-8 border-t border-stone-800 text-center text-sm">
+            Hecho para viajeros, por viajeros.
+          </div>
         </div>
       </footer>
     </div>
