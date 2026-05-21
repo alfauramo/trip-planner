@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
+import { Footer } from '../components/Footer';
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '../lib/date-utils';
 import { ImageWithFallback } from '../components/ImageWithFallback';
@@ -107,7 +108,7 @@ export function InvitationsPage() {
       await supabase.from('trip_invitations').update({ status: 'declined' }).eq('id', invitationId);
       setInvitations((prev) => prev.filter((i) => i.id !== invitationId));
     } catch (err) {
-      console.error('Error declining invitation:', err);
+      showToast(err instanceof Error ? err.message : t('common.error'), 'error');
     } finally {
       setActionLoading(null);
     }
@@ -122,30 +123,30 @@ export function InvitationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-950">
+    <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col">
       <Helmet>
         <title>Invitaciones | Trip Planner</title>
       </Helmet>
-      <header className="bg-white dark:bg-stone-800 border-b dark:border-stone-700 md:border-b-0 md:shadow-sm">
-        <div className="px-4 py-3 md:page-container md:py-4 flex items-center gap-3">
+      <header className="bg-white dark:bg-stone-800 border-b dark:border-stone-700 sm:border-b-0 sm:shadow-sm">
+        <div className="px-4 py-3 sm:page-container sm:py-4 flex items-center gap-3 sm:gap-4">
           <button
             type="button"
             onClick={() => navigate(-1)}
             aria-label={t('common.back')}
-            className="p-1.5 -ml-1.5 md:p-2 md:ml-0 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg transition-colors"
+            className="p-1.5 -ml-1.5 sm:p-2 sm:ml-0 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg transition-colors"
           >
             <ArrowLeft className="w-5 h-5 text-stone-600 dark:text-stone-300" />
           </button>
           <div className="flex items-center gap-2">
-            <Mail className="w-5 h-5 md:w-6 md:h-6 text-emerald-600" />
-            <h1 className="text-lg md:text-xl font-bold text-stone-800 dark:text-white">
+            <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
+            <h1 className="text-lg sm:text-xl font-bold text-stone-800 dark:text-white">
               {t('member.invitation.title')}
             </h1>
           </div>
         </div>
       </header>
 
-      <main className="px-4 py-4 md:page-container md:py-8">
+      <main className="flex-1 px-4 py-4 pb-20 sm:page-container sm:py-8 sm:pb-0">
         {tripId && tripTitle && !tripTitleLoading && (
           <div className="bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 p-4 rounded-xl mb-4">
             <p className="text-emerald-800 dark:text-emerald-200 text-sm">
@@ -169,8 +170,8 @@ export function InvitationsPage() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-3 md:space-y-4">
-            <p className="text-sm text-stone-600 dark:text-stone-400 mb-3 md:mb-4">
+          <div className="space-y-3 sm:space-y-4">
+            <p className="text-sm text-stone-600 dark:text-stone-400 mb-3 sm:mb-4">
               {t('member.invitation.count', { count: invitations.length })}
             </p>
             {invitations.map((invitation) => (
@@ -233,6 +234,9 @@ export function InvitationsPage() {
           </div>
         )}
       </main>
+      <div className="hidden sm:block">
+        <Footer />
+      </div>
     </div>
   );
 }
