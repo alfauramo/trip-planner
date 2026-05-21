@@ -12,7 +12,7 @@ export function Footer() {
             <Plane className="w-4 h-4 text-brand-500" />
             <span className="font-medium">{t('app.name')}</span>
           </div>
-          <span>{t('footer.madeBy')}</span>
+          <span className="text-xs sm:text-sm text-stone-400 dark:text-stone-500">{t('footer.tagline')}</span>
           <Link to="/profile" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors font-medium">
             {t('nav.profile')}
           </Link>
