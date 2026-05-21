@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Plane, Calendar, Receipt, Users, Sparkles, Check, ArrowRight, Star } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 export function LandingPage() {
   return (
@@ -23,6 +24,7 @@ export function LandingPage() {
             <span className="font-bold text-stone-800 dark:text-white">Trip Planner</span>
           </div>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Link
               to="/login"
               className="text-sm text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white transition-colors"
