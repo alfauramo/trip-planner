@@ -266,16 +266,16 @@ export function TripDetailHeader({
             <ImageIcon className="w-4 h-4" />
             <span className="hidden sm:inline">{t('trip.cover')}</span>
           </button>
-          <ExportTripHTML trip={{ ...trip, days, members } as import('../types').TripWithDetails} />
           <button
             type="button"
             onClick={handleCalendarExport}
             aria-label={t('trip.exportCalendar')}
-            className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400 hover:text-emerald-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
+            className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-300 hover:text-emerald-600 px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-all"
           >
             <CalendarPlus className="w-4 h-4" />
             <span className="hidden sm:inline">{t('trip.exportCalendar')}</span>
           </button>
+          <ExportTripHTML trip={{ ...trip, days, members } as import('../types').TripWithDetails} />
           <div className="flex-1" />
           <button
             type="button"

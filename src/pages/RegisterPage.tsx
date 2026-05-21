@@ -58,10 +58,8 @@ export function RegisterPage() {
       setError('');
       setLoadingGoogle(true);
       await signInWithGoogle();
-      sessionStorage.setItem('justRegistered', 'true');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error con Google');
-      sessionStorage.removeItem('justRegistered');
       setLoadingGoogle(false);
     }
   };

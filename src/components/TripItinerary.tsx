@@ -1,4 +1,15 @@
-import { Calendar, Plus, Compass, Pencil, Trash2, Sparkles, Route, Loader2, CalendarDays } from 'lucide-react';
+import {
+  Calendar,
+  Plus,
+  Compass,
+  Pencil,
+  Trash2,
+  Sparkles,
+  Route,
+  Loader2,
+  CalendarDays,
+  CloudSun,
+} from 'lucide-react';
 import { optimizeRoute, buildGoogleMapsRoute } from '../lib/trip-optimizer';
 import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -15,8 +26,6 @@ import { formatDate } from './EventHelpers';
 import { type TripEvent, type Day, type TripMember, type TripWithDetails } from '../types';
 import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect } from 'react';
-import { AIItineraryGenerator } from './AIItineraryGenerator';
-import type { AIItineraryResult } from '../hooks/useAIItinerary';
 import { TripCalendar } from './TripCalendar';
 
 export { AddDayForm, EditDayForm } from './DayForms';
@@ -38,7 +47,6 @@ export function TripItinerary({
   onDeleteEvent,
   onReorderEvents,
   onRefresh,
-  onBulkCreate,
 }: {
   trip: { id: string; description?: string; start_date?: string };
   days: (Day & { events: TripEvent[] })[];
@@ -54,14 +62,13 @@ export function TripItinerary({
   onDeleteEvent: (eventId: string, dayId: string) => Promise<void>;
   onReorderEvents: (dayId: string, eventIds: string[]) => Promise<void>;
   onRefresh: () => void;
-  onBulkCreate?: (result: AIItineraryResult) => Promise<void>;
 }) {
   const { showToast } = useToast();
   const { confirm } = useConfirm();
   const { t } = useTranslation();
   const [optimizingDay, setOptimizingDay] = useState<string | null>(null);
   const [routingDay, setRoutingDay] = useState<string | null>(null);
-  const [showAIGenerator, setShowAIGenerator] = useState(false);
+  const [showWeather, setShowWeather] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const routingTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -365,7 +372,20 @@ export function TripItinerary({
       {trip.description && isMobile && (
         <p className="text-sm text-stone-600 dark:text-stone-300 mb-4">{trip.description}</p>
       )}
-      <WeatherForecast trip={{ ...trip, days, members } as TripWithDetails} />
+      <div className="mb-4">
+        <button
+          onClick={() => setShowWeather(!showWeather)}
+          className={`flex items-center gap-1.5 text-sm font-medium transition-all ${showWeather ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-400 dark:text-stone-500 hover:text-emerald-600 dark:hover:text-emerald-400'}`}
+        >
+          <CloudSun className="w-4 h-4" />
+          {showWeather ? t('weather.hide') : t('weather.show')}
+        </button>
+        {showWeather && (
+          <div className="mt-3">
+            <WeatherForecast trip={{ ...trip, days, members } as TripWithDetails} />
+          </div>
+        )}
+      </div>
       {days.length > 0 && <ActivityTimeline tripId={trip.id} />}
       <div className={`flex items-center justify-between ${isMobile ? 'mb-4 mt-4' : 'mb-6'}`}>
         <h2
@@ -383,15 +403,6 @@ export function TripItinerary({
               <Plus className="w-4 h-4" />
               {t('day.add')}
             </button>
-            {onBulkCreate && (
-              <button
-                onClick={() => setShowAIGenerator(!showAIGenerator)}
-                className={`flex items-center gap-1 text-purple-600 dark:text-purple-400 font-medium ${isMobile ? 'text-sm' : 'hover:underline'}`}
-              >
-                <Sparkles className="w-4 h-4" />
-                {isMobile ? 'IA' : t('trip.generateAI')}
-              </button>
-            )}
             <button
               onClick={() => setShowCalendar(!showCalendar)}
               className={`flex items-center gap-1 font-medium ${isMobile ? 'text-sm' : 'hover:underline'} ${showCalendar ? 'text-emerald-600' : 'text-stone-500'}`}
@@ -402,19 +413,6 @@ export function TripItinerary({
           </div>
         )}
       </div>
-
-      {showAIGenerator && onBulkCreate && (
-        <div className="mb-6">
-          <div className="card-widget p-4 sm:p-6">
-            <AIItineraryGenerator
-              onSelect={(result) => {
-                onBulkCreate(result);
-                setShowAIGenerator(false);
-              }}
-            />
-          </div>
-        </div>
-      )}
 
       {showCalendar && (
         <div className="mb-6">
@@ -459,13 +457,7 @@ export function TripItinerary({
               </div>
             </div>
           </div>
-          {onBulkCreate ? (
-            <div className="card-widget p-4 sm:p-6">
-              <AIItineraryGenerator onSelect={onBulkCreate} />
-            </div>
-          ) : (
-            emptyState
-          )}
+          {emptyState}
         </div>
       ) : (
         <div className={isMobile ? 'space-y-3' : 'space-y-6 w-full'}>{days.map(renderDayCard)}</div>

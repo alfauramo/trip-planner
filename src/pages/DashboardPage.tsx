@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import { useState, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
@@ -114,13 +114,6 @@ export function DashboardPage() {
     onRefresh: handleRefresh,
     disabled: !isMobile || loading,
   });
-
-  useEffect(() => {
-    if (sessionStorage.getItem('justRegistered') === 'true') {
-      sessionStorage.removeItem('justRegistered');
-      navigate('/profile', { replace: true });
-    }
-  }, [profile]);
 
   const profileIncomplete = profile && !profile.full_name && !profile.alias;
 

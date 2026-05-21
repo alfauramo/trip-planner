@@ -114,7 +114,7 @@ export function ProfilePage() {
         </div>
       </header>
 
-      <main className="flex-1 px-4 py-4 pb-20 sm:page-container sm:py-8 sm:pb-0">
+      <main className="flex-1 px-4 py-4 pb-20 sm:max-w-2xl sm:mx-auto sm:py-8 sm:pb-0 sm:w-full">
         <div className="bg-white dark:bg-stone-800 rounded-2xl shadow-sm overflow-hidden">
           <div className="p-5 sm:p-8">
             <div className="flex items-center gap-4 sm:gap-6 mb-6 sm:mb-8">

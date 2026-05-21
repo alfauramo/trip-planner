@@ -34,7 +34,6 @@ import {
 } from '../components/TripItinerary';
 import type { PlaceForm } from '../components/EventForms';
 import { TripEvent, EventType } from '../types';
-import type { AIItineraryResult } from '../hooks/useAIItinerary';
 
 function prepareEventUpdates(data: PlaceForm, payerId?: string, participants?: string[]) {
   const clean = (val: string | undefined) => (val === '' ? undefined : val);
@@ -129,33 +128,6 @@ export function TripDetailPage() {
   const handleQuickAddExpense = async (dayId: string, data: Record<string, unknown>) => {
     await addEvent(dayId, data);
     refresh();
-  };
-
-  const handleBulkCreate = async (result: AIItineraryResult) => {
-    if (!trip?.start_date) {
-      showToast(t('trip.ai.noStartDate'), 'error');
-      return;
-    }
-    try {
-      const startDate = new Date(trip.start_date);
-      for (const dayPlan of result.days) {
-        const date = new Date(startDate);
-        date.setDate(date.getDate() + dayPlan.day - 1);
-        const dateStr = date.toISOString().split('T')[0];
-        const newDay = await addDay(dateStr, dayPlan.description);
-        for (const act of dayPlan.activities) {
-          await addEvent(newDay.id, {
-            name: act.description,
-            event_type: 'activity' as EventType,
-            notes: `${dayPlan.title}: ${act.time}`,
-            start_time: act.time,
-          });
-        }
-      }
-      showToast(t('trip.ai.created'), 'success');
-    } catch (err: unknown) {
-      showToast(err instanceof Error ? err.message : t('common.error'), 'error');
-    }
   };
 
   const displayName = profile?.alias || profile?.full_name || user?.email?.split('@')[0] || t('profile.user');
@@ -270,7 +242,6 @@ export function TripDetailPage() {
             onDeleteEvent={deleteEvent}
             onReorderEvents={reorderEvents}
             onRefresh={refresh}
-            onBulkCreate={handleBulkCreate}
           />
         );
     }

@@ -380,33 +380,6 @@ input[type='date']::-webkit-calendar-picker-indicator {
 }
 
 /* ============================================================
-   DESIGN SYSTEM — Timeline
-   ============================================================ */
-.timeline-line {
-  @apply absolute left-5 top-10 bottom-0 w-0.5;
-  background: linear-gradient(to bottom, #d6d3d1, #d6d3d1 50%, transparent);
-}
-.dark .timeline-line {
-  background: linear-gradient(to bottom, #44403c, #44403c 50%, transparent);
-}
-
-/* ============================================================
-   DESIGN SYSTEM — Drag & drop event card
-   ============================================================ */
-.event-card {
-  transition: all 0.15s var(--ease-spring);
-}
-.event-card:hover {
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.06),
-    0 2px 8px rgba(0, 0, 0, 0.03);
-  transform: translateX(2px);
-}
-.event-card:active {
-  transform: translateX(2px) scale(0.98);
-}
-
-/* ============================================================
    DESIGN SYSTEM — Button hierarchy
    ============================================================ */
 .btn-base {
