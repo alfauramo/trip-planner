@@ -9,6 +9,7 @@ import {
   Loader2,
   CalendarDays,
   CloudSun,
+  Clock,
 } from 'lucide-react';
 import { optimizeRoute, buildGoogleMapsRoute } from '../lib/trip-optimizer';
 import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core';
@@ -69,6 +70,7 @@ export function TripItinerary({
   const [optimizingDay, setOptimizingDay] = useState<string | null>(null);
   const [routingDay, setRoutingDay] = useState<string | null>(null);
   const [showWeather, setShowWeather] = useState(false);
+  const [showActivity, setShowActivity] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const routingTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -380,7 +382,7 @@ export function TripItinerary({
           {t('itinerary.title')}
         </h2>
         {!isViewer && (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-3">
             <button
               onClick={onAddDayClick}
               className={`flex items-center gap-1 text-emerald-600 font-medium ${isMobile ? 'text-sm' : 'hover:underline'}`}
@@ -388,15 +390,31 @@ export function TripItinerary({
               <Plus className="w-4 h-4" />
               {t('day.add')}
             </button>
-            <button
-              onClick={() => setShowCalendar(!showCalendar)}
-              className={`flex items-center gap-1 font-medium ${isMobile ? 'text-sm' : 'hover:underline'} ${showCalendar ? 'text-emerald-600' : 'text-stone-500'}`}
-            >
-              <CalendarDays className="w-4 h-4" />
-              {isMobile ? t('nav.calendar') : t('nav.calendar')}
-            </button>
           </div>
         )}
+        <div className="flex items-center gap-1 sm:gap-3">
+          <button
+            onClick={() => setShowCalendar(!showCalendar)}
+            className={`flex items-center gap-1 font-medium ${isMobile ? 'text-xs' : 'text-sm hover:underline'} ${showCalendar ? 'text-emerald-600' : 'text-stone-400 dark:text-stone-500'}`}
+          >
+            <CalendarDays className="w-4 h-4" />
+            {isMobile ? '' : t('nav.calendar')}
+          </button>
+          <button
+            onClick={() => setShowWeather(!showWeather)}
+            className={`flex items-center gap-1 font-medium ${isMobile ? 'text-xs' : 'text-sm hover:underline'} ${showWeather ? 'text-emerald-600' : 'text-stone-400 dark:text-stone-500'}`}
+          >
+            <CloudSun className="w-4 h-4" />
+            {isMobile ? '' : t('weather.title')}
+          </button>
+          <button
+            onClick={() => setShowActivity(!showActivity)}
+            className={`flex items-center gap-1 font-medium ${isMobile ? 'text-xs' : 'text-sm hover:underline'} ${showActivity ? 'text-emerald-600' : 'text-stone-400 dark:text-stone-500'}`}
+          >
+            <Clock className="w-4 h-4" />
+            {isMobile ? '' : t('activity.title')}
+          </button>
+        </div>
       </div>
 
       {showCalendar && (
@@ -447,25 +465,34 @@ export function TripItinerary({
       ) : (
         <div className={isMobile ? 'space-y-3' : 'space-y-6 w-full'}>{days.map(renderDayCard)}</div>
       )}
-      {days.length > 0 && (
+      {days.length > 0 && (showWeather || showActivity) && (
         <div className="mt-8 border-t border-stone-100 dark:border-stone-800 pt-6 space-y-4">
-          <div className="card p-4">
-            <button onClick={() => setShowWeather(!showWeather)} className="w-full flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <CloudSun className="w-5 h-5 text-amber-500" />
-                <span className="font-medium text-stone-800 dark:text-white text-sm">{t('weather.title')}</span>
-              </div>
-              <span className="text-xs text-stone-400">{showWeather ? t('common.hide') : t('common.show')}</span>
-            </button>
-            {showWeather && (
+          {showWeather && (
+            <div className="card p-4">
+              <button onClick={() => setShowWeather(false)} className="w-full flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CloudSun className="w-5 h-5 text-amber-500" />
+                  <span className="font-medium text-stone-800 dark:text-white text-sm">{t('weather.title')}</span>
+                </div>
+                <span className="text-xs text-stone-400">{t('common.hide')}</span>
+              </button>
               <div className="mt-3">
                 <WeatherForecast trip={{ ...trip, days, members } as TripWithDetails} />
               </div>
-            )}
-          </div>
-          <div className="card p-4">
-            <ActivityTimeline tripId={trip.id} />
-          </div>
+            </div>
+          )}
+          {showActivity && (
+            <div className="card p-4">
+              <button onClick={() => setShowActivity(false)} className="w-full flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-blue-500" />
+                  <span className="font-medium text-stone-800 dark:text-white text-sm">{t('activity.title')}</span>
+                </div>
+                <span className="text-xs text-stone-400">{t('common.hide')}</span>
+              </button>
+              <ActivityTimeline tripId={trip.id} />
+            </div>
+          )}
         </div>
       )}
     </>
