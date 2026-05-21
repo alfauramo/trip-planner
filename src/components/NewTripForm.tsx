@@ -3,10 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTrips } from '../hooks/useTrips';
 import { CoverSelector } from './CoverSelector';
 import { useToast } from './Toast';
+import { AIItineraryGenerator } from './AIItineraryGenerator';
+import type { AIItineraryResult } from '../hooks/useAIItinerary';
 
 const tripSchema = z
   .object({
@@ -32,11 +35,13 @@ export function NewTripForm() {
   const { showToast } = useToast();
   const [error, setError] = useState('');
   const [coverImage, setCoverImage] = useState('');
+  const [showAI, setShowAI] = useState(false);
 
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isSubmitting, isValid },
   } = useForm<TripForm>({
     resolver: zodResolver(tripSchema),
@@ -66,9 +71,44 @@ export function NewTripForm() {
     }
   };
 
+  const handleAIGenerated = async (result: AIItineraryResult) => {
+    setValue('title', result.days[0]?.title || '');
+    const desc = result.days.map((d) => `Día ${d.day}: ${d.title}`).join('\n');
+    setValue('description', desc);
+    setShowAI(false);
+    showToast('Itinerario generado — completa los detalles y crea el viaje', 'success');
+  };
+
   return (
     <>
       {error && <div className="form-error mb-4">{error}</div>}
+
+      {!showAI ? (
+        <button
+          type="button"
+          onClick={() => setShowAI(true)}
+          className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-purple-300 dark:border-purple-700 rounded-xl text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors mb-4 text-sm font-medium"
+        >
+          <Sparkles className="w-4 h-4" />
+          {t('trip.generateAI')}
+        </button>
+      ) : (
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-purple-600 dark:text-purple-400">{t('trip.generateAI')}</span>
+            <button
+              type="button"
+              onClick={() => setShowAI(false)}
+              className="text-xs text-stone-500 hover:text-stone-700"
+            >
+              {t('common.cancel')}
+            </button>
+          </div>
+          <AIItineraryGenerator onSelect={handleAIGenerated} />
+          <div className="mt-2 text-xs text-stone-400">{t('trip.ai.fillForm')}</div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label className="form-label">

@@ -103,23 +103,33 @@ export function AIItineraryGenerator({ onSelect }: Props) {
           <label className="flex-1">
             <span className="text-sm text-stone-500">{t('trip.ai.days')}</span>
             <input
-              type="number"
+              type="text"
               inputMode="numeric"
+              pattern="[0-9]*"
               min={1}
               max={30}
               value={days}
-              onChange={(e) => setDays(Number(e.target.value))}
+              onChange={(e) => {
+                const v = parseInt(e.target.value, 10);
+                if (!isNaN(v) && v >= 1 && v <= 30) setDays(v);
+                else if (e.target.value === '') setDays(1);
+              }}
               className="w-full rounded-lg border border-stone-300 p-2 dark:border-stone-600 dark:bg-stone-800"
             />
           </label>
           <label className="flex-1">
             <span className="text-sm text-stone-500">{t('trip.ai.travelers')}</span>
             <input
-              type="number"
+              type="text"
               inputMode="numeric"
+              pattern="[0-9]*"
               min={1}
               value={travelers}
-              onChange={(e) => setTravelers(Number(e.target.value))}
+              onChange={(e) => {
+                const v = parseInt(e.target.value, 10);
+                if (!isNaN(v) && v >= 1) setTravelers(v);
+                else if (e.target.value === '') setTravelers(1);
+              }}
               className="w-full rounded-lg border border-stone-300 p-2 dark:border-stone-600 dark:bg-stone-800"
             />
           </label>
