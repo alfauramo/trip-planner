@@ -2,7 +2,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
-import { NewTripForm } from '../components/NewTripForm';
+import { TripCreationSheet } from '../components/TripCreationSheet';
 import { Plus, Calendar, Plane, Share2, RefreshCw, Trash2, Search, Clock, Sparkles, ChevronRight } from 'lucide-react';
 import { type TripMember } from '../types';
 import { useTrips } from '../hooks/useTrips';
@@ -537,7 +537,7 @@ export function DashboardPage() {
 
       {showNewTrip && (
         <BottomSheet title={t('trip.new')} onClose={() => setShowNewTrip(false)}>
-          <NewTripForm />
+          <TripCreationSheet onClose={() => setShowNewTrip(false)} />
         </BottomSheet>
       )}
 
