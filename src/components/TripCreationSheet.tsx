@@ -6,6 +6,7 @@ import { NewTripForm } from './NewTripForm';
 import { AIItineraryGenerator } from './AIItineraryGenerator';
 import { useTrips } from '../hooks/useTrips';
 import { useToast } from './Toast';
+import { supabase } from '../lib/supabase';
 import type { AIItineraryResult } from '../hooks/useAIItinerary';
 
 type CreationMode = 'choose' | 'manual' | 'ai';
@@ -19,13 +20,39 @@ export function TripCreationSheet({ onClose }: { onClose: () => void }) {
 
   const handleAICreate = async (result: AIItineraryResult) => {
     try {
+      const startDate = new Date(Date.now() + 7 * 86400000);
+      const endDate = new Date(Date.now() + (7 + result.days.length - 1) * 86400000);
       const trip = await createTrip({
         title: result.days[0]?.title || t('trip.new'),
         description: result.days.map((d) => `Día ${d.day}: ${d.title}`).join('. '),
-        start_date: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
-        end_date: new Date(Date.now() + (7 + result.days.length - 1) * 86400000).toISOString().split('T')[0],
+        start_date: startDate.toISOString().split('T')[0],
+        end_date: endDate.toISOString().split('T')[0],
       });
       if (trip) {
+        // Create days and events from AI result
+        for (let i = 0; i < result.days.length; i++) {
+          const aiDay = result.days[i];
+          const dayDate = new Date(startDate);
+          dayDate.setDate(dayDate.getDate() + i);
+          const dateStr = dayDate.toISOString().split('T')[0];
+
+          const { data: dayData } = await supabase
+            .from('days')
+            .insert({ trip_id: trip.id, date: dateStr, day_number: i + 1, notes: aiDay.description || undefined })
+            .select()
+            .single();
+
+          if (dayData && aiDay.activities.length > 0) {
+            const events = aiDay.activities.map((act, j) => ({
+              day_id: dayData.id,
+              name: act.description,
+              event_type: 'activity',
+              start_time: act.time || undefined,
+              order: j + 1,
+            }));
+            await supabase.from('events').insert(events);
+          }
+        }
         showToast(t('trip.ai.created'));
         onClose();
         navigate(`/trips/${trip.id}`);

@@ -465,31 +465,33 @@ export function TripItinerary({
 
       {days.length === 0 ? (
         <div className="space-y-6">
-          <div className="card p-5 space-y-3">
+          <div className="card p-5 space-y-4">
             <h3 className="font-semibold">{t('trip.gettingStarted')}</h3>
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center text-sm font-bold">
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">
                   1
                 </div>
-                <span className="text-sm">{t('trip.step1')}</span>
-                {!isViewer && (
-                  <button onClick={onAddDayClick} className="btn-primary text-sm px-4 py-2">
-                    {t('trip.addDays')}
-                  </button>
-                )}
+                <div className="flex-1">
+                  <p className="text-sm">{t('trip.step1')}</p>
+                  {!isViewer && (
+                    <button onClick={onAddDayClick} className="btn-primary text-sm px-4 py-2 mt-2">
+                      {t('trip.addDays')}
+                    </button>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center text-sm font-bold">
+              <div className="flex items-start gap-3">
+                <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">
                   2
                 </div>
-                <span className="text-sm">{t('trip.step2')}</span>
+                <p className="text-sm flex-1">{t('trip.step2')}</p>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center text-sm font-bold">
+              <div className="flex items-start gap-3">
+                <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">
                   3
                 </div>
-                <span className="text-sm">{t('trip.step3')}</span>
+                <p className="text-sm flex-1">{t('trip.step3')}</p>
               </div>
             </div>
           </div>
