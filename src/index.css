@@ -372,11 +372,11 @@ input[type='date']::-webkit-calendar-picker-indicator {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  color: #1e293b;
+  color: #292524;
 }
 .dark .date-badge {
   background: rgba(28, 25, 23, 0.85);
-  color: #e2e8f0;
+  color: #e7e5e4;
 }
 
 /* ============================================================
