@@ -448,23 +448,24 @@ export function TripItinerary({
         <div className={isMobile ? 'space-y-3' : 'space-y-6 w-full'}>{days.map(renderDayCard)}</div>
       )}
       {days.length > 0 && (
-        <div className="mt-6">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowWeather(!showWeather)}
-              className={`flex items-center gap-1.5 text-sm font-medium transition-all ${showWeather ? 'text-emerald-600' : 'text-stone-400 hover:text-stone-600'}`}
-            >
-              <CloudSun className="w-4 h-4" />
-              {showWeather ? t('weather.hide') : t('weather.show')}
+        <div className="mt-8 border-t border-stone-100 dark:border-stone-800 pt-6 space-y-4">
+          <div className="card p-4">
+            <button onClick={() => setShowWeather(!showWeather)} className="w-full flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CloudSun className="w-5 h-5 text-amber-500" />
+                <span className="font-medium text-stone-800 dark:text-white text-sm">{t('weather.title')}</span>
+              </div>
+              <span className="text-xs text-stone-400">{showWeather ? t('common.hide') : t('common.show')}</span>
             </button>
-            <span className="text-stone-300 dark:text-stone-600">·</span>
+            {showWeather && (
+              <div className="mt-3">
+                <WeatherForecast trip={{ ...trip, days, members } as TripWithDetails} />
+              </div>
+            )}
+          </div>
+          <div className="card p-4">
             <ActivityTimeline tripId={trip.id} />
           </div>
-          {showWeather && (
-            <div className="mt-3">
-              <WeatherForecast trip={{ ...trip, days, members } as TripWithDetails} />
-            </div>
-          )}
         </div>
       )}
     </>
