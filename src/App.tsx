@@ -28,6 +28,7 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage').then((m) => ({ 
 const TripDetailPage = lazy(() => import('./pages/TripDetailPage').then((m) => ({ default: m.TripDetailPage })));
 const InvitationsPage = lazy(() => import('./pages/InvitationsPage').then((m) => ({ default: m.InvitationsPage })));
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage })));
+const LandingPage = lazy(() => import('./pages/LandingPage').then((m) => ({ default: m.LandingPage })));
 
 function AppRoutes() {
   const { user } = useAuth();
@@ -74,14 +75,7 @@ function AppRoutes() {
               <Route path="/register" element={user ? <Navigate to="/" replace /> : <RegisterPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/update-password" element={<UpdatePasswordPage />} />
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <DashboardPage />
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/" element={user ? <DashboardPage /> : <LandingPage />} />
               <Route
                 path="/trips/:id"
                 element={
