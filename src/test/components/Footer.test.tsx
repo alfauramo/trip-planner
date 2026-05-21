@@ -9,6 +9,7 @@ vi.mock('react-i18next', () => ({
       const translations: Record<string, string> = {
         'app.name': 'TripPlanner',
         'footer.madeBy': 'Made with ❤️',
+        'footer.tagline': 'Made by travelers, for travelers',
         'nav.profile': 'Profile',
       };
       return translations[key] || key;
@@ -26,13 +27,13 @@ describe('Footer', () => {
     expect(screen.getByText('TripPlanner')).toBeInTheDocument();
   });
 
-  it('renders made by text', () => {
+  it('renders tagline text', () => {
     render(
       <BrowserRouter>
         <Footer />
       </BrowserRouter>,
     );
-    expect(screen.getByText('Made with ❤️')).toBeInTheDocument();
+    expect(screen.getByText('Made by travelers, for travelers')).toBeInTheDocument();
   });
 
   it('renders profile link', () => {
