@@ -372,21 +372,6 @@ export function TripItinerary({
       {trip.description && isMobile && (
         <p className="text-sm text-stone-600 dark:text-stone-300 mb-4">{trip.description}</p>
       )}
-      <div className="mb-4">
-        <button
-          onClick={() => setShowWeather(!showWeather)}
-          className={`flex items-center gap-1.5 text-sm font-medium transition-all ${showWeather ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-400 dark:text-stone-500 hover:text-emerald-600 dark:hover:text-emerald-400'}`}
-        >
-          <CloudSun className="w-4 h-4" />
-          {showWeather ? t('weather.hide') : t('weather.show')}
-        </button>
-        {showWeather && (
-          <div className="mt-3">
-            <WeatherForecast trip={{ ...trip, days, members } as TripWithDetails} />
-          </div>
-        )}
-      </div>
-      {days.length > 0 && <ActivityTimeline tripId={trip.id} />}
       <div className={`flex items-center justify-between ${isMobile ? 'mb-4 mt-4' : 'mb-6'}`}>
         <h2
           className={`font-semibold text-stone-800 dark:text-white flex items-center gap-1.5 ${isMobile ? 'text-base' : 'text-lg gap-2'}`}
@@ -461,6 +446,26 @@ export function TripItinerary({
         </div>
       ) : (
         <div className={isMobile ? 'space-y-3' : 'space-y-6 w-full'}>{days.map(renderDayCard)}</div>
+      )}
+      {days.length > 0 && (
+        <div className="mt-6">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowWeather(!showWeather)}
+              className={`flex items-center gap-1.5 text-sm font-medium transition-all ${showWeather ? 'text-emerald-600' : 'text-stone-400 hover:text-stone-600'}`}
+            >
+              <CloudSun className="w-4 h-4" />
+              {showWeather ? t('weather.hide') : t('weather.show')}
+            </button>
+            <span className="text-stone-300 dark:text-stone-600">·</span>
+            <ActivityTimeline tripId={trip.id} />
+          </div>
+          {showWeather && (
+            <div className="mt-3">
+              <WeatherForecast trip={{ ...trip, days, members } as TripWithDetails} />
+            </div>
+          )}
+        </div>
       )}
     </>
   );
